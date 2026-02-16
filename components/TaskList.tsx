@@ -79,25 +79,31 @@ export function TaskList({
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const handleQuickCreate = () => {
-    const title = newTaskTitle.trim() || "Untitled task";
-    const defaultState = states[0]?._id;
-    const defaultPriority = priorities[0]?._id;
-    const defaultProject = projects[0]?._id;
+    try {
 
-    if (!defaultState || !defaultPriority || !defaultProject) return;
+      const title = newTaskTitle.trim() || "Untitled task";
+      const defaultState = states[0]?._id;
+      const defaultPriority = priorities[0]?._id;
+      const defaultProject = projects[0]?._id;
 
-    void createTask({
-      title,
-      stateId: defaultState,
-      priorityId: defaultPriority,
-      projectId: defaultProject,
-      assignees: [],
-      tagIds: [],
-    }).then((taskId) => {
-      setNewTaskTitle("");
-      setIsAddingTask(false);
-      onTaskSelect(taskId);
-    });
+      if (!defaultState || !defaultPriority || !defaultProject) return;
+
+      void createTask({
+        title,
+        stateId: defaultState,
+        priorityId: defaultPriority,
+        projectId: defaultProject,
+        assignees: [],
+        tagIds: [],
+      }).then((taskId) => {
+        setNewTaskTitle("");
+        setIsAddingTask(false);
+        onTaskSelect(taskId);
+      });
+    }
+    catch (error) {
+      console.log(error);
+    }
   };
 
   if (tasks === undefined) {
