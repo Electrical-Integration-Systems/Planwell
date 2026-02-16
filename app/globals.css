@@ -1,0 +1,284 @@
+@import "tailwindcss";
+@import "../node_modules/tw-animate-css/dist/tw-animate.css";
+@import "../node_modules/shadcn/dist/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sora);
+  --font-serif: var(--font-lora);
+  --font-mono: var(--font-sora);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #f7f5f2;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #b84a30;
+  --primary-foreground: #faf8f6;
+  --secondary: #efeae4;
+  --secondary-foreground: #3d3632;
+  --muted: #efeae4;
+  --muted-foreground: #78716c;
+  --accent: #efeae4;
+  --accent-foreground: #3d3632;
+  --destructive: #c43030;
+  --border: #e5e0d9;
+  --input: #e5e0d9;
+  --ring: #b84a30;
+  --chart-1: #b84a30;
+  --chart-2: #d4922a;
+  --chart-3: #5c7a5c;
+  --chart-4: #6a7a9c;
+  --chart-5: #9c6a8c;
+  --sidebar: #efeae4;
+  --sidebar-foreground: #1c1917;
+  --sidebar-primary: #b84a30;
+  --sidebar-primary-foreground: #faf8f6;
+  --sidebar-accent: #efeae4;
+  --sidebar-accent-foreground: #3d3632;
+  --sidebar-border: #e5e0d9;
+  --sidebar-ring: #b84a30;
+}
+
+.dark {
+  --background: #110f0e;
+  --foreground: #e5e0d9;
+  --card: #1a1816;
+  --card-foreground: #e5e0d9;
+  --popover: #1a1816;
+  --popover-foreground: #e5e0d9;
+  --primary: #d4836a;
+  --primary-foreground: #110f0e;
+  --secondary: #242120;
+  --secondary-foreground: #e5e0d9;
+  --muted: #242120;
+  --muted-foreground: #8a827a;
+  --accent: #242120;
+  --accent-foreground: #e5e0d9;
+  --destructive: #d44040;
+  --border: rgba(229, 224, 217, 0.1);
+  --input: rgba(229, 224, 217, 0.12);
+  --ring: #d4836a;
+  --chart-1: #d4836a;
+  --chart-2: #d4a24a;
+  --chart-3: #7c9a7c;
+  --chart-4: #8a9abc;
+  --chart-5: #bc8aac;
+  --sidebar: #1a1816;
+  --sidebar-foreground: #e5e0d9;
+  --sidebar-primary: #d4836a;
+  --sidebar-primary-foreground: #110f0e;
+  --sidebar-accent: #242120;
+  --sidebar-accent-foreground: #e5e0d9;
+  --sidebar-border: rgba(229, 224, 217, 0.1);
+  --sidebar-ring: #d4836a;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+/* --- Animations --- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes subtle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Stagger utility classes */
+.stagger-1 {
+  animation-delay: 0.04s;
+}
+.stagger-2 {
+  animation-delay: 0.08s;
+}
+.stagger-3 {
+  animation-delay: 0.12s;
+}
+.stagger-4 {
+  animation-delay: 0.16s;
+}
+.stagger-5 {
+  animation-delay: 0.2s;
+}
+
+/* --- Dot-grid background --- */
+.dot-grid {
+  background-image: radial-gradient(
+    circle,
+    var(--border) 0.6px,
+    transparent 0.6px
+  );
+  background-size: 22px 22px;
+}
+
+/* --- Warm shadow utilities --- */
+.shadow-warm-sm {
+  box-shadow:
+    0 1px 2px rgba(28, 25, 23, 0.04),
+    0 1px 3px rgba(28, 25, 23, 0.06);
+}
+
+.shadow-warm {
+  box-shadow:
+    0 2px 8px rgba(28, 25, 23, 0.06),
+    0 4px 12px rgba(28, 25, 23, 0.04);
+}
+
+.shadow-warm-lg {
+  box-shadow:
+    0 4px 16px rgba(28, 25, 23, 0.08),
+    0 8px 32px rgba(28, 25, 23, 0.05);
+}
+
+:is(.dark) .shadow-warm-sm {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+:is(.dark) .shadow-warm {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:is(.dark) .shadow-warm-lg {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Refined scrollbar --- */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 999px;
+  opacity: 0.3;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+/* --- Focus states --- */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* --- Table row hover --- */
+.task-row {
+  transition: background-color 0.12s ease;
+}
+
+.task-row:hover {
+  background-color: color-mix(in srgb, var(--primary) 6%, transparent);
+}
