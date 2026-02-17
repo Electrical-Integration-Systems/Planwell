@@ -379,7 +379,7 @@ export function TaskDetailDialog({
           </div>
 
           {/* Right pane - Updates */}
-          <div className="w-[380px] flex-2 flex-col shrink-0 bg-muted/30">
+          <div className="w-[380px] flex flex-col shrink-0 bg-muted/30">
             <div className="px-4 py-3 border-b border-primary/20 shrink-0">
               <h3 className="text-xs font-medium uppercase tracking-wider text-primary flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
