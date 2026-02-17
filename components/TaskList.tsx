@@ -91,15 +91,14 @@ export function TaskList({
       const title = newTaskTitle.trim() || "Untitled task";
       const defaultState = states[0]?._id;
       const defaultPriority = priorities[0]?._id;
-      const defaultProject = projects[0]?._id;
 
-      if (!defaultState || !defaultPriority || !defaultProject) return;
+      if (!defaultState || !defaultPriority) return;
 
       void createTask({
         title,
         stateId: defaultState,
         priorityId: defaultPriority,
-        projectId: defaultProject,
+        projectId: projects[0]?._id,
         assignees: [],
         tagIds: [],
       }).then((taskId) => {

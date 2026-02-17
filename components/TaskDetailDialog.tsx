@@ -292,18 +292,21 @@ export function TaskDetailDialog({
                       Project
                     </Label>
                     <Select
-                      value={task.projectId}
+                      value={task.projectId ?? "__none__"}
                       onValueChange={(val) => {
                         void updateTask({
                           id: taskId,
-                          projectId: val as Id<"projects">,
+                          projectId: val === "__none__" ? undefined : val as Id<"projects">,
                         });
                       }}
                     >
-                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={projects.find(p=>p._id===task.projectId)?.name}>
+                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.projectId ? projects.find(p => p._id === task.projectId)?.name : "N/A"}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="__none__">
+                          N/A
+                        </SelectItem>
                         {projects.map((p) => (
                           <SelectItem key={p._id} value={p._id}>
                             {p.name}

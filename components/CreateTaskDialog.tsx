@@ -48,14 +48,13 @@ export function CreateTaskDialog({
   // Auto-select first values when data loads
   const effectiveStateId = stateId || (states[0]?._id ?? "");
   const effectivePriorityId = priorityId || (priorities[0]?._id ?? "");
-  const effectiveProjectId = projectId || (projects[0]?._id ?? "");
+  const effectiveProjectId = projectId || "__none__";
 
   const handleSubmit = () => {
     if (
       !title.trim() ||
       !effectiveStateId ||
-      !effectivePriorityId ||
-      !effectiveProjectId
+      !effectivePriorityId
     )
       return;
 
@@ -64,7 +63,7 @@ export function CreateTaskDialog({
       description: description.trim() || undefined,
       stateId: effectiveStateId as Id<"taskStates">,
       priorityId: effectivePriorityId as Id<"priorities">,
-      projectId: effectiveProjectId as Id<"projects">,
+      projectId: effectiveProjectId === "__none__" ? undefined : effectiveProjectId as Id<"projects">,
       assignees: selectedAssignees,
       tagIds: selectedTags,
     }).then(() => {
@@ -98,8 +97,7 @@ export function CreateTaskDialog({
   const canCreate =
     title.trim() &&
     effectiveStateId &&
-    effectivePriorityId &&
-    effectiveProjectId;
+    effectivePriorityId;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -201,12 +199,15 @@ export function CreateTaskDialog({
               </Label>
               <Select
                 value={effectiveProjectId}
-                onValueChange={(val) => setProjectId(val as Id<"projects">)}
+                onValueChange={(val) => setProjectId(val as Id<"projects"> | "")}
               >
                 <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-lg">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__none__">
+                    N/A
+                  </SelectItem>
                   {projects.map((p) => (
                     <SelectItem key={p._id} value={p._id}>
                       {p.name}

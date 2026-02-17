@@ -42,7 +42,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     stateId: v.id("taskStates"),
     priorityId: v.id("priorities"),
-    projectId: v.id("projects"),
+    projectId: v.optional(v.id("projects")),
     assignees: v.array(v.id("users")),
     tagIds: v.array(v.id("tags")),
     creatorId: v.id("users"),

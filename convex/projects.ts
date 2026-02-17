@@ -9,24 +9,9 @@ export const list = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return [];
-    
-    let projects = await ctx.db.query("projects").collect();
-    
-    // Auto-create default project if none exist
-    if (projects.length === 0) {
-      const now = Date.now();
-      const defaultProjectId = await ctx.db.insert("projects", {
-        name: "General",
-        description: "Default project for tasks",
-        archived: false,
-        createdBy: userId,
-        createdAt: now,
-        updatedAt: now,
-      });
-      const defaultProject = await ctx.db.get(defaultProjectId);
-      if (defaultProject) projects = [defaultProject];
-    }
-    
+
+    const projects = await ctx.db.query("projects").collect();
+
     if (args.includeArchived) return projects;
     return projects.filter((p) => !p.archived);
   },

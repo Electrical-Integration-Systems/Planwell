@@ -26,11 +26,11 @@ export const list = query({
     const hasExcludeProjectFilter =
       args.excludeProjectIds && args.excludeProjectIds.length > 0;
     if (hasProjectFilter) {
-      tasks = tasks.filter((t) => args.projectIds!.includes(t.projectId));
+      tasks = tasks.filter((t) => t.projectId !== undefined && args.projectIds!.includes(t.projectId));
     }
     if (hasExcludeProjectFilter) {
       tasks = tasks.filter(
-        (t) => !args.excludeProjectIds!.includes(t.projectId),
+        (t) => t.projectId === undefined || !args.excludeProjectIds!.includes(t.projectId),
       );
     }
 
@@ -103,7 +103,7 @@ export const list = query({
       ...task,
       state: stateMap.get(task.stateId) ?? null,
       priority: priorityMap.get(task.priorityId) ?? null,
-      project: projectMap.get(task.projectId) ?? null,
+      project: task.projectId ? projectMap.get(task.projectId) ?? null : null,
       assigneeUsers: task.assignees
         .map((id) => userMap.get(id))
         .filter((u) => u !== undefined),
@@ -127,7 +127,7 @@ export const get = query({
     const [state, priority, project, tags] = await Promise.all([
       ctx.db.get(task.stateId),
       ctx.db.get(task.priorityId),
-      ctx.db.get(task.projectId),
+      task.projectId ? ctx.db.get(task.projectId) : Promise.resolve(null),
       Promise.all(task.tagIds.map((id) => ctx.db.get(id))),
     ]);
 
@@ -152,7 +152,7 @@ export const create = mutation({
     description: v.optional(v.string()),
     stateId: v.id("taskStates"),
     priorityId: v.id("priorities"),
-    projectId: v.id("projects"),
+    projectId: v.optional(v.id("projects")),
     assignees: v.array(v.id("users")),
     tagIds: v.array(v.id("tags")),
   },
