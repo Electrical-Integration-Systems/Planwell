@@ -4,6 +4,7 @@ import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Sun, Moon, Settings, LogOut } from "lucide-react";
 
@@ -21,11 +22,14 @@ export function Header({ onSettingsOpen }: { onSettingsOpen: () => void }) {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-serif text-base leading-none">
-                P
-              </span>
-            </div>
+            <Image
+              src="/planwell-logo.svg"
+              alt="Planwell Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
             <span className="font-serif text-xl tracking-tight text-foreground">
               Planwell
             </span>

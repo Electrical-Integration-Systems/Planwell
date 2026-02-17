@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Sora } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import ConvexClientProvider from "@/components/ConvexClientProvider";
+import ConvexClientProvider from "@/providers/ConvexClientProvider";
 
 const lora = Lora({
   variable: "--font-lora",

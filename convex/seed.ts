@@ -48,5 +48,19 @@ export const seedAll = mutation({
         });
       }
     }
+
+    // Seed default project if empty
+    const existingProjects = await ctx.db.query("projects").first();
+    if (existingProjects === null) {
+      const now = Date.now();
+      await ctx.db.insert("projects", {
+        name: "General",
+        description: "Default project for tasks",
+        archived: false,
+        createdBy: userId,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
   },
 });

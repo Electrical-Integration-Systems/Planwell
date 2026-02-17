@@ -55,6 +55,9 @@ export function TaskDetailDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl">
+          <DialogHeader>
+            <DialogTitle>Task Details</DialogTitle>
+          </DialogHeader>
           <p className="text-muted-foreground text-sm py-12 text-center">
             Loading...
           </p>
@@ -172,7 +175,7 @@ export function TaskDetailDialog({
         {/* Split pane: left (task details) | right (updates) */}
         <div className="flex flex-1 min-h-0">
           {/* Left pane - Description & Fields */}
-          <div className="flex-1 flex flex-col min-w-0 border-r border-border/50">
+          <div className="w-[520px] flex flex-col border-r border-border/50 shrink-0">
             <ScrollArea className="flex-1">
               <div className="p-6 flex flex-col gap-5">
                 {/* Description */}
@@ -245,7 +248,7 @@ export function TaskDetailDialog({
                         });
                       }}
                     >
-                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.state?.name}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -271,7 +274,7 @@ export function TaskDetailDialog({
                         });
                       }}
                     >
-                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.priority?.name}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -297,7 +300,7 @@ export function TaskDetailDialog({
                         });
                       }}
                     >
-                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+                      <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={projects.find(p=>p._id===task.projectId)?.name}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -379,15 +382,15 @@ export function TaskDetailDialog({
           </div>
 
           {/* Right pane - Updates */}
-          <div className="w-[380px] flex flex-col shrink-0 bg-muted/30">
+          <div className="flex-1 flex flex-col bg-muted/30">
             <div className="px-4 py-3 border-b border-primary/20 shrink-0">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-primary flex items-center gap-1.5">
+              <h3 className="text-xs font-mediumuppercase tracking-wider text-primary flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 Updates
               </h3>
             </div>
 
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="p-4 flex flex-col gap-3">
                 {taskUpdates?.length === 0 && (
                   <div className="py-8 text-center">

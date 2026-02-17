@@ -23,10 +23,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Eye, Trash2, Plus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MoreHorizontal, Eye, Trash2, Plus, UserPlus } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 
 type Filters = {
@@ -71,6 +77,7 @@ export function TaskList({
   const states = useQuery(api.taskStates.list) ?? [];
   const priorities = useQuery(api.priorities.list) ?? [];
   const projects = useQuery(api.projects.list, {}) ?? [];
+  const users = useQuery(api.users.list) ?? [];
   const updateTask = useMutation(api.tasks.update);
   const createTask = useMutation(api.tasks.create);
   const removeTask = useMutation(api.tasks.remove);
@@ -228,8 +235,11 @@ export function TaskList({
                       });
                     }}
                   >
-                    <SelectTrigger className="h-7 text-xs w-[140px] border-border/50 bg-transparent shadow-none">
-                      <span className="flex items-center gap-1.5">
+                    <SelectTrigger className="h-7 text-xs w-[140px] border-border/50 bg-transparent shadow-none overflow-hidden">
+                      <span
+                        className="flex items-center gap-1.5 truncate"
+                        title={task.state?.name}
+                      >
                         {task.state?.color && (
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -271,8 +281,11 @@ export function TaskList({
                       });
                     }}
                   >
-                    <SelectTrigger className="h-7 text-xs w-[130px] border-border/50 bg-transparent shadow-none">
-                      <span className="flex items-center gap-1.5">
+                    <SelectTrigger className="h-7 text-xs w-[130px] border-border/50 bg-transparent shadow-none overflow-hidden">
+                      <span
+                        className="flex items-center gap-1.5 truncate"
+                        title={task.priority?.name}
+                      >
                         {task.priority?.color && (
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -301,22 +314,76 @@ export function TaskList({
                 </div>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground py-2.5">
-                {task.project?.name ?? "\u2014"}
+                <span className="block truncate max-w-[220px]" title={task.project?.name ?? "\u2014"}>
+                  {task.project?.name ?? "\u2014"}
+                </span>
               </TableCell>
-              <TableCell className="text-sm py-2.5">
-                {task.assigneeUsers.length > 0 && (
-                  <div className="flex items-center -space-x-1">
-                    {task.assigneeUsers.map((u, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-card"
-                        title={u.name ?? u.email ?? "?"}
-                      >
-                        {(u.name ?? u.email ?? "?").charAt(0).toUpperCase()}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              <TableCell
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm py-2.5"
+              >
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 hover:opacity-70 transition-opacity">
+                      {task.assigneeUsers.length > 0 ? (
+                        <div className="flex items-center -space-x-1">
+                          {task.assigneeUsers.map((u, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-card"
+                              title={u.name ?? u.email ?? "?"}
+                            >
+                              {(u.name ?? u.email ?? "?").charAt(0).toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                          <UserPlus className="h-3.5 w-3.5" />
+                          <span>Assign</span>
+                        </div>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-3" align="start">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                        Assignees
+                      </p>
+                      {users.map((user) => (
+                        <div
+                          key={user._id}
+                          className="flex items-center gap-2 py-1"
+                        >
+                          <Checkbox
+                            id={`assignee-${task._id}-${user._id}`}
+                            checked={task.assignees.includes(user._id)}
+                            onCheckedChange={(checked) => {
+                              const next = checked
+                                ? [...task.assignees, user._id]
+                                : task.assignees.filter((id) => id !== user._id);
+                              void updateTask({
+                                id: task._id,
+                                assignees: next,
+                              });
+                            }}
+                          />
+                          <label
+                            htmlFor={`assignee-${task._id}-${user._id}`}
+                            className="text-xs cursor-pointer flex-1 truncate"
+                          >
+                            {user.name ?? user.email ?? "?"}
+                          </label>
+                        </div>
+                      ))}
+                      {users.length === 0 && (
+                        <p className="text-xs text-muted-foreground/50">
+                          No users available
+                        </p>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </TableCell>
               <TableCell className="py-2.5">
                 <div className="flex flex-wrap gap-1">

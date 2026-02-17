@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import { TaskList } from "@/components/TaskList";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";

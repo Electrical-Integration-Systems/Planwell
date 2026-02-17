@@ -1,0 +1,5 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Check icon with rounded corners -->
+  <rect x="2" y="2" width="36" height="36" rx="8" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="2"/>
+  <path d="M12 20L18 26L28 14" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
