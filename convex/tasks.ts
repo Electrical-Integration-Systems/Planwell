@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { logAudit } from "./auditLog";
 
 export const list = query({
   args: {
@@ -160,7 +161,7 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
     const now = Date.now();
-    return await ctx.db.insert("tasks", {
+    const taskId = await ctx.db.insert("tasks", {
       title: args.title,
       description: args.description,
       stateId: args.stateId,
@@ -172,6 +173,14 @@ export const create = mutation({
       createdAt: now,
       updatedAt: now,
     });
+    await logAudit(ctx, {
+      userId,
+      action: "create",
+      entityType: "task",
+      entityId: taskId,
+      metadata: { name: args.title },
+    });
+    return taskId;
   },
 });
 
@@ -189,12 +198,65 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const oldTask = await ctx.db.get(args.id);
+    if (!oldTask) throw new Error("Task not found");
+
     const { id, ...fields } = args;
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) patch[key] = value;
     }
     await ctx.db.patch(id, patch);
+
+    // Build changes diff with resolved names
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    for (const [key, value] of Object.entries(fields)) {
+      if (value === undefined) continue;
+      const oldVal = (oldTask as Record<string, unknown>)[key];
+      if (JSON.stringify(oldVal) === JSON.stringify(value)) continue;
+
+      if (key === "stateId") {
+        const oldState = await ctx.db.get(oldVal as any) as any;
+        const newState = await ctx.db.get(value as any) as any;
+        changes["state"] = { old: oldState?.name ?? oldVal, new: newState?.name ?? value };
+      } else if (key === "priorityId") {
+        const oldPriority = await ctx.db.get(oldVal as any) as any;
+        const newPriority = await ctx.db.get(value as any) as any;
+        changes["priority"] = { old: oldPriority?.name ?? oldVal, new: newPriority?.name ?? value };
+      } else if (key === "projectId") {
+        const oldProject = oldVal ? await ctx.db.get(oldVal as any) as any : null;
+        const newProject = value ? await ctx.db.get(value as any) as any : null;
+        changes["project"] = { old: oldProject?.name ?? oldVal ?? "N/A", new: newProject?.name ?? value ?? "N/A" };
+      } else if (key === "assignees") {
+        const oldUsers = await Promise.all((oldVal as any[]).map((id: any) => ctx.db.get(id)));
+        const newUsers = await Promise.all((value as any[]).map((id: any) => ctx.db.get(id)));
+        changes["assignees"] = {
+          old: oldUsers.filter(Boolean).map((u: any) => u.name ?? u.email ?? "?"),
+          new: newUsers.filter(Boolean).map((u: any) => u.name ?? u.email ?? "?"),
+        };
+      } else if (key === "tagIds") {
+        const oldTags = await Promise.all((oldVal as any[]).map((id: any) => ctx.db.get(id)));
+        const newTags = await Promise.all((value as any[]).map((id: any) => ctx.db.get(id)));
+        changes["tags"] = {
+          old: oldTags.filter(Boolean).map((t: any) => t.name),
+          new: newTags.filter(Boolean).map((t: any) => t.name),
+        };
+      } else {
+        changes[key] = { old: oldVal, new: value };
+      }
+    }
+
+    if (Object.keys(changes).length > 0) {
+      await logAudit(ctx, {
+        userId,
+        action: "update",
+        entityType: "task",
+        entityId: id,
+        changes,
+        metadata: { name: oldTask.title },
+      });
+    }
   },
 });
 
@@ -205,6 +267,9 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const task = await ctx.db.get(args.id);
+
     // Delete all task updates for this task
     const updates = await ctx.db
       .query("taskUpdates")
@@ -214,5 +279,13 @@ export const remove = mutation({
       await ctx.db.delete(update._id);
     }
     await ctx.db.delete(args.id);
+
+    await logAudit(ctx, {
+      userId,
+      action: "delete",
+      entityType: "task",
+      entityId: args.id,
+      metadata: { name: task?.title ?? "Unknown" },
+    });
   },
 });

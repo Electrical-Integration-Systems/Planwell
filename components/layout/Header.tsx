@@ -6,9 +6,15 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Settings, LogOut } from "lucide-react";
+import { Sun, Moon, Settings, History, LogOut } from "lucide-react";
 
-export function Header({ onSettingsOpen }: { onSettingsOpen: () => void }) {
+export function Header({
+  onSettingsOpen,
+  onHistoryOpen,
+}: {
+  onSettingsOpen: () => void;
+  onHistoryOpen: () => void;
+}) {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
   const router = useRouter();
@@ -48,6 +54,15 @@ export function Header({ onSettingsOpen }: { onSettingsOpen: () => void }) {
               ) : (
                 <Moon className="h-4 w-4" />
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              onClick={onHistoryOpen}
+              aria-label="Audit History"
+            >
+              <History className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"

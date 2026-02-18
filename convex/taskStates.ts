@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { logAudit } from "./auditLog";
 
 export const list = query({
   args: {},
@@ -26,13 +27,21 @@ export const create = mutation({
     const maxOrder =
       existing.length > 0 ? Math.max(...existing.map((s) => s.order)) : -1;
     const now = Date.now();
-    return await ctx.db.insert("taskStates", {
+    const stateId = await ctx.db.insert("taskStates", {
       name: args.name,
       color: args.color,
       order: maxOrder + 1,
       createdAt: now,
       updatedAt: now,
     });
+    await logAudit(ctx, {
+      userId,
+      action: "create",
+      entityType: "taskState",
+      entityId: stateId,
+      metadata: { name: args.name },
+    });
+    return stateId;
   },
 });
 
@@ -45,10 +54,31 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const oldState = await ctx.db.get(args.id);
+
     const updates: Record<string, unknown> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
     if (args.color !== undefined) updates.color = args.color;
     await ctx.db.patch(args.id, updates);
+
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    if (args.name !== undefined && args.name !== oldState?.name) {
+      changes["name"] = { old: oldState?.name, new: args.name };
+    }
+    if (args.color !== undefined && args.color !== oldState?.color) {
+      changes["color"] = { old: oldState?.color, new: args.color };
+    }
+    if (Object.keys(changes).length > 0) {
+      await logAudit(ctx, {
+        userId,
+        action: "update",
+        entityType: "taskState",
+        entityId: args.id,
+        changes,
+        metadata: { name: oldState?.name ?? "Unknown" },
+      });
+    }
   },
 });
 
@@ -66,7 +96,15 @@ export const remove = mutation({
     if (tasks !== null) {
       throw new Error("Cannot delete state that is assigned to tasks");
     }
+    const state = await ctx.db.get(args.id);
     await ctx.db.delete(args.id);
+    await logAudit(ctx, {
+      userId,
+      action: "delete",
+      entityType: "taskState",
+      entityId: args.id,
+      metadata: { name: state?.name ?? "Unknown" },
+    });
   },
 });
 
@@ -81,5 +119,12 @@ export const reorder = mutation({
     for (let i = 0; i < args.ids.length; i++) {
       await ctx.db.patch(args.ids[i], { order: i, updatedAt: now });
     }
+    await logAudit(ctx, {
+      userId,
+      action: "reorder",
+      entityType: "taskState",
+      entityId: "all",
+      metadata: { count: args.ids.length },
+    });
   },
 });

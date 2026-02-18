@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { logAudit } from "./auditLog";
 
 export const list = query({
   args: {},
@@ -20,12 +21,20 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
     const now = Date.now();
-    return await ctx.db.insert("tags", {
+    const tagId = await ctx.db.insert("tags", {
       name: args.name,
       color: args.color,
       createdAt: now,
       updatedAt: now,
     });
+    await logAudit(ctx, {
+      userId,
+      action: "create",
+      entityType: "tag",
+      entityId: tagId,
+      metadata: { name: args.name },
+    });
+    return tagId;
   },
 });
 
@@ -38,10 +47,31 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const oldTag = await ctx.db.get(args.id);
+
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     if (args.name !== undefined) patch.name = args.name;
     if (args.color !== undefined) patch.color = args.color;
     await ctx.db.patch(args.id, patch);
+
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    if (args.name !== undefined && args.name !== oldTag?.name) {
+      changes["name"] = { old: oldTag?.name, new: args.name };
+    }
+    if (args.color !== undefined && args.color !== oldTag?.color) {
+      changes["color"] = { old: oldTag?.color, new: args.color };
+    }
+    if (Object.keys(changes).length > 0) {
+      await logAudit(ctx, {
+        userId,
+        action: "update",
+        entityType: "tag",
+        entityId: args.id,
+        changes,
+        metadata: { name: oldTag?.name ?? "Unknown" },
+      });
+    }
   },
 });
 
@@ -52,6 +82,9 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const tag = await ctx.db.get(args.id);
+
     // Remove tag from all tasks that reference it
     const allTasks = await ctx.db.query("tasks").collect();
     for (const task of allTasks) {
@@ -63,5 +96,13 @@ export const remove = mutation({
       }
     }
     await ctx.db.delete(args.id);
+
+    await logAudit(ctx, {
+      userId,
+      action: "delete",
+      entityType: "tag",
+      entityId: args.id,
+      metadata: { name: tag?.name ?? "Unknown" },
+    });
   },
 });

@@ -9,6 +9,7 @@ import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 type SortKey = {
@@ -38,6 +39,7 @@ export default function Home() {
   const [filters, setFilters] = useState<Filters>({});
   const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(
     null,
   );
@@ -74,7 +76,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Header onSettingsOpen={() => setSettingsOpen(true)} />
+      <Header onSettingsOpen={() => setSettingsOpen(true)} onHistoryOpen={() => setHistoryOpen(true)} />
 
       <main className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
         {/* Page heading */}
@@ -116,6 +118,7 @@ export default function Home() {
         )}
 
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+        <AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
       </main>
     </div>
   );
