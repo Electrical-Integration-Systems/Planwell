@@ -1,5 +1,8 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -40,6 +43,7 @@ export default function Home() {
   const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(
     null,
   );
@@ -90,6 +94,14 @@ export default function Home() {
               Manage and track your team&apos;s work
             </p>
           </div>
+          <Button
+            size="sm"
+            className="h-8 text-xs gap-1.5 rounded-lg px-3"
+            onClick={() => setIsAddingTask(true)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add task
+          </Button>
         </div>
 
         {/* Filters & Sort */}
@@ -104,6 +116,8 @@ export default function Home() {
             filters={filters}
             sortKeys={sortKeys}
             onTaskSelect={setSelectedTaskId}
+            isAddingTask={isAddingTask}
+            onIsAddingTaskChange={setIsAddingTask}
           />
         </div>
 

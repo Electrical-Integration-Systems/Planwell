@@ -57,10 +57,14 @@ export function TaskList({
   filters,
   sortKeys,
   onTaskSelect,
+  isAddingTask,
+  onIsAddingTaskChange,
 }: {
   filters: Filters;
   sortKeys: SortKey[];
   onTaskSelect: (id: Id<"tasks">) => void;
+  isAddingTask: boolean;
+  onIsAddingTaskChange: (v: boolean) => void;
 }) {
   const tasks = useQuery(api.tasks.list, {
     projectIds: filters.projectIds,
@@ -82,7 +86,6 @@ export function TaskList({
   const createTask = useMutation(api.tasks.create);
   const removeTask = useMutation(api.tasks.remove);
 
-  const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const handleQuickCreate = () => {
@@ -103,7 +106,7 @@ export function TaskList({
         tagIds: [],
       }).then((taskId) => {
         setNewTaskTitle("");
-        setIsAddingTask(false);
+        onIsAddingTaskChange(false);
         onTaskSelect(taskId);
       });
     }
@@ -164,15 +167,6 @@ export function TaskList({
             Create a task to get started
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-2 h-8 text-xs text-primary/70 hover:text-primary hover:bg-primary/10 gap-1.5 rounded-lg"
-          onClick={() => setIsAddingTask(true)}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add task
-        </Button>
       </div>
     );
   }
@@ -210,6 +204,48 @@ export function TaskList({
           </TableRow>
         </TableHeader>
         <TableBody>
+          {/* Inline add task row — at top so it's always visible */}
+          {isAddingTask && (
+            <TableRow className="border-border/50">
+              <TableCell colSpan={9} className="py-2">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder="Task title (or leave blank for 'Untitled task')"
+                    className="h-8 text-sm border-border/50 bg-transparent shadow-none flex-1"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleQuickCreate();
+                      if (e.key === "Escape") {
+                        onIsAddingTaskChange(false);
+                        setNewTaskTitle("");
+                      }
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs px-3 rounded-lg"
+                    onClick={handleQuickCreate}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs px-2 rounded-lg text-muted-foreground"
+                    onClick={() => {
+                      onIsAddingTaskChange(false);
+                      setNewTaskTitle("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+
           {sortedTasks.map((task, index) => (
             <TableRow
               key={task._id}
@@ -446,61 +482,8 @@ export function TaskList({
               </TableCell>
             </TableRow>
           ))}
-
-          {/* Inline add task row */}
-          {isAddingTask && (
-            <TableRow className="border-border/50">
-              <TableCell colSpan={9} className="py-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newTaskTitle}
-                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder="Task title (or leave blank for 'Untitled task')"
-                    className="h-8 text-sm border-border/50 bg-transparent shadow-none flex-1"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleQuickCreate();
-                      if (e.key === "Escape") {
-                        setIsAddingTask(false);
-                        setNewTaskTitle("");
-                      }
-                    }}
-                  />
-                  <Button
-                    size="sm"
-                    className="h-8 text-xs px-3 rounded-lg"
-                    onClick={handleQuickCreate}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-xs px-2 rounded-lg text-muted-foreground"
-                    onClick={() => {
-                      setIsAddingTask(false);
-                      setNewTaskTitle("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
         </TableBody>
       </Table>
-
-      {/* + button at bottom of list */}
-      {!isAddingTask && (
-        <button
-          onClick={() => setIsAddingTask(true)}
-          className="w-full flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors border-t border-border/50 cursor-pointer"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>Add task</span>
-        </button>
-      )}
     </div>
   );
 }
