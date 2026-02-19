@@ -132,18 +132,20 @@ function ChangesDisplay({ changesJson }: { changesJson: string }) {
             {Object.entries(changes).map(([field, { old: oldVal, new: newVal }]) => (
                 <div
                     key={field}
-                    className="text-[11px] leading-relaxed flex items-start gap-1.5"
+                    className="text-[11px] leading-relaxed flex flex-col sm:flex-row items-start gap-1.5"
                 >
                     <span className="font-medium text-muted-foreground capitalize shrink-0">
                         {field}:
                     </span>
-                    <span className="text-red-400/80 line-through truncate max-w-[180px]">
-                        {Array.isArray(oldVal) ? oldVal.join(", ") : String(oldVal ?? "—")}
-                    </span>
-                    <span className="text-muted-foreground shrink-0">→</span>
-                    <span className="text-green-500/80 truncate max-w-[180px]">
-                        {Array.isArray(newVal) ? newVal.join(", ") : String(newVal ?? "—")}
-                    </span>
+                    <div className="flex-1 min-w-0 sm:flex sm:items-center sm:gap-2">
+                        <span className="text-red-400/80 line-through break-words sm:truncate sm:max-w-[180px]">
+                            {Array.isArray(oldVal) ? oldVal.join(", ") : String(oldVal ?? "—")}
+                        </span>
+                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="text-green-500/80 break-words sm:truncate sm:max-w-[180px]">
+                            {Array.isArray(newVal) ? newVal.join(", ") : String(newVal ?? "—")}
+                        </span>
+                    </div>
                 </div>
             ))}
         </div>
