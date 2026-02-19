@@ -265,242 +265,330 @@ export function TaskList({
 
       {/* Task rows */}
       {sortedTasks.map((task, index) => (
-        <div
-          key={task._id}
-          className="grid items-center py-2.5 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in"
-          style={{
-            gridTemplateColumns: TASK_GRID_COLS,
-            animationDelay: `${Math.min(index, 20) * 25}ms`,
-          }}
-          onClick={() => onTaskSelect(task._id)}
-        >
-          <div className="font-medium text-sm truncate pr-2">
-            {task.title}
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <Select
-              value={task.stateId}
-              onValueChange={(val) => {
-                void updateTask({
-                  id: task._id,
-                  stateId: val as Id<"taskStates">,
-                });
-              }}
-            >
-              <SelectTrigger className="h-7 text-xs w-[140px] border-border/50 bg-transparent shadow-none overflow-hidden">
-                <span
-                  className="flex items-center gap-1.5 truncate"
-                  title={task.state?.name}
-                >
-                  {task.state?.color && (
-                    <span
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: task.state.color }}
-                    />
-                  )}
-                  {task.state?.name}
-                </span>
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {states.map((s) => (
-                  <SelectItem key={s._id} value={s._id}>
-                    <span className="flex items-center gap-2">
-                      {s.color && (
-                        <span
-                          className="w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: s.color }}
-                        />
+        <div key={task._id}>
+          {/* Mobile card layout */}
+          <div
+            className="md:hidden border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in p-3"
+            style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
+            onClick={() => onTaskSelect(task._id)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{task.title}</p>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  {task.state && (
+                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-medium gap-1">
+                      {task.state.color && (
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: task.state.color }} />
                       )}
-                      {s.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <Select
-              value={task.priorityId}
-              onValueChange={(val) => {
-                void updateTask({
-                  id: task._id,
-                  priorityId: val as Id<"priorities">,
-                });
-              }}
-            >
-              <SelectTrigger className="h-7 text-xs w-[130px] border-border/50 bg-transparent shadow-none overflow-hidden">
-                <span
-                  className="flex items-center gap-1.5 truncate"
-                  title={task.priority?.name}
-                >
-                  {task.priority?.color && (
-                    <span
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: task.priority.color }}
-                    />
+                      {task.state.name}
+                    </Badge>
                   )}
-                  {task.priority?.name}
-                </span>
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {priorities.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>
-                    <span className="flex items-center gap-2">
-                      {p.color && (
-                        <span
-                          className="w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: p.color }}
-                        />
+                  {task.priority && (
+                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-medium gap-1">
+                      {task.priority.color && (
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: task.priority.color }} />
                       )}
-                      {p.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-sm text-muted-foreground truncate pr-2" title={task.project?.name ?? "\u2014"}>
-            {task.project?.name ?? "\u2014"}
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-1 hover:opacity-70 transition-opacity">
-                  {task.assigneeUsers.length > 0 ? (
-                    <div className="flex items-center -space-x-1">
-                      {task.assigneeUsers.map((u, i) => (
-                        <span
-                          key={i}
-                          className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-card"
-                          title={u.name ?? u.email ?? "?"}
-                        >
+                      {task.priority.name}
+                    </Badge>
+                  )}
+                  {task.project && (
+                    <span className="text-[10px] text-muted-foreground">{task.project.name}</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  {task.tagList.map((tag) => (
+                    <Badge key={tag._id} variant="outline" className="text-[10px] h-5 px-1.5 border-current/20 font-medium" style={{ color: tag.color }}>
+                      {tag.name}
+                    </Badge>
+                  ))}
+                  {task.assigneeUsers.length > 0 && (
+                    <div className="flex items-center -space-x-1 ml-1">
+                      {task.assigneeUsers.slice(0, 3).map((u, i) => (
+                        <span key={i} className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-[9px] font-medium text-primary-foreground ring-1 ring-card" title={u.name ?? u.email ?? "?"}>
                           {(u.name ?? u.email ?? "?").charAt(0).toUpperCase()}
                         </span>
                       ))}
+                      {task.assigneeUsers.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground ml-1">+{task.assigneeUsers.length - 3}</span>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                      <UserPlus className="h-3.5 w-3.5" />
-                      <span>Assign</span>
-                    </div>
-                  )}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-3" align="start">
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Assignees
-                  </p>
-                  {users.map((user) => (
-                    <div
-                      key={user._id}
-                      className="flex items-center gap-2 py-1"
-                    >
-                      <Checkbox
-                        id={`assignee-${task._id}-${user._id}`}
-                        checked={task.assignees.includes(user._id)}
-                        onCheckedChange={(checked) => {
-                          const next = checked
-                            ? [...task.assignees, user._id]
-                            : task.assignees.filter((id) => id !== user._id);
-                          void updateTask({
-                            id: task._id,
-                            assignees: next,
-                          });
-                        }}
-                      />
-                      <label
-                        htmlFor={`assignee-${task._id}-${user._id}`}
-                        className="text-xs cursor-pointer flex-1 truncate"
-                      >
-                        {user.name ?? user.email ?? "?"}
-                      </label>
-                    </div>
-                  ))}
-                  {users.length === 0 && (
-                    <p className="text-xs text-muted-foreground/50">
-                      No users available
-                    </p>
                   )}
                 </div>
-              </PopoverContent>
-            </Popover>
+              </div>
+              <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                <span className="text-[10px] text-muted-foreground tabular-nums">
+                  {new Date(task.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => onTaskSelect(task._id)} className="gap-2 text-xs">
+                      <Eye className="h-3.5 w-3.5" />
+                      View details
+                    </DropdownMenuItem>
+                    {archived ? (
+                      <DropdownMenuItem className="gap-2 text-xs" onClick={() => { void unarchiveTask({ id: task._id }); }}>
+                        <ArchiveRestore className="h-3.5 w-3.5" />
+                        Unarchive
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem className="gap-2 text-xs" onClick={() => { void archiveTask({ id: task._id }); }}>
+                        <Archive className="h-3.5 w-3.5" />
+                        Archive
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem className="text-destructive gap-2 text-xs" onClick={() => { void removeTask({ id: task._id }); }}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {task.tagList.map((tag) => (
-              <Badge
-                key={tag._id}
-                variant="outline"
-                className="text-[10px] h-5 px-1.5 border-current/20 font-medium"
-                style={{ color: tag.color }}
+
+          {/* Desktop grid layout */}
+          <div
+            className="hidden md:grid items-center py-2.5 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in"
+            style={{
+              gridTemplateColumns: TASK_GRID_COLS,
+              animationDelay: `${Math.min(index, 20) * 25}ms`,
+            }}
+            onClick={() => onTaskSelect(task._id)}
+          >
+            <div className="font-medium text-sm truncate pr-2">
+              {task.title}
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <Select
+                value={task.stateId}
+                onValueChange={(val) => {
+                  void updateTask({
+                    id: task._id,
+                    stateId: val as Id<"taskStates">,
+                  });
+                }}
               >
-                {tag.name}
-              </Badge>
-            ))}
-          </div>
-          <div className="text-xs text-muted-foreground tabular-nums">
-            {new Date(task.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </div>
-          <div className="text-xs text-muted-foreground tabular-nums">
-            {new Date(task.updatedAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground"
+                <SelectTrigger className="h-7 text-xs w-[140px] border-border/50 bg-transparent shadow-none overflow-hidden">
+                  <span
+                    className="flex items-center gap-1.5 truncate"
+                    title={task.state?.name}
+                  >
+                    {task.state?.color && (
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: task.state.color }}
+                      />
+                    )}
+                    {task.state?.name}
+                  </span>
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {states.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      <span className="flex items-center gap-2">
+                        {s.color && (
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: s.color }}
+                          />
+                        )}
+                        {s.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <Select
+                value={task.priorityId}
+                onValueChange={(val) => {
+                  void updateTask({
+                    id: task._id,
+                    priorityId: val as Id<"priorities">,
+                  });
+                }}
+              >
+                <SelectTrigger className="h-7 text-xs w-[130px] border-border/50 bg-transparent shadow-none overflow-hidden">
+                  <span
+                    className="flex items-center gap-1.5 truncate"
+                    title={task.priority?.name}
+                  >
+                    {task.priority?.color && (
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: task.priority.color }}
+                      />
+                    )}
+                    {task.priority?.name}
+                  </span>
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {priorities.map((p) => (
+                    <SelectItem key={p._id} value={p._id}>
+                      <span className="flex items-center gap-2">
+                        {p.color && (
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: p.color }}
+                          />
+                        )}
+                        {p.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-muted-foreground truncate pr-2" title={task.project?.name ?? "\u2014"}>
+              {task.project?.name ?? "\u2014"}
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 hover:opacity-70 transition-opacity">
+                    {task.assigneeUsers.length > 0 ? (
+                      <div className="flex items-center -space-x-1">
+                        {task.assigneeUsers.map((u, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-card"
+                            title={u.name ?? u.email ?? "?"}
+                          >
+                            {(u.name ?? u.email ?? "?").charAt(0).toUpperCase()}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                        <UserPlus className="h-3.5 w-3.5" />
+                        <span>Assign</span>
+                      </div>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-3" align="start">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                      Assignees
+                    </p>
+                    {users.map((user) => (
+                      <div
+                        key={user._id}
+                        className="flex items-center gap-2 py-1"
+                      >
+                        <Checkbox
+                          id={`assignee-${task._id}-${user._id}`}
+                          checked={task.assignees.includes(user._id)}
+                          onCheckedChange={(checked) => {
+                            const next = checked
+                              ? [...task.assignees, user._id]
+                              : task.assignees.filter((id) => id !== user._id);
+                            void updateTask({
+                              id: task._id,
+                              assignees: next,
+                            });
+                          }}
+                        />
+                        <label
+                          htmlFor={`assignee-${task._id}-${user._id}`}
+                          className="text-xs cursor-pointer flex-1 truncate"
+                        >
+                          {user.name ?? user.email ?? "?"}
+                        </label>
+                      </div>
+                    ))}
+                    {users.length === 0 && (
+                      <p className="text-xs text-muted-foreground/50">
+                        No users available
+                      </p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {task.tagList.map((tag) => (
+                <Badge
+                  key={tag._id}
+                  variant="outline"
+                  className="text-[10px] h-5 px-1.5 border-current/20 font-medium"
+                  style={{ color: tag.color }}
                 >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem
-                  onClick={() => onTaskSelect(task._id)}
-                  className="gap-2 text-xs"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  View details
-                </DropdownMenuItem>
-                {archived ? (
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+            <div className="text-xs text-muted-foreground tabular-nums">
+              {new Date(task.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+            <div className="text-xs text-muted-foreground tabular-nums">
+              {new Date(task.updatedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem
+                    onClick={() => onTaskSelect(task._id)}
                     className="gap-2 text-xs"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    View details
+                  </DropdownMenuItem>
+                  {archived ? (
+                    <DropdownMenuItem
+                      className="gap-2 text-xs"
+                      onClick={() => {
+                        void unarchiveTask({ id: task._id });
+                      }}
+                    >
+                      <ArchiveRestore className="h-3.5 w-3.5" />
+                      Unarchive
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      className="gap-2 text-xs"
+                      onClick={() => {
+                        void archiveTask({ id: task._id });
+                      }}
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                      Archive
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className="text-destructive gap-2 text-xs"
                     onClick={() => {
-                      void unarchiveTask({ id: task._id });
+                      void removeTask({ id: task._id });
                     }}
                   >
-                    <ArchiveRestore className="h-3.5 w-3.5" />
-                    Unarchive
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
                   </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    className="gap-2 text-xs"
-                    onClick={() => {
-                      void archiveTask({ id: task._id });
-                    }}
-                  >
-                    <Archive className="h-3.5 w-3.5" />
-                    Archive
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  className="text-destructive gap-2 text-xs"
-                  onClick={() => {
-                    void removeTask({ id: task._id });
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       ))}

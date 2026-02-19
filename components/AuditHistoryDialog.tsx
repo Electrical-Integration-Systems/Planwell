@@ -166,10 +166,10 @@ export function AuditHistoryDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="!max-w-[700px] h-[80vh] p-0 gap-0 flex flex-col overflow-hidden shadow-warm-lg border-border/60">
-                <DialogHeader className="px-6 pt-5 pb-4 border-b border-primary/20 shrink-0 bg-primary/[0.03]">
-                    <div className="h-1 -mx-6 -mt-5 mb-4 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
-                    <div className="flex items-center justify-between">
+            <DialogContent className="max-w-[calc(100%-1rem)] sm:!max-w-[700px] h-[95dvh] sm:h-[80vh] p-0 gap-0 flex flex-col overflow-hidden shadow-warm-lg border-border/60">
+                <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-primary/20 shrink-0 bg-primary/[0.03]">
+                    <div className="h-1 -mx-4 sm:-mx-6 -mt-4 sm:-mt-5 mb-3 sm:mb-4 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <DialogTitle className="font-serif text-xl tracking-tight flex items-center gap-2">
                             <History className="h-5 w-5 text-primary" />
                             Audit History

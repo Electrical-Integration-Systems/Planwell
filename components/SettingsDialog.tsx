@@ -56,7 +56,7 @@ export function SettingsDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] shadow-warm-lg border-border/60">
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90dvh] sm:max-h-[80vh] shadow-warm-lg border-border/60">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl tracking-tight flex items-center gap-2">
             Settings
@@ -64,7 +64,7 @@ export function SettingsDialog({
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="states">
-          <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-border">
+          <TabsList className="flex w-full overflow-x-auto bg-transparent border-b border-border">
             <TabsTrigger
               value="states"
               className="text-xs rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"

@@ -112,11 +112,11 @@ export default function Home() {
       <main className="flex-1 overflow-y-auto">
         {/* Sticky toolbar: heading, tabs, search, filters, sort, presets, column headers */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
-          <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8">
+          <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
           {/* Page heading */}
-          <div className="flex items-end justify-between pt-5 pb-3 animate-fade-in-up">
+          <div className="flex items-end justify-between pt-4 sm:pt-5 pb-2 sm:pb-3 animate-fade-in-up">
             <div>
-              <h2 className="font-serif text-2xl tracking-tight flex items-center gap-2">
+              <h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
                 Tasks
                 <span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
               </h2>
@@ -135,7 +135,7 @@ export default function Home() {
           </div>
 
           {/* Tab row + Search */}
-          <div className="flex items-center gap-4 pt-2 pb-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
             <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
               <button
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
@@ -160,7 +160,7 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="relative flex-1 max-w-xs">
+            <div className="relative w-full sm:flex-1 sm:max-w-xs">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
               <Input
                 value={searchQuery}
@@ -196,9 +196,9 @@ export default function Home() {
             </div>
           )}
 
-          {/* Column headers */}
+          {/* Column headers - hidden on mobile, shown as grid on md+ */}
           <div
-            className="grid items-center py-2.5 border-t border-border/30"
+            className="hidden md:grid items-center py-2.5 border-t border-border/30"
             style={{ gridTemplateColumns: TASK_GRID_COLS }}
           >
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</div>
@@ -215,7 +215,7 @@ export default function Home() {
         </div>
 
         {/* Task list */}
-        <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8 pt-0 pb-6 animate-fade-in-up stagger-3">
+        <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-0 pb-6 animate-fade-in-up stagger-3">
           <TaskList
             key={`${activeTab}-${JSON.stringify(filters)}`}
             filters={filters}

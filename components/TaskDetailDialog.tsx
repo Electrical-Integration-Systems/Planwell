@@ -133,10 +133,10 @@ export function TaskDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className=" !max-w-[80vw] h-[80vh] p-0 gap-0 flex flex-col overflow-hidden shadow-warm-lg border-border/60">
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-[calc(100%-2rem)] md:!max-w-[80vw] h-[95dvh] sm:h-[80vh] p-0 gap-0 flex flex-col overflow-hidden shadow-warm-lg border-border/60">
         {/* Header */}
-        <DialogHeader className="px-6 pt-5 pb-4 border-b border-primary/20 shrink-0 bg-primary/[0.03]">
-          <div className="h-1 -mx-6 -mt-5 mb-4 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-primary/20 shrink-0 bg-primary/[0.03]">
+          <div className="h-1 -mx-4 sm:-mx-6 -mt-4 sm:-mt-5 mb-3 sm:mb-4 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
           <DialogTitle className="pr-8">
             {editingTitle ? (
               <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export function TaskDetailDialog({
               </span>
             )}
           </DialogTitle>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1">
+          <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-[11px] text-muted-foreground mt-1 flex-wrap">
             <span>Created {formatTimestamp(task.createdAt)}</span>
             <span className="text-border">|</span>
             <span>Updated {formatTimestamp(task.updatedAt)}</span>
@@ -179,7 +179,7 @@ export function TaskDetailDialog({
 
         {/* Tabbed content: Details | Audit */}
         <Tabs defaultValue="details" className="flex-1 min-h-0 flex flex-col">
-          <TabsList variant="line" className="px-6 pt-1 border-b border-border/30 shrink-0">
+          <TabsList variant="line" className="px-4 sm:px-6 pt-1 border-b border-border/30 shrink-0">
             <TabsTrigger value="details" className="text-xs gap-1.5">
               <Clock className="h-3.5 w-3.5" />
               Details
@@ -192,11 +192,11 @@ export function TaskDetailDialog({
 
           {/* Details Tab - Original split pane */}
           <TabsContent value="details" className="flex-1 min-h-0">
-            <div className="flex flex-1 min-h-0 h-full">
+            <div className="flex flex-col md:flex-row flex-1 min-h-0 h-full overflow-y-auto md:overflow-hidden">
               {/* Left pane - Description & Fields */}
-              <div className="w-[520px] flex flex-col border-r border-border/50 shrink-0">
+              <div className="md:w-[520px] flex flex-col md:border-r border-b md:border-b-0 border-border/50 md:shrink-0">
                 <ScrollArea className="flex-1">
-                  <div className="p-6 flex flex-col gap-5">
+                  <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5">
                     {/* Description */}
                     <div>
                       <Label className="text-[11px] font-medium uppercase tracking-wider text-primary flex items-center gap-1.5">
@@ -252,7 +252,7 @@ export function TaskDetailDialog({
                     </div>
 
                     {/* Fields grid */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                       <div className="space-y-1.5">
                         <Label className="text-[11px] font-medium uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary" />

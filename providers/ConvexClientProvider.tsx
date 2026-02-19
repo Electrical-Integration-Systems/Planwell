@@ -16,7 +16,7 @@ export default function ConvexClientProvider({
     <ConvexAuthNextjsProvider client={convex}>
       <ThemeProvider
         attribute="class"
-        defaultTheme="light"
+        defaultTheme="dark"
         enableSystem={false}
         disableTransitionOnChange
       >

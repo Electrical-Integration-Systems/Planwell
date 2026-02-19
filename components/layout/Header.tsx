@@ -25,7 +25,7 @@ export function Header({
   return (
     <header className="shrink-0 z-40 bg-background border-b border-border animate-fade-in">
       <div className="h-1 bg-gradient-to-r from-primary via-[#d4922a] via-[#b84a30] to-primary/30" />
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-2.5">
             <Image
@@ -85,7 +85,7 @@ export function Header({
               }}
             >
               <LogOut className="h-3.5 w-3.5" />
-              Sign out
+              <span className="hidden sm:inline">Sign out</span>
             </Button>
           </div>
         </div>
