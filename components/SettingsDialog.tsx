@@ -216,7 +216,7 @@ function StatesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleMoveUp(index)}
                 disabled={index === 0}
               >
@@ -225,7 +225,7 @@ function StatesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleMoveDown(index)}
                 disabled={index === states.length - 1}
               >
@@ -234,7 +234,7 @@ function StatesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   setEditingId(state._id);
                   setEditName(state.name);
@@ -246,7 +246,7 @@ function StatesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleRemove(state._id)}
               >
                 <Trash2 className="h-3 w-3" />
@@ -383,7 +383,7 @@ function PrioritiesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleMoveUp(index)}
                 disabled={index === 0}
               >
@@ -392,7 +392,7 @@ function PrioritiesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleMoveDown(index)}
                 disabled={index === priorities.length - 1}
               >
@@ -401,7 +401,7 @@ function PrioritiesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   setEditingId(priority._id);
                   setEditName(priority.name);
@@ -413,7 +413,7 @@ function PrioritiesTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleRemove(priority._id)}
               >
                 <Trash2 className="h-3 w-3" />
@@ -527,7 +527,7 @@ function TagsTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   setEditingId(tag._id);
                   setEditName(tag.name);
@@ -539,7 +539,7 @@ function TagsTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   void removeTag({ id: tag._id });
                 }}
@@ -643,7 +643,7 @@ function ProjectsTab() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   setEditingId(project._id);
                   setEditName(project.name);
@@ -655,7 +655,7 @@ function ProjectsTab() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => {
                     void unarchiveProject({ id: project._id });
                   }}
@@ -666,7 +666,7 @@ function ProjectsTab() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => {
                     void archiveProject({ id: project._id });
                   }}
@@ -794,7 +794,7 @@ function PresetsTab({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 text-[10px] px-2 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 text-[10px] px-2 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => handleUpdateConfig(preset._id)}
                 title="Overwrite this preset with current filters & sort"
               >
@@ -803,7 +803,7 @@ function PresetsTab({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   setEditingId(preset._id);
                   setEditName(preset.name);
@@ -814,7 +814,7 @@ function PresetsTab({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   void removePreset({ id: preset._id });
                 }}
