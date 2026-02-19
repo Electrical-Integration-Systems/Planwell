@@ -103,7 +103,7 @@ export const list = query({
       ...task,
       state: stateMap.get(task.stateId) ?? null,
       priority: priorityMap.get(task.priorityId) ?? null,
-      project: projectMap.get(task.projectId) ?? null,
+      project: task.projectId ? projectMap.get(task.projectId) ?? null : null,
       assigneeUsers: task.assignees
         .map((id) => userMap.get(id))
         .filter((u) => u !== undefined),
