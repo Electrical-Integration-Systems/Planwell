@@ -1,9 +1,11 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { logAudit } from "./auditLog";
 
 export const list = query({
   args: {
+    archived: v.optional(v.boolean()),
     projectIds: v.optional(v.array(v.id("projects"))),
     excludeProjectIds: v.optional(v.array(v.id("projects"))),
     stateIds: v.optional(v.array(v.id("taskStates"))),
@@ -14,12 +16,17 @@ export const list = query({
     excludeAssigneeIds: v.optional(v.array(v.id("users"))),
     tagIds: v.optional(v.array(v.id("tags"))),
     excludeTagIds: v.optional(v.array(v.id("tags"))),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return [];
+    if (userId === null) return { tasks: [], nextCursor: null, totalCount: 0 };
 
     let tasks = await ctx.db.query("tasks").collect();
+
+    // Filter by archived status (default: non-archived)
+    const showArchived = args.archived ?? false;
+    tasks = tasks.filter((t) => (t.archived ?? false) === showArchived);
 
     // Filter: OR within category, AND between categories
     const hasProjectFilter = args.projectIds && args.projectIds.length > 0;
@@ -84,6 +91,15 @@ export const list = query({
       );
     }
 
+    // Total count for UI
+    const totalCount = tasks.length;
+
+    // Pagination: limit-based (frontend increases limit for infinite scroll)
+    const limit = args.limit ?? 50;
+    // Sort by createdAt desc for consistent ordering
+    tasks.sort((a, b) => b.createdAt - a.createdAt);
+    const page = tasks.slice(0, limit);
+
     // Denormalize: fetch related data
     const [states, priorities, projects, allUsers, tags] = await Promise.all([
       ctx.db.query("taskStates").collect(),
@@ -99,18 +115,21 @@ export const list = query({
     const userMap = new Map(allUsers.map((u) => [u._id, u]));
     const tagMap = new Map(tags.map((t) => [t._id, t]));
 
-    return tasks.map((task) => ({
-      ...task,
-      state: stateMap.get(task.stateId) ?? null,
-      priority: priorityMap.get(task.priorityId) ?? null,
-      project: task.projectId ? projectMap.get(task.projectId) ?? null : null,
-      assigneeUsers: task.assignees
-        .map((id) => userMap.get(id))
-        .filter((u) => u !== undefined),
-      tagList: task.tagIds
-        .map((id) => tagMap.get(id))
-        .filter((t) => t !== undefined),
-    }));
+    return {
+      tasks: page.map((task) => ({
+        ...task,
+        state: stateMap.get(task.stateId) ?? null,
+        priority: priorityMap.get(task.priorityId) ?? null,
+        project: task.projectId ? projectMap.get(task.projectId) ?? null : null,
+        assigneeUsers: task.assignees
+          .map((id) => userMap.get(id))
+          .filter((u) => u !== undefined),
+        tagList: task.tagIds
+          .map((id) => tagMap.get(id))
+          .filter((t) => t !== undefined),
+      })),
+      totalCount,
+    };
   },
 });
 
@@ -160,7 +179,7 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
     const now = Date.now();
-    return await ctx.db.insert("tasks", {
+    const taskId = await ctx.db.insert("tasks", {
       title: args.title,
       description: args.description,
       stateId: args.stateId,
@@ -169,9 +188,20 @@ export const create = mutation({
       assignees: args.assignees,
       tagIds: args.tagIds,
       creatorId: userId,
+      archived: false,
       createdAt: now,
       updatedAt: now,
     });
+
+    await logAudit(ctx, {
+      userId,
+      action: "create",
+      entityType: "task",
+      entityId: taskId,
+      metadata: { name: args.title },
+    });
+
+    return taskId;
   },
 });
 
@@ -198,6 +228,50 @@ export const update = mutation({
   },
 });
 
+export const archive = mutation({
+  args: {
+    id: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Not authenticated");
+    const task = await ctx.db.get(args.id);
+    if (task === null) throw new Error("Task not found");
+    const now = Date.now();
+    await ctx.db.patch(args.id, { archived: true, archivedAt: now, updatedAt: now });
+
+    await logAudit(ctx, {
+      userId,
+      action: "archive",
+      entityType: "task",
+      entityId: args.id,
+      metadata: { name: task.title },
+    });
+  },
+});
+
+export const unarchive = mutation({
+  args: {
+    id: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Not authenticated");
+    const task = await ctx.db.get(args.id);
+    if (task === null) throw new Error("Task not found");
+    const now = Date.now();
+    await ctx.db.patch(args.id, { archived: false, archivedAt: undefined, updatedAt: now });
+
+    await logAudit(ctx, {
+      userId,
+      action: "unarchive",
+      entityType: "task",
+      entityId: args.id,
+      metadata: { name: task.title },
+    });
+  },
+});
+
 export const remove = mutation({
   args: {
     id: v.id("tasks"),
@@ -213,6 +287,49 @@ export const remove = mutation({
     for (const update of updates) {
       await ctx.db.delete(update._id);
     }
+
+    const task = await ctx.db.get(args.id);
     await ctx.db.delete(args.id);
+
+    if (task) {
+      await logAudit(ctx, {
+        userId,
+        action: "delete",
+        entityType: "task",
+        entityId: args.id,
+        metadata: { name: task.title },
+      });
+    }
+  },
+});
+
+// Internal mutation for auto-archiving (called by cron)
+export const autoArchiveDone = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    // Find all "Done" states
+    const states = await ctx.db.query("taskStates").collect();
+    const doneStates = states.filter((s) => s.name.toLowerCase() === "done");
+    if (doneStates.length === 0) return 0;
+
+    const doneStateIds = new Set(doneStates.map((s) => s._id));
+
+    // Find all non-archived tasks in Done state updated more than 1 week ago
+    const allTasks = await ctx.db.query("tasks").collect();
+    const toArchive = allTasks.filter(
+      (t) =>
+        !t.archived &&
+        doneStateIds.has(t.stateId) &&
+        t.updatedAt <= oneWeekAgo,
+    );
+
+    const now = Date.now();
+    for (const task of toArchive) {
+      await ctx.db.patch(task._id, { archived: true, archivedAt: now, updatedAt: now });
+    }
+
+    return toArchive.length;
   },
 });

@@ -25,12 +25,34 @@ import {
 import type { Id } from "@/convex/_generated/dataModel";
 import { ColorPicker } from "@/components/ColorPicker";
 
+type Filters = {
+  stateIds?: Id<"taskStates">[];
+  excludeStateIds?: Id<"taskStates">[];
+  priorityIds?: Id<"priorities">[];
+  excludePriorityIds?: Id<"priorities">[];
+  projectIds?: Id<"projects">[];
+  excludeProjectIds?: Id<"projects">[];
+  assigneeIds?: Id<"users">[];
+  excludeAssigneeIds?: Id<"users">[];
+  tagIds?: Id<"tags">[];
+  excludeTagIds?: Id<"tags">[];
+};
+
+type SortKey = {
+  column: string;
+  direction: "asc" | "desc";
+};
+
 export function SettingsDialog({
   open,
   onOpenChange,
+  currentFilters,
+  currentSortKeys,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentFilters?: Filters;
+  currentSortKeys?: SortKey[];
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -42,7 +64,7 @@ export function SettingsDialog({
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="states">
-          <TabsList className="grid w-full grid-cols-4 bg-transparent border-b border-border">
+          <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-border">
             <TabsTrigger
               value="states"
               className="text-xs rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
@@ -67,6 +89,12 @@ export function SettingsDialog({
             >
               Projects
             </TabsTrigger>
+            <TabsTrigger
+              value="presets"
+              className="text-xs rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
+            >
+              Presets
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="states">
             <StatesTab />
@@ -79,6 +107,9 @@ export function SettingsDialog({
           </TabsContent>
           <TabsContent value="projects">
             <ProjectsTab />
+          </TabsContent>
+          <TabsContent value="presets">
+            <PresetsTab currentFilters={currentFilters ?? {}} currentSortKeys={currentSortKeys ?? []} />
           </TabsContent>
         </Tabs>
       </DialogContent>
@@ -668,6 +699,164 @@ function ProjectsTab() {
           Add
         </Button>
       </div>
+    </div>
+  );
+}
+
+function PresetsTab({
+  currentFilters,
+  currentSortKeys,
+}: {
+  currentFilters: Filters;
+  currentSortKeys: SortKey[];
+}) {
+  const presets = useQuery(api.filterPresets.list) ?? [];
+  const createPreset = useMutation(api.filterPresets.create);
+  const updatePreset = useMutation(api.filterPresets.update);
+  const removePreset = useMutation(api.filterPresets.remove);
+  const [newName, setNewName] = useState("");
+  const [editingId, setEditingId] = useState<Id<"filterPresets"> | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const hasActiveConfig =
+    Object.values(currentFilters).some(
+      (v) => Array.isArray(v) && v.length > 0,
+    ) || currentSortKeys.length > 0;
+
+  const handleCreate = () => {
+    if (!newName.trim()) return;
+    void createPreset({
+      name: newName.trim(),
+      filters: JSON.stringify(currentFilters),
+      sortKeys: JSON.stringify(currentSortKeys),
+    }).then(() => setNewName(""));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingId || !editName.trim()) return;
+    void updatePreset({ id: editingId, name: editName.trim() }).then(() => {
+      setEditingId(null);
+    });
+  };
+
+  const handleUpdateConfig = (id: Id<"filterPresets">) => {
+    void updatePreset({
+      id,
+      filters: JSON.stringify(currentFilters),
+      sortKeys: JSON.stringify(currentSortKeys),
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-2 py-3">
+      <p className="text-xs text-muted-foreground">
+        Save your current filter and sort configuration as a preset for quick
+        access.
+      </p>
+      {presets.length === 0 && (
+        <p className="text-xs text-muted-foreground/60 py-4 text-center">
+          No presets yet. Set up filters/sort, then save them here.
+        </p>
+      )}
+      {presets.map((preset) => (
+        <div key={preset._id} className="flex items-center gap-2 group">
+          {editingId === preset._id ? (
+            <>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="flex-1 h-8 text-sm border-border/50 shadow-none"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveEdit();
+                  if (e.key === "Escape") setEditingId(null);
+                }}
+                autoFocus
+              />
+              <Button
+                size="sm"
+                className="h-7 text-xs rounded-lg"
+                onClick={handleSaveEdit}
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs rounded-lg text-muted-foreground"
+                onClick={() => setEditingId(null)}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <span className="flex-1 text-sm">{preset.name}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-[10px] px-2 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleUpdateConfig(preset._id)}
+                title="Overwrite this preset with current filters & sort"
+              >
+                Overwrite
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => {
+                  setEditingId(preset._id);
+                  setEditName(preset.name);
+                }}
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => {
+                  void removePreset({ id: preset._id });
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </>
+          )}
+        </div>
+      ))}
+      <Separator className="my-1" />
+      <div className="flex items-center gap-2">
+        <Input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Preset name"
+          className="flex-1 h-8 text-sm border-border/50 shadow-none"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleCreate();
+          }}
+        />
+        <Button
+          size="sm"
+          className="h-8 text-xs rounded-lg gap-1"
+          onClick={handleCreate}
+          disabled={!newName.trim()}
+          title={
+            hasActiveConfig
+              ? "Save current filters & sort as a preset"
+              : "Set filters or sort keys first, then save"
+          }
+        >
+          <Plus className="h-3 w-3" />
+          Save
+        </Button>
+      </div>
+      {!hasActiveConfig && newName.trim() && (
+        <p className="text-[10px] text-muted-foreground/60">
+          Tip: Set up filters and/or sort keys first, then save them as a
+          preset.
+        </p>
+      )}
     </div>
   );
 }

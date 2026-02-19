@@ -46,12 +46,15 @@ export default defineSchema({
     assignees: v.array(v.id("users")),
     tagIds: v.array(v.id("tags")),
     creatorId: v.id("users"),
+    archived: v.optional(v.boolean()),
+    archivedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_project", ["projectId"])
     .index("by_state", ["stateId"])
-    .index("by_priority", ["priorityId"]),
+    .index("by_priority", ["priorityId"])
+    .index("by_archived", ["archived"]),
 
   taskUpdates: defineTable({
     taskId: v.id("tasks"),
@@ -59,6 +62,15 @@ export default defineSchema({
     body: v.string(),
     createdAt: v.number(),
   }).index("by_task", ["taskId"]),
+
+  filterPresets: defineTable({
+    name: v.string(),
+    filters: v.string(),
+    sortKeys: v.string(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 
   auditLogs: defineTable({
     userId: v.id("users"),

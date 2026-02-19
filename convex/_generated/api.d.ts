@@ -10,6 +10,8 @@
 
 import type * as auditLog from "../auditLog.js";
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
+import type * as filterPresets from "../filterPresets.js";
 import type * as http from "../http.js";
 import type * as priorities from "../priorities.js";
 import type * as projects from "../projects.js";
@@ -29,6 +31,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   auditLog: typeof auditLog;
   auth: typeof auth;
+  crons: typeof crons;
+  filterPresets: typeof filterPresets;
   http: typeof http;
   priorities: typeof priorities;
   projects: typeof projects;
