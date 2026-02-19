@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { logAudit } from "./auditLog";
 
 export const list = query({
   args: {
@@ -35,12 +36,24 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
-    return await ctx.db.insert("taskUpdates", {
+
+    const task = await ctx.db.get(args.taskId);
+    const updateId = await ctx.db.insert("taskUpdates", {
       taskId: args.taskId,
       userId,
       body: args.body,
       createdAt: Date.now(),
     });
+
+    await logAudit(ctx, {
+      userId,
+      action: "add_update",
+      entityType: "task",
+      entityId: args.taskId,
+      metadata: { name: task?.title ?? "Unknown", body: args.body },
+    });
+
+    return updateId;
   },
 });
 
@@ -51,6 +64,19 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not authenticated");
+
+    const update = await ctx.db.get(args.id);
     await ctx.db.delete(args.id);
+
+    if (update) {
+      const task = await ctx.db.get(update.taskId);
+      await logAudit(ctx, {
+        userId,
+        action: "remove_update",
+        entityType: "task",
+        entityId: update.taskId,
+        metadata: { name: task?.title ?? "Unknown", body: update.body },
+      });
+    }
   },
 });
