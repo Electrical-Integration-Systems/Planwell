@@ -48,7 +48,6 @@ export function CreateTaskDialog({
   // Auto-select first values when data loads
   const effectiveStateId = stateId || (states[0]?._id ?? "");
   const effectivePriorityId = priorityId || (priorities[0]?._id ?? "");
-  const effectiveProjectId = projectId || "__none__";
 
   const handleSubmit = () => {
     if (
@@ -63,7 +62,7 @@ export function CreateTaskDialog({
       description: description.trim() || undefined,
       stateId: effectiveStateId as Id<"taskStates">,
       priorityId: effectivePriorityId as Id<"priorities">,
-      projectId: effectiveProjectId === "__none__" ? undefined : effectiveProjectId as Id<"projects">,
+      projectId: projectId || undefined,
       assignees: selectedAssignees,
       tagIds: selectedTags,
     }).then(() => {
@@ -193,21 +192,19 @@ export function CreateTaskDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium uppercase tracking-wider text-primary flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                 Project
               </Label>
               <Select
-                value={effectiveProjectId}
-                onValueChange={(val) => setProjectId(val as Id<"projects"> | "")}
+                value={projectId}
+                onValueChange={(val) => setProjectId(val as Id<"projects">)}
               >
                 <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-lg">
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">
-                    N/A
-                  </SelectItem>
+                  <SelectItem value="">None</SelectItem>
                   {projects.map((p) => (
                     <SelectItem key={p._id} value={p._id}>
                       {p.name}

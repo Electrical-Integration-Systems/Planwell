@@ -27,6 +27,8 @@ import {
     ArrowUpDown,
     UserPlus,
     History,
+    MessageSquarePlus,
+    MessageSquareX,
 } from "lucide-react";
 
 const ENTITY_TYPES = [
@@ -77,6 +79,16 @@ const ACTION_CONFIG: Record<
         icon: <UserPlus className="h-3 w-3" />,
         label: "Signed up",
         color: "hsl(160, 60%, 45%)",
+    },
+    add_update: {
+        icon: <MessageSquarePlus className="h-3 w-3" />,
+        label: "Posted update",
+        color: "hsl(210, 80%, 60%)",
+    },
+    remove_update: {
+        icon: <MessageSquareX className="h-3 w-3" />,
+        label: "Deleted update",
+        color: "hsl(0, 70%, 60%)",
     },
 };
 
@@ -263,6 +275,11 @@ export function AuditHistoryDialog({
                                                         {String(meta.name)}
                                                     </p>
                                                 )}
+                                                {meta.body && typeof meta.body === "string" && (
+                                                    <div className="mt-1.5 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic line-clamp-2">
+                                                        &quot;{meta.body}&quot;
+                                                    </div>
+                                                )}
                                                 {log.changes && (
                                                     <ChangesDisplay changesJson={log.changes} />
                                                 )}
@@ -357,6 +374,11 @@ export function TaskAuditTimeline({ taskId }: { taskId: string }) {
                                             {config.label}
                                         </Badge>
                                     </div>
+                                    {meta.body && typeof meta.body === "string" && (
+                                        <div className="mt-1.5 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic text-wrap break-words">
+                                            &quot;{meta.body}&quot;
+                                        </div>
+                                    )}
                                     {log.changes && (
                                         <ChangesDisplay changesJson={log.changes} />
                                     )}
