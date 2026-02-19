@@ -110,32 +110,30 @@ export default function Home() {
       <Header onSettingsOpen={() => setSettingsOpen(true)} onHistoryOpen={() => setHistoryOpen(true)} />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8">
-        {/* Page heading */}
-        <div className="flex items-end justify-between py-5 animate-fade-in-up">
-          <div>
-            <h2 className="font-serif text-2xl tracking-tight flex items-center gap-2">
-              Tasks
-              <span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Manage and track your team&apos;s work
-            </p>
-          </div>
-          <Button
-            size="sm"
-            className="h-8 text-xs gap-1.5 rounded-lg px-3"
-            onClick={() => setIsAddingTask(true)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add task
-          </Button>
-        </div>
-        </div>
-
-        {/* Sticky toolbar: tabs, search, filters, sort, presets, column headers */}
+        {/* Sticky toolbar: heading, tabs, search, filters, sort, presets, column headers */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
           <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8">
+          {/* Page heading */}
+          <div className="flex items-end justify-between pt-5 pb-3 animate-fade-in-up">
+            <div>
+              <h2 className="font-serif text-2xl tracking-tight flex items-center gap-2">
+                Tasks
+                <span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Manage and track your team&apos;s work
+              </p>
+            </div>
+            <Button
+              size="sm"
+              className="h-8 text-xs gap-1.5 rounded-lg px-3"
+              onClick={() => setIsAddingTask(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add task
+            </Button>
+          </div>
+
           {/* Tab row + Search */}
           <div className="flex items-center gap-4 pt-2 pb-2">
             <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
