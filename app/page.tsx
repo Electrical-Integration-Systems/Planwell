@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/layout/Header";
-import { TaskList } from "@/components/TaskList";
+import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
@@ -106,10 +106,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-dvh flex flex-col">
       <Header onSettingsOpen={() => setSettingsOpen(true)} onHistoryOpen={() => setHistoryOpen(true)} />
 
-      <main className="flex-1 flex flex-col max-w-[1400px] w-full mx-auto px-6 lg:px-8">
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8">
         {/* Page heading */}
         <div className="flex items-end justify-between py-5 animate-fade-in-up">
           <div>
@@ -130,9 +131,11 @@ export default function Home() {
             Add task
           </Button>
         </div>
+        </div>
 
-        {/* Sticky toolbar: tabs, search, filters, sort, presets, table header */}
-        <div className="sticky top-[calc(3.5rem+4px)] z-30 bg-background/95 backdrop-blur-sm -mx-6 lg:-mx-8 px-6 lg:px-8 border-b border-border/40 pb-0">
+        {/* Sticky toolbar: tabs, search, filters, sort, presets, column headers */}
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
+          <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8">
           {/* Tab row + Search */}
           <div className="flex items-center gap-4 pt-2 pb-2">
             <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
@@ -194,10 +197,27 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          {/* Column headers */}
+          <div
+            className="grid items-center py-2.5 border-t border-border/30"
+            style={{ gridTemplateColumns: TASK_GRID_COLS }}
+          >
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">State</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Project</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Assignees</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tags</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</div>
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Updated</div>
+            <div />
+          </div>
+          </div>
         </div>
 
         {/* Task list */}
-        <div className="flex-1 pt-3 animate-fade-in-up stagger-3">
+        <div className="max-w-[1400px] w-full mx-auto px-6 lg:px-8 pt-0 pb-6 animate-fade-in-up stagger-3">
           <TaskList
             key={`${activeTab}-${JSON.stringify(filters)}`}
             filters={filters}
