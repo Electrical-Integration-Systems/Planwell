@@ -1,14 +1,14 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { logAudit } from "./auditLog";
+import { getWhitelistedUserId, requireWhitelistedUser } from "./authz";
 
 export const list = query({
   args: {
     taskId: v.id("tasks"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getWhitelistedUserId(ctx);
     if (userId === null) return [];
     const updates = await ctx.db
       .query("taskUpdates")
@@ -34,8 +34,7 @@ export const create = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
 
     const task = await ctx.db.get(args.taskId);
     const updateId = await ctx.db.insert("taskUpdates", {
@@ -62,8 +61,7 @@ export const remove = mutation({
     id: v.id("taskUpdates"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
 
     const update = await ctx.db.get(args.id);
     await ctx.db.delete(args.id);

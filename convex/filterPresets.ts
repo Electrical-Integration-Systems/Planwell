@@ -1,11 +1,11 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getWhitelistedUserId, requireWhitelistedUser } from "./authz";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getWhitelistedUserId(ctx);
     if (userId === null) return [];
     return await ctx.db.query("filterPresets").collect();
   },
@@ -18,8 +18,7 @@ export const create = mutation({
     sortKeys: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
     const now = Date.now();
     return await ctx.db.insert("filterPresets", {
       name: args.name,
@@ -40,8 +39,7 @@ export const update = mutation({
     sortKeys: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    await requireWhitelistedUser(ctx);
     const { id, ...fields } = args;
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     for (const [key, value] of Object.entries(fields)) {
@@ -56,8 +54,7 @@ export const remove = mutation({
     id: v.id("filterPresets"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    await requireWhitelistedUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
