@@ -84,4 +84,13 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_entity", ["entityType", "entityId"])
     .index("by_user", ["userId"]),
+
+  files: defineTable({
+    storageId: v.id("_storage"),
+    name: v.string(),
+    size: v.number(),
+    type: v.string(),
+    uploadedBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_createdAt", ["createdAt"]),
 });

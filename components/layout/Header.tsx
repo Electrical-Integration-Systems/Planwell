@@ -3,10 +3,11 @@
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Settings, History, LogOut } from "lucide-react";
+import { Sun, Moon, Settings, History, LogOut, FileText, ListTodo } from "lucide-react";
 
 export function Header({
   onSettingsOpen,
@@ -27,7 +28,10 @@ export function Header({
       <div className="h-1 bg-gradient-to-r from-primary via-[#d4922a] via-[#b84a30] to-primary/30" />
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          <div className="flex items-center gap-2.5">
+          <Link 
+            href="/" 
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
             <Image
               src="/planwell-logo.svg"
               alt="Planwell Logo"
@@ -39,7 +43,7 @@ export function Header({
             <span className="font-serif text-xl tracking-tight text-foreground">
               Planwell
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-0.5">
             <Button
@@ -54,6 +58,26 @@ export function Header({
               ) : (
                 <Moon className="h-4 w-4" />
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              asChild
+            >
+              <Link href="/" aria-label="Tasks">
+                <ListTodo className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              asChild
+            >
+              <Link href="/files" aria-label="Files">
+                <FileText className="h-4 w-4" />
+              </Link>
             </Button>
             <Button
               variant="ghost"

@@ -3,6 +3,7 @@ import { Lora, Sora } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/providers/ConvexClientProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -31,6 +32,7 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${lora.variable} ${sora.variable} antialiased`}>
           <ConvexClientProvider>{children}</ConvexClientProvider>
+          <Toaster richColors closeButton />
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>
