@@ -1,12 +1,12 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { logAudit } from "./auditLog";
+import { getWhitelistedUserId, requireWhitelistedUser } from "./authz";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getWhitelistedUserId(ctx);
     if (userId === null) return [];
     return await ctx.db.query("tags").collect();
   },
@@ -18,8 +18,7 @@ export const create = mutation({
     color: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
     const now = Date.now();
     const tagId = await ctx.db.insert("tags", {
       name: args.name,
@@ -45,8 +44,7 @@ export const update = mutation({
     color: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
 
     const oldTag = await ctx.db.get(args.id);
 
@@ -80,8 +78,7 @@ export const remove = mutation({
     id: v.id("tags"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    const userId = await requireWhitelistedUser(ctx);
 
     const tag = await ctx.db.get(args.id);
 

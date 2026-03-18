@@ -2,6 +2,7 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +16,19 @@ import { Sun, Moon } from "lucide-react";
 
 export default function SignIn() {
   const { signIn } = useAuthActions();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { theme, setTheme } = useTheme();
+  const accessDenied = searchParams.get("error") === "unauthorized";
+  const missingAllowlist = searchParams.get("error") === "missing_allowlist";
+  const displayedError =
+    error ??
+    (missingAllowlist
+      ? "Server configuration error: ALLOWED_EMAILS is missing in Next.js environment."
+      : accessDenied
+      ? "This Google account is not allowed for this workspace."
+      : null);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 relative bg-background">
@@ -102,8 +113,8 @@ export default function SignIn() {
               </svg>
               {loading ? "Redirecting..." : "Continue with Google"}
             </Button>
-            {error && (
-              <p className="text-sm text-destructive text-center">{error}</p>
+            {displayedError && (
+              <p className="text-sm text-destructive text-center">{displayedError}</p>
             )}
           </CardContent>
         </Card>

@@ -1,11 +1,10 @@
 import { mutation } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireWhitelistedUser } from "./authz";
 
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Not authenticated");
+    await requireWhitelistedUser(ctx);
 
     // Seed task states if empty
     const existingStates = await ctx.db.query("taskStates").first();
@@ -48,6 +47,5 @@ export const seedAll = mutation({
         });
       }
     }
-
   },
 });

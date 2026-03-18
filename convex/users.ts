@@ -1,10 +1,10 @@
 import { query } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getWhitelistedUserId } from "./authz";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getWhitelistedUserId(ctx);
     if (userId === null) return [];
     return await ctx.db.query("users").collect();
   },
