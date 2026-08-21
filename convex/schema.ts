@@ -14,6 +14,32 @@ export default defineSchema({
     updatedAt: v.number(),
   }),
 
+  projectDevices: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    ipAddress: v.optional(v.string()),
+    deviceType: v.optional(v.string()),
+    location: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_project", ["projectId"]),
+
+  projectCredentials: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    type: v.string(),
+    username: v.optional(v.string()),
+    secret: v.optional(v.string()),
+    endpoint: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_project", ["projectId"]),
+
   taskStates: defineTable({
     name: v.string(),
     color: v.optional(v.string()),
@@ -90,7 +116,10 @@ export default defineSchema({
     name: v.string(),
     size: v.number(),
     type: v.string(),
+    projectId: v.optional(v.id("projects")),
     uploadedBy: v.id("users"),
     createdAt: v.number(),
-  }).index("by_createdAt", ["createdAt"]),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_project", ["projectId"]),
 });

@@ -119,6 +119,10 @@ export function TaskList({
       const title = newTaskTitle.trim() || "Untitled task";
       const defaultState = states[0]?._id;
       const defaultPriority = priorities[0]?._id;
+      const defaultProjectId =
+        filters.projectIds?.length === 1
+          ? filters.projectIds[0]
+          : projects[0]?._id;
 
       if (!defaultState || !defaultPriority) return;
 
@@ -126,7 +130,7 @@ export function TaskList({
         title,
         stateId: defaultState,
         priorityId: defaultPriority,
-        projectId: projects[0]?._id,
+        projectId: defaultProjectId,
         assignees: [],
         tagIds: [],
       }).then((taskId) => {

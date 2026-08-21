@@ -5,9 +5,9 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import Image from "next/image";
+import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Settings, History, LogOut, FileText, ListTodo } from "lucide-react";
+import { Sun, Moon, Settings, History, LogOut, FileText, ListTodo, FolderKanban } from "lucide-react";
 
 export function Header({
   onSettingsOpen,
@@ -32,14 +32,7 @@ export function Header({
             href="/" 
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <Image
-              src="/planwell-logo.svg"
-              alt="Planwell Logo"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-              priority
-            />
+            <PlanwellLogoMark size="xs" className="shrink-0" />
             <span className="font-serif text-xl tracking-tight text-foreground">
               Planwell
             </span>
@@ -77,6 +70,16 @@ export function Header({
             >
               <Link href="/files" aria-label="Files">
                 <FileText className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              asChild
+            >
+              <Link href="/projects" aria-label="Projects">
+                <FolderKanban className="h-4 w-4" />
               </Link>
             </Button>
             <Button

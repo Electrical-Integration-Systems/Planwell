@@ -18,6 +18,134 @@ export const list = query({
   },
 });
 
+export const listWithStats = query({
+  args: {
+    includeArchived: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getWhitelistedUserId(ctx);
+    if (userId === null) return [];
+
+    const [projects, tasks, devices, credentials, files] = await Promise.all([
+      ctx.db.query("projects").collect(),
+      ctx.db.query("tasks").collect(),
+      ctx.db.query("projectDevices").collect(),
+      ctx.db.query("projectCredentials").collect(),
+      ctx.db.query("files").collect(),
+    ]);
+
+    const visibleProjects = args.includeArchived
+      ? projects
+      : projects.filter((project) => !project.archived);
+
+    const taskStats = new Map<
+      string,
+      { total: number; active: number; archived: number }
+    >();
+    for (const task of tasks) {
+      if (!task.projectId) continue;
+
+      const current = taskStats.get(task.projectId) ?? {
+        total: 0,
+        active: 0,
+        archived: 0,
+      };
+      current.total += 1;
+      if (task.archived ?? false) {
+        current.archived += 1;
+      } else {
+        current.active += 1;
+      }
+      taskStats.set(task.projectId, current);
+    }
+
+    const deviceCounts = new Map<string, number>();
+    for (const device of devices) {
+      deviceCounts.set(
+        device.projectId,
+        (deviceCounts.get(device.projectId) ?? 0) + 1,
+      );
+    }
+
+    const credentialCounts = new Map<string, number>();
+    for (const credential of credentials) {
+      credentialCounts.set(
+        credential.projectId,
+        (credentialCounts.get(credential.projectId) ?? 0) + 1,
+      );
+    }
+
+    const fileCounts = new Map<string, number>();
+    for (const file of files) {
+      if (!file.projectId) continue;
+
+      fileCounts.set(
+        file.projectId,
+        (fileCounts.get(file.projectId) ?? 0) + 1,
+      );
+    }
+    return visibleProjects.map((project) => {
+      const stats = taskStats.get(project._id) ?? {
+        total: 0,
+        active: 0,
+        archived: 0,
+      };
+
+      return {
+        ...project,
+        taskCount: stats.total,
+        activeTaskCount: stats.active,
+        archivedTaskCount: stats.archived,
+        deviceCount: deviceCounts.get(project._id) ?? 0,
+        credentialCount: credentialCounts.get(project._id) ?? 0,
+        fileCount: fileCounts.get(project._id) ?? 0,
+      };
+    });
+  },
+});
+
+export const get = query({
+  args: {
+    id: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getWhitelistedUserId(ctx);
+    if (userId === null) return null;
+
+    const project = await ctx.db.get(args.id);
+    if (project === null) return null;
+
+    const [tasks, devices, credentials, files] = await Promise.all([
+      ctx.db
+        .query("tasks")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("projectDevices")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("projectCredentials")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("files")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+    ]);
+
+    return {
+      ...project,
+      taskCount: tasks.length,
+      activeTaskCount: tasks.filter((task) => !(task.archived ?? false)).length,
+      archivedTaskCount: tasks.filter((task) => task.archived ?? false).length,
+      deviceCount: devices.length,
+      credentialCount: credentials.length,
+      fileCount: files.length,
+    };
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),
@@ -125,3 +253,4 @@ export const unarchive = mutation({
     });
   },
 });
+

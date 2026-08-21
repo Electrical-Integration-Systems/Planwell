@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/layout/Header";
+import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";
@@ -67,11 +68,7 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-3 animate-fade-in">
-          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-            <span className="font-serif text-base text-primary animate-subtle-pulse">
-              P
-            </span>
-          </div>
+          <PlanwellLogoMark size="sm" />
           <p className="text-xs text-muted-foreground tracking-wide">
             Loading...
           </p>

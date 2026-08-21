@@ -670,17 +670,19 @@ function TagFilterDropdown({
 export function TaskFilters({
   filters,
   onFiltersChange,
+  showProjectFilter = true,
 }: {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
+  showProjectFilter?: boolean;
 }) {
   const activeFilterCount =
     (filters.stateIds?.length ?? 0) +
     (filters.excludeStateIds?.length ?? 0) +
     (filters.priorityIds?.length ?? 0) +
     (filters.excludePriorityIds?.length ?? 0) +
-    (filters.projectIds?.length ?? 0) +
-    (filters.excludeProjectIds?.length ?? 0) +
+    (showProjectFilter ? (filters.projectIds?.length ?? 0) : 0) +
+    (showProjectFilter ? (filters.excludeProjectIds?.length ?? 0) : 0) +
     (filters.assigneeIds?.length ?? 0) +
     (filters.excludeAssigneeIds?.length ?? 0) +
     (filters.tagIds?.length ?? 0) +
@@ -703,10 +705,12 @@ export function TaskFilters({
         filters={filters}
         onFiltersChange={onFiltersChange}
       />
-      <ProjectFilterDropdown
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-      />
+      {showProjectFilter && (
+        <ProjectFilterDropdown
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+        />
+      )}
       <AssigneeFilterDropdown
         filters={filters}
         onFiltersChange={onFiltersChange}
