@@ -8,7 +8,6 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Archive, ArrowLeft, Eye, EyeOff, FolderKanban, KeyRound, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
@@ -278,7 +277,6 @@ export default function ProjectDetailsPage() {
 	const removeCredential = useMutation(api.credentials.remove);
 
 	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [historyOpen, setHistoryOpen] = useState(false);
 	const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
 	const [taskSearchQuery, setTaskSearchQuery] = useState("");
 	const [deviceSearchQuery, setDeviceSearchQuery] = useState("");
@@ -461,7 +459,7 @@ export default function ProjectDetailsPage() {
 		<div className="h-dvh flex flex-col">
 			<Header
 				onSettingsOpen={() => setSettingsOpen(true)}
-				onHistoryOpen={() => setHistoryOpen(true)}
+				isSettingsOpen={settingsOpen}
 			/>
 
 			<main className="flex-1 overflow-y-auto">
@@ -994,7 +992,6 @@ export default function ProjectDetailsPage() {
 				onSubmit={handleSaveCredential}
 			/>
 			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-			<AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
 		</div>
 	);
 }

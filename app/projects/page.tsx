@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArchiveRestore, FolderKanban, KeyRound, Pencil, Plus, Search, Server, ArrowRight } from "lucide-react";
+import { Archive, ArchiveRestore, FolderKanban, KeyRound, Pencil, Search, Server, ArrowRight } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/SettingsDialog";
@@ -115,7 +114,6 @@ export default function ProjectsPage() {
 	const unarchiveProject = useMutation(api.projects.unarchive);
 
 	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [historyOpen, setHistoryOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
 	const [editorOpen, setEditorOpen] = useState(false);
@@ -189,7 +187,7 @@ export default function ProjectsPage() {
 		<div className="h-dvh flex flex-col">
 			<Header
 				onSettingsOpen={() => setSettingsOpen(true)}
-				onHistoryOpen={() => setHistoryOpen(true)}
+				isSettingsOpen={settingsOpen}
 			/>
 
 			<main className="flex-1 overflow-y-auto">
@@ -214,7 +212,6 @@ export default function ProjectsPage() {
 									setEditorOpen(true);
 								}}
 							>
-								<Plus className="h-3.5 w-3.5" />
 								Add project
 							</Button>
 						</div>
@@ -416,7 +413,6 @@ export default function ProjectsPage() {
 				onSubmit={editingProjectId === null ? handleCreate : handleUpdate}
 			/>
 			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-			<AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
 		</div>
 	);
 }

@@ -15,7 +15,6 @@ import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 type SortKey = {
@@ -46,7 +45,6 @@ export default function Home() {
   const [filters, setFilters] = useState<Filters>({});
   const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
@@ -104,7 +102,7 @@ export default function Home() {
 
   return (
     <div className="h-dvh flex flex-col">
-      <Header onSettingsOpen={() => setSettingsOpen(true)} onHistoryOpen={() => setHistoryOpen(true)} />
+      <Header onSettingsOpen={() => setSettingsOpen(true)} isSettingsOpen={settingsOpen} />
 
       <main className="flex-1 overflow-y-auto">
         {/* Sticky toolbar: heading, tabs, search, filters, sort, presets, column headers */}
@@ -241,7 +239,6 @@ export default function Home() {
           currentFilters={filters}
           currentSortKeys={sortKeys}
         />
-        <AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
       </main>
     </div>
   );

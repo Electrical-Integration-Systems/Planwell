@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/AuditHistoryList";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
@@ -21,7 +20,6 @@ import {
 export default function AuditHistoryPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [entityFilter, setEntityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const logs =
@@ -49,7 +47,7 @@ export default function AuditHistoryPage() {
     <div className="h-dvh flex flex-col">
       <Header
         onSettingsOpen={() => setSettingsOpen(true)}
-        onHistoryOpen={() => setHistoryOpen(true)}
+        isSettingsOpen={settingsOpen}
       />
 
       <main className="flex-1 overflow-y-auto">
@@ -114,7 +112,6 @@ export default function AuditHistoryPage() {
       </main>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
     </div>
   );
 }

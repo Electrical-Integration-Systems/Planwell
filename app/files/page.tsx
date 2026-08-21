@@ -6,12 +6,10 @@ import { Header } from "@/components/layout/Header";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { AuditHistoryDialog } from "@/components/AuditHistoryDialog";
 
 export default function FilesPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -32,7 +30,7 @@ export default function FilesPage() {
     <div className="h-dvh flex flex-col">
       <Header
         onSettingsOpen={() => setSettingsOpen(true)}
-        onHistoryOpen={() => setHistoryOpen(true)}
+        isSettingsOpen={settingsOpen}
       />
 
       <main className="flex-1 overflow-y-auto">
@@ -60,7 +58,6 @@ export default function FilesPage() {
       </main>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <AuditHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
     </div>
   );
 }
