@@ -88,26 +88,25 @@ export function Header({
                   </Link>
                 </Button>
               ))}
-
-              <Button
-                variant={isSettingsOpen ? "secondary" : "ghost"}
-                size="sm"
-                className={cn(
-                  "h-8 rounded-lg px-3 text-xs whitespace-nowrap",
-                  isSettingsOpen
-                    ? "text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={onSettingsOpen}
-                aria-pressed={isSettingsOpen}
-              >
-                <Settings className="h-3.5 w-3.5" />
-                <span>Settings</span>
-              </Button>
             </div>
           </nav>
 
           <div className="flex items-center gap-0.5 shrink-0">
+            <Button
+              variant={isSettingsOpen ? "secondary" : "ghost"}
+              size="icon"
+              className={cn(
+                "h-8 w-8 rounded-lg transition-colors",
+                isSettingsOpen
+                  ? "text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              onClick={onSettingsOpen}
+              aria-label="Settings"
+              aria-pressed={isSettingsOpen}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
