@@ -20,6 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,13 @@ type Filters = {
 type SortKey = {
   column: string;
   direction: "asc" | "desc";
+};
+
+type ConfirmActionState = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  onConfirm: () => Promise<void>;
 };
 
 const PAGE_SIZE = 50;
@@ -94,6 +102,7 @@ export function TaskList({
   const unarchiveTask = useMutation(api.tasks.unarchive);
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   // Infinite scroll: observe sentinel, load more by increasing limit
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -341,12 +350,32 @@ export function TaskList({
                         Unarchive
                       </DropdownMenuItem>
                     ) : (
-                      <DropdownMenuItem className="gap-2 text-xs" onClick={() => { void archiveTask({ id: task._id }); }}>
+                      <DropdownMenuItem
+                        className="gap-2 text-xs"
+                        onClick={() => {
+                          setConfirmAction({
+                            title: "Archive task?",
+                            description: `Archive \"${task.title}\"? You can restore it later from the archived tasks view.`,
+                            confirmLabel: "Archive task",
+                            onConfirm: () => archiveTask({ id: task._id }),
+                          });
+                        }}
+                      >
                         <Archive className="h-3.5 w-3.5" />
                         Archive
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem className="text-destructive gap-2 text-xs" onClick={() => { void removeTask({ id: task._id }); }}>
+                    <DropdownMenuItem
+                      className="text-destructive gap-2 text-xs"
+                      onClick={() => {
+                        setConfirmAction({
+                          title: "Delete task?",
+                          description: `Delete \"${task.title}\"? This permanently removes the task and its updates.`,
+                          confirmLabel: "Delete task",
+                          onConfirm: () => removeTask({ id: task._id }),
+                        });
+                      }}
+                    >
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete
                     </DropdownMenuItem>
@@ -574,7 +603,12 @@ export function TaskList({
                     <DropdownMenuItem
                       className="gap-2 text-xs"
                       onClick={() => {
-                        void archiveTask({ id: task._id });
+                        setConfirmAction({
+                          title: "Archive task?",
+                          description: `Archive \"${task.title}\"? You can restore it later from the archived tasks view.`,
+                          confirmLabel: "Archive task",
+                          onConfirm: () => archiveTask({ id: task._id }),
+                        });
                       }}
                     >
                       <Archive className="h-3.5 w-3.5" />
@@ -584,7 +618,12 @@ export function TaskList({
                   <DropdownMenuItem
                     className="text-destructive gap-2 text-xs"
                     onClick={() => {
-                      void removeTask({ id: task._id });
+                      setConfirmAction({
+                        title: "Delete task?",
+                        description: `Delete \"${task.title}\"? This permanently removes the task and its updates.`,
+                        confirmLabel: "Delete task",
+                        onConfirm: () => removeTask({ id: task._id }),
+                      });
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -611,6 +650,19 @@ export function TaskList({
         {sortedTasks.length} of {result.totalCount} tasks
         {searchQuery && ` (filtered by "${searchQuery}")`}
       </div>
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ export default defineSchema({
   projects: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
+    location: v.optional(v.string()),
     archived: v.boolean(),
     createdBy: v.id("users"),
     createdAt: v.number(),
@@ -116,10 +117,14 @@ export default defineSchema({
     name: v.string(),
     size: v.number(),
     type: v.string(),
+    kind: v.optional(v.union(v.literal("file"), v.literal("photo"))),
     projectId: v.optional(v.id("projects")),
+    taskId: v.optional(v.id("tasks")),
     uploadedBy: v.id("users"),
     createdAt: v.number(),
   })
     .index("by_createdAt", ["createdAt"])
-    .index("by_project", ["projectId"]),
+    .index("by_project", ["projectId"])
+    .index("by_task", ["taskId"])
+    .index("by_kind", ["kind"]),
 });

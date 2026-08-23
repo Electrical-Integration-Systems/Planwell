@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArchiveRestore, FolderKanban, KeyRound, Pencil, Search, Server, ArrowRight } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowRight, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/SettingsDialog";
@@ -25,11 +26,13 @@ import { Textarea } from "@/components/ui/textarea";
 type ProjectFormState = {
 	name: string;
 	description: string;
+	location: string;
 };
 
 const EMPTY_PROJECT_FORM: ProjectFormState = {
 	name: "",
 	description: "",
+	location: "",
 };
 
 function formatDate(ts: number) {
@@ -75,6 +78,12 @@ function ProjectEditorDialog({
 						placeholder="Project name"
 						className="h-10 border-border/50 shadow-none"
 					/>
+					<Input
+						value={values.location}
+						onChange={(e) => onValuesChange({ ...values, location: e.target.value })}
+						placeholder="Project location"
+						className="h-10 border-border/50 shadow-none"
+					/>
 					<Textarea
 						value={values.description}
 						onChange={(e) =>
@@ -111,6 +120,7 @@ export default function ProjectsPage() {
 	const createProject = useMutation(api.projects.create);
 	const updateProject = useMutation(api.projects.update);
 	const archiveProject = useMutation(api.projects.archive);
+	const deleteProject = useMutation(api.projects.remove);
 	const unarchiveProject = useMutation(api.projects.unarchive);
 
 	const [settingsOpen, setSettingsOpen] = useState(false);
@@ -119,6 +129,14 @@ export default function ProjectsPage() {
 	const [editorOpen, setEditorOpen] = useState(false);
 	const [editingProjectId, setEditingProjectId] = useState<Id<"projects"> | null>(null);
 	const [projectForm, setProjectForm] = useState<ProjectFormState>(EMPTY_PROJECT_FORM);
+	const [pendingArchive, setPendingArchive] = useState<{
+		id: Id<"projects">;
+		name: string;
+	} | null>(null);
+	const [pendingDelete, setPendingDelete] = useState<{
+		id: Id<"projects">;
+		name: string;
+	} | null>(null);
 
 	if (isLoading) {
 		return (
@@ -148,7 +166,8 @@ export default function ProjectsPage() {
 
 						return (
 							project.name.toLowerCase().includes(query) ||
-							(project.description ?? "").toLowerCase().includes(query)
+							(project.description ?? "").toLowerCase().includes(query) ||
+							(project.location ?? "").toLowerCase().includes(query)
 						);
 					})
 					.sort((a, b) => b.updatedAt - a.updatedAt);
@@ -157,6 +176,7 @@ export default function ProjectsPage() {
 		void createProject({
 			name: projectForm.name.trim(),
 			description: normalizeOptionalText(projectForm.description),
+			location: normalizeOptionalText(projectForm.location),
 		})
 			.then(() => {
 				toast.success("Project created");
@@ -173,6 +193,7 @@ export default function ProjectsPage() {
 			id: editingProjectId,
 			name: projectForm.name.trim(),
 			description: normalizeOptionalText(projectForm.description),
+			location: normalizeOptionalText(projectForm.location),
 		})
 			.then(() => {
 				toast.success("Project updated");
@@ -291,6 +312,12 @@ export default function ProjectsPage() {
 												<CardTitle className="font-serif text-lg truncate">
 													{project.name}
 												</CardTitle>
+												{project.location?.trim() ? (
+													<div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+														<MapPin className="h-3 w-3" />
+														<span className="truncate">{project.location}</span>
+													</div>
+												) : null}
 												<CardDescription className="mt-1 line-clamp-2 min-h-[2.5rem]">
 													{project.description?.trim() || "No description provided yet."}
 												</CardDescription>
@@ -303,33 +330,17 @@ export default function ProjectsPage() {
 										</div>
 									</CardHeader>
 									<CardContent className="space-y-4">
-										<div className="grid grid-cols-3 gap-2">
-											<div className="rounded-lg border border-border/40 bg-background/70 p-3">
-												<p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-													Tasks
-												</p>
-												<p className="mt-1 text-lg font-semibold">{project.taskCount}</p>
-												<p className="text-[11px] text-muted-foreground">
-													{project.activeTaskCount} active
-												</p>
-											</div>
-											<div className="rounded-lg border border-border/40 bg-background/70 p-3">
-												<p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-													Devices
-												</p>
-												<p className="mt-1 text-lg font-semibold">{project.deviceCount}</p>
-												<p className="text-[11px] text-muted-foreground">tracked</p>
-											</div>
-											<div className="rounded-lg border border-border/40 bg-background/70 p-3">
-												<p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-													Credentials
-												</p>
-												<p className="mt-1 text-lg font-semibold">{project.credentialCount}</p>
-												<p className="text-[11px] text-muted-foreground">stored</p>
-											</div>
-										</div>
-
 										<div className="flex flex-wrap gap-1.5">
+											{project.location?.trim() ? (
+												<Badge variant="outline" className="gap-1.5">
+													<MapPin className="h-3 w-3" />
+													{project.location}
+												</Badge>
+											) : null}
+											<Badge variant="outline" className="gap-1.5">
+												<FolderKanban className="h-3 w-3" />
+												{project.taskCount} tasks
+											</Badge>
 											<Badge variant="outline" className="gap-1.5">
 												<Server className="h-3 w-3" />
 												{project.deviceCount} devices
@@ -337,6 +348,10 @@ export default function ProjectsPage() {
 											<Badge variant="outline" className="gap-1.5">
 												<KeyRound className="h-3 w-3" />
 												{project.credentialCount} credentials
+											</Badge>
+											<Badge variant="outline" className="gap-1.5">
+												<ImageIcon className="h-3 w-3" />
+												{project.photoCount} photos
 											</Badge>
 										</div>
 
@@ -361,6 +376,7 @@ export default function ProjectsPage() {
 														setProjectForm({
 															name: project.name,
 															description: project.description ?? "",
+															location: project.location ?? "",
 														});
 														setEditorOpen(true);
 													}}
@@ -386,14 +402,24 @@ export default function ProjectsPage() {
 														size="icon"
 														className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
 														onClick={() => {
-															void archiveProject({ id: project._id })
-																.then(() => toast.success("Project archived"))
-																.catch(() => toast.error("Failed to archive project"));
+															setPendingArchive({ id: project._id, name: project.name });
 														}}
 													>
 														<Archive className="h-4 w-4" />
 													</Button>
 												)}
+												{project.archived ? (
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
+														onClick={() => {
+															setPendingDelete({ id: project._id, name: project.name });
+														}}
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												) : null}
 											</div>
 										</div>
 									</CardContent>
@@ -411,6 +437,64 @@ export default function ProjectsPage() {
 				values={projectForm}
 				onValuesChange={setProjectForm}
 				onSubmit={editingProjectId === null ? handleCreate : handleUpdate}
+			/>
+			<ConfirmActionDialog
+				open={pendingArchive !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setPendingArchive(null);
+					}
+				}}
+				title="Archive project?"
+				description={
+					pendingArchive
+						? `Archive \"${pendingArchive.name}\"? You can restore it later.`
+						: ""
+				}
+				confirmLabel="Archive project"
+				onConfirm={() =>
+					pendingArchive
+						? archiveProject({ id: pendingArchive.id })
+							.then(() => {
+								toast.success("Project archived");
+							})
+							.catch(() => {
+								toast.error("Failed to archive project");
+							})
+						: Promise.resolve()
+				}
+			/>
+			<ConfirmActionDialog
+				open={pendingDelete !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setPendingDelete(null);
+					}
+				}}
+				title="Delete project?"
+				description={
+					pendingDelete
+						? `Delete \"${pendingDelete.name}\"? This permanently removes the project and its tasks, files, photos, devices, and credentials.`
+						: ""
+				}
+				requiredText={
+					pendingDelete
+						? `Delete project ${pendingDelete.name} and all its associated data.`
+						: undefined
+				}
+				requiredTextLabel="Type the exact sentence below to confirm this destructive action."
+				confirmLabel="Delete project"
+				onConfirm={() =>
+					pendingDelete
+						? deleteProject({ id: pendingDelete.id })
+							.then(() => {
+								toast.success("Project deleted");
+							})
+							.catch(() => {
+								toast.error("Failed to delete project");
+							})
+						: Promise.resolve()
+				}
 			/>
 			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 		</div>

@@ -279,8 +279,16 @@ export const remove = mutation({
       .query("taskUpdates")
       .withIndex("by_task", (q) => q.eq("taskId", args.id))
       .collect();
+    const attachedFiles = await ctx.db
+      .query("files")
+      .withIndex("by_task", (q) => q.eq("taskId", args.id))
+      .collect();
     for (const update of updates) {
       await ctx.db.delete(update._id);
+    }
+    for (const file of attachedFiles) {
+      await ctx.storage.delete(file.storageId);
+      await ctx.db.delete(file._id);
     }
 
     const task = await ctx.db.get(args.id);

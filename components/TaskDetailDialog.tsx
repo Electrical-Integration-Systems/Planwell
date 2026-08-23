@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { PhotoBrowser } from "@/components/PhotoBrowser";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Trash2, Clock, History } from "lucide-react";
+import { Send, Trash2, Clock, History, ImageIcon } from "lucide-react";
 import { TaskAuditTimeline } from "@/components/AuditHistoryDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
@@ -52,6 +54,11 @@ export function TaskDetailDialog({
   const [editingDesc, setEditingDesc] = useState(false);
   const [descValue, setDescValue] = useState("");
   const [updateBody, setUpdateBody] = useState("");
+  const [renderedAt] = useState(() => Date.now());
+  const [pendingDeleteUpdate, setPendingDeleteUpdate] = useState<{
+    id: Id<"taskUpdates">;
+    body: string;
+  } | null>(null);
 
   if (task === undefined || task === null) {
     return (
@@ -114,7 +121,7 @@ export function TaskDetailDialog({
   };
 
   const formatRelative = (ts: number) => {
-    const diff = Date.now() - ts;
+    const diff = renderedAt - ts;
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return "just now";
     if (mins < 60) return `${mins}m ago`;
@@ -183,6 +190,10 @@ export function TaskDetailDialog({
             <TabsTrigger value="details" className="text-xs gap-1.5">
               <Clock className="h-3.5 w-3.5" />
               Details
+            </TabsTrigger>
+            <TabsTrigger value="photos" className="text-xs gap-1.5">
+              <ImageIcon className="h-3.5 w-3.5" />
+              Photos
             </TabsTrigger>
             <TabsTrigger value="audit" className="text-xs gap-1.5">
               <History className="h-3.5 w-3.5" />
@@ -445,7 +456,7 @@ export function TaskDetailDialog({
                             size="icon"
                             className="h-5 w-5 rounded text-muted-foreground/40 hover:text-destructive shrink-0"
                             onClick={() => {
-                              void removeUpdate({ id: update._id });
+                              setPendingDeleteUpdate({ id: update._id, body: update.body });
                             }}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -491,6 +502,17 @@ export function TaskDetailDialog({
             </div>
           </TabsContent>
 
+          <TabsContent value="photos" className="flex-1 min-h-0 overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <PhotoBrowser
+                fixedTaskId={taskId}
+                emptyTitle="No task photos yet"
+                emptyDescription="Attach site photos, screenshots, or reference images to this task."
+                uploadLabel="Attach photos"
+              />
+            </div>
+          </TabsContent>
+
           {/* Audit Tab */}
           <TabsContent value="audit" className="flex-1 min-h-0">
             <ScrollArea className="h-full">
@@ -506,6 +528,27 @@ export function TaskDetailDialog({
             </ScrollArea>
           </TabsContent>
         </Tabs>
+
+        <ConfirmActionDialog
+          open={pendingDeleteUpdate !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPendingDeleteUpdate(null);
+            }
+          }}
+          title="Delete update?"
+          description={
+            pendingDeleteUpdate
+              ? `Delete this task update? \"${pendingDeleteUpdate.body.slice(0, 120)}${pendingDeleteUpdate.body.length > 120 ? "..." : ""}\"`
+              : ""
+          }
+          confirmLabel="Delete update"
+          onConfirm={() =>
+            pendingDeleteUpdate
+              ? removeUpdate({ id: pendingDeleteUpdate.id })
+              : Promise.resolve()
+          }
+        />
       </DialogContent>
     </Dialog>
   );

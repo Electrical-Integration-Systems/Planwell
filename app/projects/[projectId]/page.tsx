@@ -5,11 +5,13 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArrowLeft, Eye, EyeOff, FolderKanban, KeyRound, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, Eye, EyeOff, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { Header } from "@/components/layout/Header";
+import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
@@ -292,6 +294,12 @@ export default function ProjectDetailsPage() {
 	const [deviceForm, setDeviceForm] = useState<DeviceFormState>(EMPTY_DEVICE_FORM);
 	const [credentialForm, setCredentialForm] = useState<CredentialFormState>(EMPTY_CREDENTIAL_FORM);
 	const [revealedCredentials, setRevealedCredentials] = useState<Record<string, boolean>>({});
+	const [confirmAction, setConfirmAction] = useState<{
+		title: string;
+		description: string;
+		confirmLabel: string;
+		onConfirm: () => Promise<void>;
+	} | null>(null);
 
 	if (isLoading) {
 		return (
@@ -455,6 +463,41 @@ export default function ProjectDetailsPage() {
 			.catch(() => toast.error("Failed to update credential"));
 	};
 
+	const confirmDeleteDevice = (deviceId: Id<"projectDevices">, deviceName: string) => {
+		setConfirmAction({
+			title: "Delete device?",
+			description: `Delete \"${deviceName}\"? This cannot be undone.`,
+			confirmLabel: "Delete device",
+			onConfirm: () =>
+				removeDevice({ id: deviceId })
+					.then(() => {
+						toast.success("Device deleted");
+					})
+					.catch(() => {
+						toast.error("Failed to delete device");
+					}),
+		});
+	};
+
+	const confirmDeleteCredential = (
+		credentialId: Id<"projectCredentials">,
+		credentialName: string,
+	) => {
+		setConfirmAction({
+			title: "Delete credential?",
+			description: `Delete \"${credentialName}\"? This cannot be undone.`,
+			confirmLabel: "Delete credential",
+			onConfirm: () =>
+				removeCredential({ id: credentialId })
+					.then(() => {
+						toast.success("Credential deleted");
+					})
+					.catch(() => {
+						toast.error("Failed to delete credential");
+					}),
+		});
+	};
+
 	return (
 		<div className="h-dvh flex flex-col">
 			<Header
@@ -487,6 +530,12 @@ export default function ProjectDetailsPage() {
 											</h2>
 											{project.archived && <Badge variant="outline">Archived</Badge>}
 										</div>
+										{project.location?.trim() ? (
+											<div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+												<MapPin className="h-3.5 w-3.5" />
+												<span>{project.location}</span>
+											</div>
+										) : null}
 										<p className="text-xs text-muted-foreground mt-1 max-w-3xl">
 											{project.description?.trim() || "No description added for this project yet."}
 										</p>
@@ -521,7 +570,7 @@ export default function ProjectDetailsPage() {
 						</Card>
 					) : project !== undefined ? (
 						<>
-							<div className="grid gap-3 md:grid-cols-5 mb-4">
+							<div className="grid gap-3 md:grid-cols-6 mb-4">
 								<Card className="border-border/50 shadow-warm-sm bg-card/60">
 									<CardContent className="p-4">
 										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active tasks</p>
@@ -552,12 +601,19 @@ export default function ProjectDetailsPage() {
 										<p className="mt-1 text-2xl font-semibold">{project.fileCount}</p>
 									</CardContent>
 								</Card>
+								<Card className="border-border/50 shadow-warm-sm bg-card/60">
+									<CardContent className="p-4">
+										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Photos</p>
+										<p className="mt-1 text-2xl font-semibold">{project.photoCount}</p>
+									</CardContent>
+								</Card>
 							</div>
 
 							<Tabs defaultValue="tasks" className="gap-4">
 								<TabsList variant="line" className="w-full justify-start overflow-x-auto rounded-none px-0">
 									<TabsTrigger value="tasks" className="text-xs sm:text-sm">Tasks</TabsTrigger>
 									<TabsTrigger value="files" className="text-xs sm:text-sm">Files</TabsTrigger>
+									<TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>
 									<TabsTrigger value="devices" className="text-xs sm:text-sm">Devices</TabsTrigger>
 									<TabsTrigger value="credentials" className="text-xs sm:text-sm">Credentials</TabsTrigger>
 								</TabsList>
@@ -647,6 +703,19 @@ export default function ProjectDetailsPage() {
 									<FilesBrowser fixedProjectId={projectId} />
 								</TabsContent>
 
+								<TabsContent value="photos" className="space-y-4">
+									<div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
+										<ImageIcon className="h-3.5 w-3.5" />
+										<span>Project photos include direct project uploads and photos attached to this project&apos;s tasks.</span>
+									</div>
+									<PhotoBrowser
+										fixedProjectId={projectId}
+										emptyTitle="No project photos yet"
+										emptyDescription="Upload general project photos here. Task-specific photos will also appear in this tab."
+										uploadLabel="Upload project photos"
+									/>
+								</TabsContent>
+
 								<TabsContent value="devices" className="space-y-4">
 									<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2">
 										{devices !== undefined && devices.length > 0 && (
@@ -727,11 +796,7 @@ export default function ProjectDetailsPage() {
 																	variant="ghost"
 																	size="icon"
 																	className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																	onClick={() => {
-																		void removeDevice({ id: device._id })
-																			.then(() => toast.success("Device deleted"))
-																			.catch(() => toast.error("Failed to delete device"));
-																	}}
+																	onClick={() => confirmDeleteDevice(device._id, device.name)}
 																>
 																	<Trash2 className="h-3.5 w-3.5" />
 																</Button>
@@ -767,11 +832,7 @@ export default function ProjectDetailsPage() {
 																variant="ghost"
 																size="icon"
 																className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																onClick={() => {
-																	void removeDevice({ id: device._id })
-																		.then(() => toast.success("Device deleted"))
-																		.catch(() => toast.error("Failed to delete device"));
-																}}
+																onClick={() => confirmDeleteDevice(device._id, device.name)}
 															>
 																<Trash2 className="h-3.5 w-3.5" />
 															</Button>
@@ -886,11 +947,7 @@ export default function ProjectDetailsPage() {
 																		variant="ghost"
 																		size="icon"
 																		className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																		onClick={() => {
-																			void removeCredential({ id: credential._id })
-																				.then(() => toast.success("Credential deleted"))
-																				.catch(() => toast.error("Failed to delete credential"));
-																		}}
+																		onClick={() => confirmDeleteCredential(credential._id, credential.name)}
 																	>
 																		<Trash2 className="h-3.5 w-3.5" />
 																	</Button>
@@ -943,11 +1000,7 @@ export default function ProjectDetailsPage() {
 																	variant="ghost"
 																	size="icon"
 																	className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																	onClick={() => {
-																		void removeCredential({ id: credential._id })
-																			.then(() => toast.success("Credential deleted"))
-																			.catch(() => toast.error("Failed to delete credential"));
-																	}}
+																	onClick={() => confirmDeleteCredential(credential._id, credential.name)}
 																>
 																	<Trash2 className="h-3.5 w-3.5" />
 																</Button>
@@ -990,6 +1043,18 @@ export default function ProjectDetailsPage() {
 				values={credentialForm}
 				onValuesChange={setCredentialForm}
 				onSubmit={handleSaveCredential}
+			/>
+			<ConfirmActionDialog
+				open={confirmAction !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setConfirmAction(null);
+					}
+				}}
+				title={confirmAction?.title ?? ""}
+				description={confirmAction?.description ?? ""}
+				confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+				onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
 			/>
 			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 		</div>

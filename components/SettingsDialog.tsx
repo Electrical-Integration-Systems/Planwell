@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,13 @@ type Filters = {
 type SortKey = {
   column: string;
   direction: "asc" | "desc";
+};
+
+type ConfirmActionState = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  onConfirm: () => Promise<void>;
 };
 
 export function SettingsDialog({
@@ -129,6 +137,7 @@ function StatesTab() {
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
@@ -247,7 +256,17 @@ function StatesTab() {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                onClick={() => handleRemove(state._id)}
+                onClick={() =>
+                  setConfirmAction({
+                    title: "Delete state?",
+                    description: `Delete \"${state.name}\"? This cannot be undone.`,
+                    confirmLabel: "Delete state",
+                    onConfirm: () => {
+                      handleRemove(state._id);
+                      return Promise.resolve();
+                    },
+                  })
+                }
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -280,6 +299,19 @@ function StatesTab() {
           Add
         </Button>
       </div>
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }
@@ -296,6 +328,7 @@ function PrioritiesTab() {
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
@@ -414,7 +447,17 @@ function PrioritiesTab() {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                onClick={() => handleRemove(priority._id)}
+                onClick={() =>
+                  setConfirmAction({
+                    title: "Delete priority?",
+                    description: `Delete \"${priority.name}\"? This cannot be undone.`,
+                    confirmLabel: "Delete priority",
+                    onConfirm: () => {
+                      handleRemove(priority._id);
+                      return Promise.resolve();
+                    },
+                  })
+                }
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -447,6 +490,19 @@ function PrioritiesTab() {
           Add
         </Button>
       </div>
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }
@@ -461,6 +517,7 @@ function TagsTab() {
   const [editingId, setEditingId] = useState<Id<"tags"> | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
@@ -541,7 +598,12 @@ function TagsTab() {
                 size="icon"
                 className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
-                  void removeTag({ id: tag._id });
+                  setConfirmAction({
+                    title: "Delete tag?",
+                    description: `Delete \"${tag.name}\"? This cannot be undone.`,
+                    confirmLabel: "Delete tag",
+                    onConfirm: () => removeTag({ id: tag._id }),
+                  });
                 }}
               >
                 <Trash2 className="h-3 w-3" />
@@ -575,6 +637,19 @@ function TagsTab() {
           Add
         </Button>
       </div>
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }
@@ -584,10 +659,12 @@ function ProjectsTab() {
   const createProject = useMutation(api.projects.create);
   const updateProject = useMutation(api.projects.update);
   const archiveProject = useMutation(api.projects.archive);
+  const deleteProject = useMutation(api.projects.remove);
   const unarchiveProject = useMutation(api.projects.unarchive);
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<Id<"projects"> | null>(null);
   const [editName, setEditName] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
@@ -668,12 +745,36 @@ function ProjectsTab() {
                   size="icon"
                   className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => {
-                    void archiveProject({ id: project._id });
+                    setConfirmAction({
+                      title: "Archive project?",
+                      description: `Archive \"${project.name}\"? You can restore it later.`,
+                      confirmLabel: "Archive project",
+                      onConfirm: () => archiveProject({ id: project._id }),
+                    });
                   }}
                 >
                   <Archive className="h-3 w-3" />
                 </Button>
               )}
+              {project.archived ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                  onClick={() => {
+                    setConfirmAction({
+                      title: "Delete project?",
+                      description: `Delete \"${project.name}\"? This permanently removes the project and its tasks, files, photos, devices, and credentials.`,
+                      requiredText: `Delete project ${project.name} and all its associated data.`,
+                      requiredTextLabel: "Type the exact sentence below to confirm this destructive action.",
+                      confirmLabel: "Delete project",
+                      onConfirm: () => deleteProject({ id: project._id }),
+                    });
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              ) : null}
             </>
           )}
         </div>
@@ -699,6 +800,19 @@ function ProjectsTab() {
           Add
         </Button>
       </div>
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }
@@ -717,6 +831,7 @@ function PresetsTab({
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<Id<"filterPresets"> | null>(null);
   const [editName, setEditName] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
 
   const hasActiveConfig =
     Object.values(currentFilters).some(
@@ -816,7 +931,12 @@ function PresetsTab({
                 size="icon"
                 className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 onClick={() => {
-                  void removePreset({ id: preset._id });
+                  setConfirmAction({
+                    title: "Delete preset?",
+                    description: `Delete \"${preset.name}\"? This cannot be undone.`,
+                    confirmLabel: "Delete preset",
+                    onConfirm: () => removePreset({ id: preset._id }),
+                  });
                 }}
               >
                 <Trash2 className="h-3 w-3" />
@@ -857,6 +977,19 @@ function PresetsTab({
           preset.
         </p>
       )}
+
+      <ConfirmActionDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description ?? ""}
+        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
+        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+      />
     </div>
   );
 }

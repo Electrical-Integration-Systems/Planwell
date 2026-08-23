@@ -75,8 +75,28 @@ export const listWithStats = query({
       );
     }
 
+    const taskProjectMap = new Map<string, string>();
+    for (const task of tasks) {
+      if (task.projectId) {
+        taskProjectMap.set(task._id, task.projectId);
+      }
+    }
+
     const fileCounts = new Map<string, number>();
+    const photoCounts = new Map<string, number>();
     for (const file of files) {
+      const kind = file.kind ?? "file";
+      if (kind === "photo") {
+        const effectiveProjectId = file.projectId ?? (file.taskId ? taskProjectMap.get(file.taskId) : undefined);
+        if (!effectiveProjectId) continue;
+
+        photoCounts.set(
+          effectiveProjectId,
+          (photoCounts.get(effectiveProjectId) ?? 0) + 1,
+        );
+        continue;
+      }
+
       if (!file.projectId) continue;
 
       fileCounts.set(
@@ -99,6 +119,7 @@ export const listWithStats = query({
         deviceCount: deviceCounts.get(project._id) ?? 0,
         credentialCount: credentialCounts.get(project._id) ?? 0,
         fileCount: fileCounts.get(project._id) ?? 0,
+        photoCount: photoCounts.get(project._id) ?? 0,
       };
     });
   },
@@ -115,7 +136,7 @@ export const get = query({
     const project = await ctx.db.get(args.id);
     if (project === null) return null;
 
-    const [tasks, devices, credentials, files] = await Promise.all([
+    const [tasks, devices, credentials, directFiles, photos] = await Promise.all([
       ctx.db
         .query("tasks")
         .withIndex("by_project", (q) => q.eq("projectId", args.id))
@@ -132,7 +153,19 @@ export const get = query({
         .query("files")
         .withIndex("by_project", (q) => q.eq("projectId", args.id))
         .collect(),
+      ctx.db
+        .query("files")
+        .withIndex("by_kind", (q) => q.eq("kind", "photo"))
+        .collect(),
     ]);
+
+    const taskIds = new Set(tasks.map((task) => task._id));
+    const fileCount = directFiles.filter((file) => (file.kind ?? "file") !== "photo").length;
+    const photoCount = photos.filter(
+      (photo) =>
+        photo.projectId === args.id ||
+        (photo.taskId !== undefined && taskIds.has(photo.taskId)),
+    ).length;
 
     return {
       ...project,
@@ -141,7 +174,8 @@ export const get = query({
       archivedTaskCount: tasks.filter((task) => task.archived ?? false).length,
       deviceCount: devices.length,
       credentialCount: credentials.length,
-      fileCount: files.length,
+      fileCount,
+      photoCount,
     };
   },
 });
@@ -150,6 +184,7 @@ export const create = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
+    location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await requireWhitelistedUser(ctx);
@@ -157,6 +192,7 @@ export const create = mutation({
     const projectId = await ctx.db.insert("projects", {
       name: args.name,
       description: args.description,
+      location: args.location,
       archived: false,
       createdBy: userId,
       createdAt: now,
@@ -178,6 +214,7 @@ export const update = mutation({
     id: v.id("projects"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
+    location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await requireWhitelistedUser(ctx);
@@ -219,16 +256,38 @@ export const archive = mutation({
   handler: async (ctx, args) => {
     const userId = await requireWhitelistedUser(ctx);
     const project = await ctx.db.get(args.id);
+    if (project === null) throw new Error("Project not found");
+
+    const now = Date.now();
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_project", (q) => q.eq("projectId", args.id))
+      .collect();
+
+    const activeTasks = tasks.filter((task) => !(task.archived ?? false));
+
     await ctx.db.patch(args.id, {
       archived: true,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
+
+    for (const task of activeTasks) {
+      await ctx.db.patch(task._id, {
+        archived: true,
+        archivedAt: now,
+        updatedAt: now,
+      });
+    }
+
     await logAudit(ctx, {
       userId,
       action: "archive",
       entityType: "project",
       entityId: args.id,
-      metadata: { name: project?.name ?? "Unknown" },
+      metadata: {
+        name: project.name,
+        archivedTaskCount: activeTasks.length,
+      },
     });
   },
 });
@@ -250,6 +309,92 @@ export const unarchive = mutation({
       entityType: "project",
       entityId: args.id,
       metadata: { name: project?.name ?? "Unknown" },
+    });
+  },
+});
+
+export const remove = mutation({
+  args: {
+    id: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireWhitelistedUser(ctx);
+    const project = await ctx.db.get(args.id);
+    if (project === null) throw new Error("Project not found");
+    if (!project.archived) {
+      throw new Error("Only archived projects can be deleted");
+    }
+
+    const [tasks, devices, credentials, directFiles] = await Promise.all([
+      ctx.db
+        .query("tasks")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("projectDevices")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("projectCredentials")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("files")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+    ]);
+
+    for (const task of tasks) {
+      const [updates, taskFiles] = await Promise.all([
+        ctx.db
+          .query("taskUpdates")
+          .withIndex("by_task", (q) => q.eq("taskId", task._id))
+          .collect(),
+        ctx.db
+          .query("files")
+          .withIndex("by_task", (q) => q.eq("taskId", task._id))
+          .collect(),
+      ]);
+
+      for (const update of updates) {
+        await ctx.db.delete(update._id);
+      }
+
+      for (const file of taskFiles) {
+        await ctx.storage.delete(file.storageId);
+        await ctx.db.delete(file._id);
+      }
+
+      await ctx.db.delete(task._id);
+    }
+
+    for (const file of directFiles) {
+      await ctx.storage.delete(file.storageId);
+      await ctx.db.delete(file._id);
+    }
+
+    for (const device of devices) {
+      await ctx.db.delete(device._id);
+    }
+
+    for (const credential of credentials) {
+      await ctx.db.delete(credential._id);
+    }
+
+    await ctx.db.delete(args.id);
+
+    await logAudit(ctx, {
+      userId,
+      action: "delete",
+      entityType: "project",
+      entityId: args.id,
+      metadata: {
+        name: project.name,
+        deletedTaskCount: tasks.length,
+        deletedDeviceCount: devices.length,
+        deletedCredentialCount: credentials.length,
+        deletedFileCount: directFiles.length,
+      },
     });
   },
 });

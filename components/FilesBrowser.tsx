@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -38,6 +40,21 @@ type FileSortValue =
   | "size-desc"
   | "size-asc";
 
+type PendingUpload = {
+  localId: string;
+  name: string;
+  size: number;
+  type: string;
+  createdAt: number;
+  projectId?: Id<"projects">;
+  projectName?: string;
+  progress: number;
+  uploadedBytes: number;
+  etaSeconds: number | null;
+  status: "uploading" | "saving";
+  savedFileId?: Id<"files">;
+};
+
 function formatBytes(bytes: number) {
   if (bytes === 0) return "0 B";
   const k = 1024;
@@ -53,6 +70,48 @@ function formatDate(ts: number) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+}
+
+function formatEta(seconds: number | null): string {
+  if (seconds === null || !Number.isFinite(seconds) || seconds < 0) {
+    return "ETA calculating...";
+  }
+  if (seconds < 60) {
+    return `ETA ${Math.max(1, Math.ceil(seconds))}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.ceil(seconds % 60);
+  return `ETA ${minutes}m ${remainingSeconds}s`;
+}
+
+function uploadWithProgress(
+  uploadUrl: string,
+  file: File,
+  onProgress: (loaded: number, total: number) => void,
+) {
+  return new Promise<{ storageId?: Id<"_storage"> }>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", uploadUrl);
+    xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+      onProgress(event.loaded, event.total);
+    };
+    xhr.onerror = () => reject(new Error("Network connection failed"));
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(new Error(getErrorReason(null, xhr.status)));
+        return;
+      }
+
+      try {
+        resolve(JSON.parse(xhr.responseText) as { storageId?: Id<"_storage"> });
+      } catch {
+        reject(new Error("Server returned an invalid response"));
+      }
+    };
+    xhr.send(file);
   });
 }
 
@@ -116,6 +175,11 @@ export function FilesBrowser({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState<FileSortValue>("newest");
   const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [pendingDelete, setPendingDelete] = useState<{
+    fileId: Id<"files">;
+    name: string;
+  } | null>(null);
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [uploadProjectId, setUploadProjectId] = useState<string>(
     fixedProjectId ?? "__none__",
   );
@@ -131,6 +195,17 @@ export function FilesBrowser({
     folderInputRef.current?.click();
   }
 
+  function updatePendingUpload(
+    localId: string,
+    updater: (current: PendingUpload) => PendingUpload,
+  ) {
+    setPendingUploads((current) =>
+      current.map((upload) =>
+        upload.localId === localId ? updater(upload) : upload,
+      ),
+    );
+  }
+
   function uploadFiles(selectedFiles: FileList) {
     if (selectedFiles.length === 0) return;
 
@@ -142,34 +217,75 @@ export function FilesBrowser({
       (uploadProjectId === "__none__"
         ? undefined
         : (uploadProjectId as Id<"projects">));
+    const targetProjectName = targetProjectId
+      ? projects.find((project) => project._id === targetProjectId)?.name
+      : undefined;
 
-    const uploads = Array.from(selectedFiles).map(async (file) => {
+    const filesToUpload = Array.from(selectedFiles);
+    const now = Date.now();
+    const nextPendingUploads = filesToUpload.map((file, index) => ({
+      localId: `${now}-${index}-${file.name}`,
+      name: file.webkitRelativePath || file.name,
+      size: file.size,
+      type: file.type || "application/octet-stream",
+      createdAt: now + index,
+      projectId: targetProjectId,
+      projectName: targetProjectName,
+      progress: 0,
+      uploadedBytes: 0,
+      etaSeconds: null,
+      status: "uploading" as const,
+    }));
+
+    setPendingUploads((current) => [...nextPendingUploads, ...current]);
+
+    const uploads = filesToUpload.map(async (file, index) => {
+      const localId = nextPendingUploads[index].localId;
+      const startedAt = Date.now();
+
       try {
         const contentType = file.type || "application/octet-stream";
         const uploadUrl = await generateUploadUrl();
-        const result = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": contentType },
-          body: file,
+        const json = await uploadWithProgress(uploadUrl, file, (loaded, total) => {
+          const elapsedSeconds = Math.max((Date.now() - startedAt) / 1000, 0.25);
+          const bytesPerSecond = loaded / elapsedSeconds;
+          const remainingBytes = Math.max(total - loaded, 0);
+
+          updatePendingUpload(localId, (current) => ({
+            ...current,
+            progress: total > 0 ? loaded / total : 0,
+            uploadedBytes: loaded,
+            etaSeconds:
+              bytesPerSecond > 0 ? remainingBytes / bytesPerSecond : null,
+          }));
         });
-        if (!result.ok) {
-          const reason = getErrorReason(null, result.status);
-          throw new Error(reason);
-        }
-        const json = (await result.json()) as { storageId?: Id<"_storage"> };
         if (!json.storageId) {
           throw new Error("Server did not return a storage ID");
         }
         const name = file.webkitRelativePath || file.name;
-        await saveFile({
+        updatePendingUpload(localId, (current) => ({
+          ...current,
+          progress: 1,
+          uploadedBytes: file.size,
+          etaSeconds: 0,
+          status: "saving",
+        }));
+        const fileId = await saveFile({
           storageId: json.storageId,
           name,
           size: file.size,
           type: contentType,
           projectId: targetProjectId,
         });
+        updatePendingUpload(localId, (current) => ({
+          ...current,
+          savedFileId: fileId,
+        }));
         successCount++;
       } catch (err) {
+        setPendingUploads((current) =>
+          current.filter((upload) => upload.localId !== localId),
+        );
         errors.push({
           file: file.name,
           reason: getErrorReason(err),
@@ -191,6 +307,7 @@ export function FilesBrowser({
       } else if (successCount > 0) {
         toast.success(`${successCount} file(s) uploaded successfully`);
       }
+
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (folderInputRef.current) folderInputRef.current.value = "";
@@ -250,6 +367,30 @@ export function FilesBrowser({
   }
 
   const query = searchQuery.toLowerCase().trim();
+  const activePendingUploads = pendingUploads.filter(
+    (upload) => !files?.some((file) => file._id === upload.savedFileId),
+  );
+
+  const visiblePendingUploads = activePendingUploads.filter((upload) => {
+    if (files?.some((file) => file._id === upload.savedFileId)) {
+      return false;
+    }
+    if (!showProjectControls || projectFilter === "all") return true;
+    if (projectFilter === "__none__") return upload.projectId === undefined;
+    return upload.projectId === projectFilter;
+  });
+
+  const filteredPendingUploads = visiblePendingUploads.filter((upload) => {
+    if (query.length === 0) return true;
+
+    return (
+      upload.name.toLowerCase().includes(query) ||
+      upload.type.toLowerCase().includes(query) ||
+      (upload.projectName ?? "").toLowerCase().includes(query) ||
+      "uploading".includes(query)
+    );
+  });
+
   const filteredFiles =
     files === undefined
       ? undefined
@@ -287,6 +428,13 @@ export function FilesBrowser({
             }
           });
 
+  const uploadEtaSeconds =
+    filteredPendingUploads.length > 0
+      ? Math.max(
+          ...filteredPendingUploads.map((upload) => upload.etaSeconds ?? 0),
+        )
+      : null;
+
   const gridCols = showProjectControls
     ? FILE_GRID_COLS_WITH_PROJECT
     : FILE_GRID_COLS_PROJECT_SCOPED;
@@ -294,7 +442,7 @@ export function FilesBrowser({
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
-        {(files?.length ?? 0) > 0 && (
+        {((files?.length ?? 0) > 0 || activePendingUploads.length > 0) && (
           <div className="relative w-full sm:flex-1 sm:max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             <Input
@@ -371,7 +519,9 @@ export function FilesBrowser({
             className="h-8 text-xs gap-1.5 rounded-lg px-3"
           >
             <Upload className="h-3.5 w-3.5" />
-            {uploading ? "Uploading..." : "Upload"}
+            {uploading
+              ? `Uploading ${activePendingUploads.length} file${activePendingUploads.length === 1 ? "" : "s"}${uploadEtaSeconds !== null ? ` · ${formatEta(uploadEtaSeconds)}` : ""}`
+              : "Upload"}
           </Button>
         </div>
       </div>
@@ -397,7 +547,7 @@ export function FilesBrowser({
         </span>
       </div>
 
-      {filteredFiles !== undefined && filteredFiles.length > 0 && (
+      {(filteredPendingUploads.length > 0 || (filteredFiles !== undefined && filteredFiles.length > 0)) && (
         <div
           className="hidden md:grid items-center py-2.5 border-t border-border/30 gap-3"
           style={{ gridTemplateColumns: gridCols }}
@@ -415,11 +565,11 @@ export function FilesBrowser({
       )}
 
       <div className="pt-0 pb-6 animate-fade-in-up stagger-3">
-        {files === undefined ? (
+        {files === undefined && filteredPendingUploads.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
             Loading files...
           </div>
-        ) : files.length === 0 ? (
+        ) : files !== undefined && files.length === 0 && filteredPendingUploads.length === 0 ? (
           <div className="p-16 text-center">
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
             <p className="text-sm font-medium text-muted-foreground mb-1">
@@ -429,7 +579,7 @@ export function FilesBrowser({
               Upload files or folders to get started
             </p>
           </div>
-        ) : filteredFiles !== undefined && filteredFiles.length === 0 ? (
+        ) : filteredFiles !== undefined && filteredFiles.length === 0 && filteredPendingUploads.length === 0 ? (
           <div className="p-12 text-center">
             <Search className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground">
@@ -438,11 +588,74 @@ export function FilesBrowser({
           </div>
         ) : (
           <div>
+            {filteredPendingUploads.map((file, index) => (
+              <div key={file.localId}>
+                <div
+                  className="md:hidden border-b border-border/50 bg-primary/5 animate-fade-in p-3"
+                  style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <FileIcon className="h-4 w-4 shrink-0 text-primary/70" />
+                        <p className="font-medium text-sm truncate">{file.name}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] text-muted-foreground">
+                        <span>{formatBytes(file.size)}</span>
+                        <span>{file.type || "—"}</span>
+                        <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
+                          {file.status === "saving" ? "Saving..." : `${Math.round(file.progress * 100)}%`}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {file.status === "saving" ? "Finalizing upload..." : formatEta(file.etaSeconds)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="hidden md:grid items-center py-2.5 border-b border-border/50 bg-primary/5 animate-fade-in gap-3"
+                  style={{
+                    gridTemplateColumns: gridCols,
+                    animationDelay: `${Math.min(index, 20) * 25}ms`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 min-w-0 pr-2">
+                    <FileIcon className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="font-medium text-sm truncate">{file.name}</span>
+                  </div>
+                  {showProjectControls && (
+                    <div className="text-xs text-muted-foreground truncate pr-2">
+                      {file.projectName ?? "No project"}
+                    </div>
+                  )}
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {formatBytes(file.size)}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate pr-2" title={file.type || "—"}>
+                    {file.type || "—"}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate pr-2">
+                    {file.status === "saving" ? "Saving entry..." : `${Math.round(file.progress * 100)}% uploaded`}
+                  </div>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {file.status === "saving" ? "Finalizing..." : formatEta(file.etaSeconds)}
+                  </div>
+                  <div className="flex items-center justify-end">
+                    <Badge variant="outline" className="text-[10px]">
+                      Uploading
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+
             {filteredFiles?.map((file, index) => (
               <div key={file._id}>
                 <div
                   className="md:hidden border-b border-border/50 transition-colors hover:bg-muted/50 animate-fade-in p-3"
-                  style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
+                  style={{ animationDelay: `${Math.min(index + filteredPendingUploads.length, 20) * 25}ms` }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -502,7 +715,9 @@ export function FilesBrowser({
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(file._id)}
+                        onClick={() =>
+                          setPendingDelete({ fileId: file._id, name: file.name })
+                        }
                         title="Delete"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -515,7 +730,7 @@ export function FilesBrowser({
                   className="hidden md:grid items-center py-2.5 border-b border-border/50 transition-colors hover:bg-muted/50 animate-fade-in gap-3"
                   style={{
                     gridTemplateColumns: gridCols,
-                    animationDelay: `${Math.min(index, 20) * 25}ms`,
+                    animationDelay: `${Math.min(index + filteredPendingUploads.length, 20) * 25}ms`,
                   }}
                 >
                   <div className="flex items-center gap-2 min-w-0 pr-2">
@@ -577,7 +792,9 @@ export function FilesBrowser({
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(file._id)}
+                      onClick={() =>
+                        setPendingDelete({ fileId: file._id, name: file.name })
+                      }
                       title="Delete"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -589,6 +806,27 @@ export function FilesBrowser({
           </div>
         )}
       </div>
+
+      <ConfirmActionDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDelete(null);
+          }
+        }}
+        title="Delete file?"
+        description={
+          pendingDelete
+            ? `Delete \"${pendingDelete.name}\"? This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete file"
+        onConfirm={() =>
+          pendingDelete
+            ? handleDelete(pendingDelete.fileId)
+            : Promise.resolve()
+        }
+      />
     </div>
   );
 }
