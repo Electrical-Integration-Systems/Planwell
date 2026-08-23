@@ -48,7 +48,9 @@ type ConfirmActionState = {
   title: string;
   description: string;
   confirmLabel: string;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => Promise<unknown> | void;
+  requiredText?: string;
+  requiredTextLabel?: string;
 };
 
 export function SettingsDialog({
@@ -311,6 +313,8 @@ function StatesTab() {
         description={confirmAction?.description ?? ""}
         confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
         onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+        requiredText={confirmAction?.requiredText}
+        requiredTextLabel={confirmAction?.requiredTextLabel}
       />
     </div>
   );
@@ -502,6 +506,8 @@ function PrioritiesTab() {
         description={confirmAction?.description ?? ""}
         confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
         onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+        requiredText={confirmAction?.requiredText}
+        requiredTextLabel={confirmAction?.requiredTextLabel}
       />
     </div>
   );
@@ -649,6 +655,8 @@ function TagsTab() {
         description={confirmAction?.description ?? ""}
         confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
         onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+        requiredText={confirmAction?.requiredText}
+        requiredTextLabel={confirmAction?.requiredTextLabel}
       />
     </div>
   );
@@ -812,6 +820,8 @@ function ProjectsTab() {
         description={confirmAction?.description ?? ""}
         confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
         onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+        requiredText={confirmAction?.requiredText}
+        requiredTextLabel={confirmAction?.requiredTextLabel}
       />
     </div>
   );
@@ -989,6 +999,8 @@ function PresetsTab({
         description={confirmAction?.description ?? ""}
         confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
         onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
+        requiredText={confirmAction?.requiredText}
+        requiredTextLabel={confirmAction?.requiredTextLabel}
       />
     </div>
   );

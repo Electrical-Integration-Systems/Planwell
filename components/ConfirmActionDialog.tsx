@@ -28,7 +28,7 @@ export function ConfirmActionDialog({
   title: string;
   description: string;
   confirmLabel: string;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: () => Promise<unknown> | void;
   tone?: "default" | "destructive";
   requiredText?: string;
   requiredTextLabel?: string;

@@ -52,7 +52,7 @@ type ConfirmActionState = {
   title: string;
   description: string;
   confirmLabel: string;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => Promise<unknown> | void;
 };
 
 const PAGE_SIZE = 50;
