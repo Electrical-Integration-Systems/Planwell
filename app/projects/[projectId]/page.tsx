@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArrowLeft, Eye, EyeOff, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -547,12 +547,28 @@ export default function ProjectDetailsPage() {
 											{project.taskCount} tasks
 										</Badge>
 										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
+											<Archive className="h-3.5 w-3.5" />
+											{project.activeTaskCount} active
+										</Badge>
+										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
+											<Archive className="h-3.5 w-3.5" />
+											{project.archivedTaskCount} archived
+										</Badge>
+										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
 											<Server className="h-3.5 w-3.5" />
 											{project.deviceCount} devices
 										</Badge>
 										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
 											<KeyRound className="h-3.5 w-3.5" />
 											{project.credentialCount} credentials
+										</Badge>
+										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
+											<FileText className="h-3.5 w-3.5" />
+											{project.fileCount} files
+										</Badge>
+										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
+											<ImageIcon className="h-3.5 w-3.5" />
+											{project.photoCount} photos
 										</Badge>
 									</div>
 								</div>
@@ -570,45 +586,6 @@ export default function ProjectDetailsPage() {
 						</Card>
 					) : project !== undefined ? (
 						<>
-							<div className="grid gap-3 md:grid-cols-6 mb-4">
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active tasks</p>
-										<p className="mt-1 text-2xl font-semibold">{project.activeTaskCount}</p>
-									</CardContent>
-								</Card>
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Archived tasks</p>
-										<p className="mt-1 text-2xl font-semibold">{project.archivedTaskCount}</p>
-									</CardContent>
-								</Card>
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Devices</p>
-										<p className="mt-1 text-2xl font-semibold">{project.deviceCount}</p>
-									</CardContent>
-								</Card>
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Credentials</p>
-										<p className="mt-1 text-2xl font-semibold">{project.credentialCount}</p>
-									</CardContent>
-								</Card>
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Files</p>
-										<p className="mt-1 text-2xl font-semibold">{project.fileCount}</p>
-									</CardContent>
-								</Card>
-								<Card className="border-border/50 shadow-warm-sm bg-card/60">
-									<CardContent className="p-4">
-										<p className="text-[10px] uppercase tracking-wider text-muted-foreground">Photos</p>
-										<p className="mt-1 text-2xl font-semibold">{project.photoCount}</p>
-									</CardContent>
-								</Card>
-							</div>
-
 							<Tabs defaultValue="tasks" className="gap-4">
 								<TabsList variant="line" className="w-full justify-start overflow-x-auto rounded-none px-0">
 									<TabsTrigger value="tasks" className="text-xs sm:text-sm">Tasks</TabsTrigger>
