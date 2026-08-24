@@ -42,10 +42,10 @@ export function Header({
 
   const navItems = [
     {
-      href: "/",
+      href: "/tasks",
       label: "Tasks",
       icon: ListTodo,
-      isActive: pathname === "/",
+      isActive: pathname === "/tasks",
     },
     {
       href: "/files",
@@ -54,10 +54,10 @@ export function Header({
       isActive: pathname.startsWith("/files"),
     },
     {
-      href: "/projects",
+      href: "/",
       label: "Projects",
       icon: FolderKanban,
-      isActive: pathname.startsWith("/projects"),
+      isActive: pathname === "/" || pathname.startsWith("/projects"),
     },
     {
       href: "/audit-history",

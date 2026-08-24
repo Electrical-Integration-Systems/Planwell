@@ -37,12 +37,17 @@ export const create = mutation({
     const userId = await requireWhitelistedUser(ctx);
 
     const task = await ctx.db.get(args.taskId);
+    const now = Date.now();
     const updateId = await ctx.db.insert("taskUpdates", {
       taskId: args.taskId,
       userId,
       body: args.body,
-      createdAt: Date.now(),
+      createdAt: now,
     });
+
+    if (task?.projectId) {
+      await ctx.db.patch(task.projectId, { updatedAt: now });
+    }
 
     await logAudit(ctx, {
       userId,

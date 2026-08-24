@@ -318,9 +318,11 @@ export default function ProjectsPage() {
 														<span className="truncate">{project.location}</span>
 													</div>
 												) : null}
-												<CardDescription className="mt-1 line-clamp-2 min-h-[2.5rem]">
-													{project.description?.trim() || "No description provided yet."}
-												</CardDescription>
+												{project.description?.trim() ? (
+													<CardDescription className="mt-1 line-clamp-2 min-h-[2.5rem]">
+														{project.description.trim()}
+													</CardDescription>
+												) : null}
 											</div>
 											{project.archived && (
 												<Badge variant="outline" className="shrink-0">
@@ -331,12 +333,6 @@ export default function ProjectsPage() {
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="flex flex-wrap gap-1.5">
-											{project.location?.trim() ? (
-												<Badge variant="outline" className="gap-1.5">
-													<MapPin className="h-3 w-3" />
-													{project.location}
-												</Badge>
-											) : null}
 											<Badge variant="outline" className="gap-1.5">
 												<FolderKanban className="h-3 w-3" />
 												{project.taskCount} tasks

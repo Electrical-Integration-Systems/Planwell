@@ -537,7 +537,7 @@ export default function ProjectDetailsPage() {
 											</div>
 										) : null}
 										<p className="text-xs text-muted-foreground mt-1 max-w-3xl">
-											{project.description?.trim() || "No description added for this project yet."}
+											{project.description?.trim() || ""}
 										</p>
 									</div>
 

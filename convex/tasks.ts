@@ -218,11 +218,17 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await requireWhitelistedUser(ctx);
     const { id, ...fields } = args;
-    const patch: Record<string, unknown> = { updatedAt: Date.now() };
+    const now = Date.now();
+    const patch: Record<string, unknown> = { updatedAt: now };
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) patch[key] = value;
     }
+    const task = await ctx.db.get(id);
     await ctx.db.patch(id, patch);
+    const projectId = args.projectId ?? task?.projectId;
+    if (projectId) {
+      await ctx.db.patch(projectId, { updatedAt: now });
+    }
   },
 });
 
@@ -236,6 +242,9 @@ export const archive = mutation({
     if (task === null) throw new Error("Task not found");
     const now = Date.now();
     await ctx.db.patch(args.id, { archived: true, archivedAt: now, updatedAt: now });
+    if (task.projectId) {
+      await ctx.db.patch(task.projectId, { updatedAt: now });
+    }
 
     await logAudit(ctx, {
       userId,
@@ -257,6 +266,9 @@ export const unarchive = mutation({
     if (task === null) throw new Error("Task not found");
     const now = Date.now();
     await ctx.db.patch(args.id, { archived: false, archivedAt: undefined, updatedAt: now });
+    if (task.projectId) {
+      await ctx.db.patch(task.projectId, { updatedAt: now });
+    }
 
     await logAudit(ctx, {
       userId,
