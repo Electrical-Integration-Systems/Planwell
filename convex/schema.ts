@@ -90,6 +90,13 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_task", ["taskId"]),
 
+  projectUpdates: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    body: v.string(),
+    createdAt: v.number(),
+  }).index("by_project", ["projectId"]),
+
   filterPresets: defineTable({
     name: v.string(),
     filters: v.string(),

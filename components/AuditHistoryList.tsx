@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
-import { History, Plus, Pencil, Trash2, Archive, ArchiveRestore, ArrowUpDown, UserPlus, MessageSquarePlus, MessageSquareX, Search } from "lucide-react";
+import { History, Plus, Pencil, Trash2, Archive, ArchiveRestore, ArrowUpDown, UserPlus, MessageSquarePlus, MessageSquareX, Search, Upload } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export const AUDIT_GRID_COLS = "minmax(0, 1.8fr) 120px 100px 150px 120px";
@@ -93,6 +93,11 @@ export const ACTION_CONFIG: Record<
     icon: <MessageSquareX className="h-3 w-3" />,
     label: "Deleted update",
     color: "hsl(0, 70%, 60%)",
+  },
+  upload: {
+    icon: <Upload className="h-3 w-3" />,
+    label: "Uploaded",
+    color: "hsl(210, 80%, 60%)",
   },
 };
 

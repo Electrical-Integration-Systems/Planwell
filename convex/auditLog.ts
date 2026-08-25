@@ -89,3 +89,108 @@ export const listByEntity = query({
     }));
   },
 });
+
+export const listForProject = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getWhitelistedUserId(ctx);
+    if (userId === null) return [];
+
+    // Collect all entities that belong to this project
+    const [tasks, files, devices, credentials] = await Promise.all([
+      ctx.db
+        .query("tasks")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .collect(),
+      ctx.db
+        .query("files")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .collect(),
+      ctx.db
+        .query("projectDevices")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .collect(),
+      ctx.db
+        .query("projectCredentials")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .collect(),
+    ]);
+
+    // Also collect files attached to tasks (e.g. task photos)
+    const taskFileArrays = await Promise.all(
+      tasks.map((t) =>
+        ctx.db
+          .query("files")
+          .withIndex("by_task", (q) => q.eq("taskId", t._id))
+          .collect(),
+      ),
+    );
+    const taskFiles = taskFileArrays.flat();
+
+    // Fetch audit logs for each entity type in parallel
+    const [projectLogs, ...rest] = await Promise.all([
+      ctx.db
+        .query("auditLogs")
+        .withIndex("by_entity", (q) =>
+          q.eq("entityType", "project").eq("entityId", args.projectId),
+        )
+        .collect(),
+      ...tasks.map((t) =>
+        ctx.db
+          .query("auditLogs")
+          .withIndex("by_entity", (q) =>
+            q.eq("entityType", "task").eq("entityId", t._id),
+          )
+          .collect(),
+      ),
+      ...[...files, ...taskFiles].map((f) =>
+        ctx.db
+          .query("auditLogs")
+          .withIndex("by_entity", (q) =>
+            q.eq("entityType", "file").eq("entityId", f._id),
+          )
+          .collect(),
+      ),
+      ...devices.map((d) =>
+        ctx.db
+          .query("auditLogs")
+          .withIndex("by_entity", (q) =>
+            q.eq("entityType", "device").eq("entityId", d._id),
+          )
+          .collect(),
+      ),
+      ...credentials.map((c) =>
+        ctx.db
+          .query("auditLogs")
+          .withIndex("by_entity", (q) =>
+            q.eq("entityType", "credential").eq("entityId", c._id),
+          )
+          .collect(),
+      ),
+    ]);
+
+    // Merge, deduplicate, and sort oldest-first
+    const seen = new Set<string>();
+    const allLogs = [projectLogs, ...rest]
+      .flat()
+      .filter((log) => {
+        if (seen.has(log._id)) return false;
+        seen.add(log._id);
+        return true;
+      })
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    const allUserIds = [...new Set(allLogs.map((l) => l.userId))];
+    const allUsers = await Promise.all(allUserIds.map((id) => ctx.db.get(id)));
+    const allUserMap = new Map(
+      allUsers.filter((u) => u !== null).map((u) => [u._id, u]),
+    );
+
+    return allLogs.map((log) => ({
+      ...log,
+      user: allUserMap.get(log.userId) ?? null,
+    }));
+  },
+});

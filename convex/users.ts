@@ -9,3 +9,12 @@ export const list = query({
     return await ctx.db.query("users").collect();
   },
 });
+
+export const viewer = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getWhitelistedUserId(ctx);
+    if (userId === null) return null;
+    return await ctx.db.get(userId);
+  },
+});

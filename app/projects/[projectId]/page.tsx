@@ -14,6 +14,7 @@ import { Header } from "@/components/layout/Header";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
@@ -593,6 +594,7 @@ export default function ProjectDetailsPage() {
 									<TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>
 									<TabsTrigger value="devices" className="text-xs sm:text-sm">Devices</TabsTrigger>
 									<TabsTrigger value="credentials" className="text-xs sm:text-sm">Credentials</TabsTrigger>
+								<TabsTrigger value="updates" className="text-xs sm:text-sm">Updates</TabsTrigger>
 								</TabsList>
 
 								<TabsContent value="tasks" className="space-y-4">
@@ -630,7 +632,6 @@ export default function ProjectDetailsPage() {
 												className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
 											/>
 										</div>
-
 										<Button
 											size="sm"
 											className="h-8 text-xs gap-1.5 rounded-lg px-3"
@@ -988,6 +989,10 @@ export default function ProjectDetailsPage() {
 											})}
 										</div>
 									)}
+								</TabsContent>
+
+								<TabsContent value="updates">
+									<ProjectUpdatesTab projectId={projectId} />
 								</TabsContent>
 							</Tabs>
 						</>

@@ -18,6 +18,7 @@ import type * as files from "../files.js";
 import type * as filterPresets from "../filterPresets.js";
 import type * as http from "../http.js";
 import type * as priorities from "../priorities.js";
+import type * as projectUpdates from "../projectUpdates.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
 import type * as tags from "../tags.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   filterPresets: typeof filterPresets;
   http: typeof http;
   priorities: typeof priorities;
+  projectUpdates: typeof projectUpdates;
   projects: typeof projects;
   seed: typeof seed;
   tags: typeof tags;
