@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import {
   Dialog,
@@ -250,8 +251,15 @@ export function TaskDetailDialog({
                           }}
                         >
                           {task.description ? (
-                            <p className="whitespace-pre-wrap">
-                              {task.description}
+                            <p
+                              className="whitespace-pre-wrap"
+                              onClick={(event) => {
+                                if ((event.target as HTMLElement).closest("a")) {
+                                  event.stopPropagation();
+                                }
+                              }}
+                            >
+                              <LinkifiedText>{task.description}</LinkifiedText>
                             </p>
                           ) : (
                             <p className="text-muted-foreground/50 italic">
@@ -463,7 +471,7 @@ export function TaskDetailDialog({
                           </Button>
                         </div>
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {update.body}
+                          <LinkifiedText>{update.body}</LinkifiedText>
                         </p>
                         <p className="text-[10px] text-muted-foreground/50 mt-2">
                           {formatRelative(update.createdAt)}
