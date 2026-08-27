@@ -1,20 +1,56 @@
 <div align="center">
-	<br>
-	<img src="public/planwell-logo.svg" alt="Planwell logo" width="100">
-	<br>
-</div>
-
-<div align="center">
+	<img src="public/planwell-logo.svg" alt="Planwell logo" width="80">
   <h1>Planwell</h1>
-  <p>Collaborative task and project management platform for engineering teams</p>
+	<p>Collaborative task and project tracking for engineering teams.</p>
 </div>
 
-<br />
+## Overview
 
-## About
+Planwell is a list-based work management application for coordinating projects,
+tasks, updates, files, devices, and audit history in real time.
 
-Planwell is a streamlined task management platform built for engineering teams. It provides real-time collaborative workflows with customizable task states, priorities, tagging, and project organization — all backed by a reactive, serverless architecture.
+## Features
 
-**Technology Stack:** Next.js, React, Convex, Convex Auth, Tailwind CSS
+- Configurable task states, priorities, tags, and assignees
+- Multi-filter and multi-column task sorting
+- Project and task updates with audit history
+- File, photo, device, and credential management
+- Google authentication and real-time Convex data
 
-**Built for teams.** Planwell enables teams to track work with flexible filtering, multi-column sorting, and inline task creation for fast, friction-free workflows.
+## Stack
+
+Next.js 16, React 19, TypeScript, Convex, Convex Auth, Tailwind CSS 4, and
+shadcn/ui. Planwell is designed for deployment on Vercel.
+
+## Development
+
+Requirements: Node.js 20 or later, npm, a Convex deployment, and Google OAuth
+credentials configured for Convex Auth.
+
+```bash
+npm install
+npm run dev
+```
+
+Set `NEXT_PUBLIC_CONVEX_URL` in `.env.local`. Configure authentication secrets
+in the Convex deployment environment.
+
+## Commands
+
+```bash
+npm run dev           # Start Next.js and Convex
+npm run dev:frontend  # Start Next.js only
+npm run dev:backend   # Start Convex only
+npm run lint          # Run ESLint
+npm run build         # Create a production build
+```
+
+## Security
+
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+Do not open public issues for security-sensitive reports.
+
+## License
+
+Planwell is proprietary software. All rights are reserved. See
+[LICENSE](LICENSE) for terms.
