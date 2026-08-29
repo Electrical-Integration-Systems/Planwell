@@ -4,33 +4,30 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, Eye, EyeOff, ImageIcon, KeyRound, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
+import {
+  CredentialEditorDialog,
+  EMPTY_CREDENTIAL_FORM,
+  type CredentialFormState,
+} from "@/components/projects/CredentialEditorDialog";
+import { ProjectDetailsHeader } from "@/components/projects/ProjectDetailsHeader";
 import { ProjectBanner } from "@/components/ProjectBanner";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import { DeviceSpreadsheet } from "@/components/DeviceSpreadsheet";
 import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
 import { TaskSort } from "@/components/TaskSort";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 
 type SortKey = {
 	column: string;
@@ -50,109 +47,11 @@ type ProjectTaskFilters = {
 	excludeTagIds?: Id<"tags">[];
 };
 
-type CredentialFormState = {
-	name: string;
-	type: string;
-	username: string;
-	endpoint: string;
-	secret: string;
-	notes: string;
-};
-
 const CREDENTIAL_GRID_COLS = "minmax(0,1.3fr) 120px 130px minmax(0,1fr) 120px 96px";
-
-const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
-	name: "",
-	type: "",
-	username: "",
-	endpoint: "",
-	secret: "",
-	notes: "",
-};
 
 function normalizeOptionalText(value: string) {
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function CredentialEditorDialog({
-	open,
-	onOpenChange,
-	values,
-	onValuesChange,
-	onSubmit,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	values: CredentialFormState;
-	onValuesChange: (values: CredentialFormState) => void;
-	onSubmit: () => void;
-}) {
-	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[640px] border-border/60 shadow-warm-lg">
-				<DialogHeader>
-					<DialogTitle className="font-serif text-xl tracking-tight">
-						Credential entry
-					</DialogTitle>
-				</DialogHeader>
-				<div className="grid gap-3 sm:grid-cols-2">
-					<Input
-						value={values.name}
-						onChange={(e) => onValuesChange({ ...values, name: e.target.value })}
-						placeholder="Credential name"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.type}
-						onChange={(e) => onValuesChange({ ...values, type: e.target.value })}
-						placeholder="Type (VPN, Server, Database...)"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.username}
-						onChange={(e) =>
-							onValuesChange({ ...values, username: e.target.value })
-						}
-						placeholder="Username"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.endpoint}
-						onChange={(e) =>
-							onValuesChange({ ...values, endpoint: e.target.value })
-						}
-						placeholder="Endpoint / URL / Host"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.secret}
-						onChange={(e) => onValuesChange({ ...values, secret: e.target.value })}
-						placeholder="Secret / Password / Token"
-						className="h-10 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<Textarea
-						value={values.notes}
-						onChange={(e) => onValuesChange({ ...values, notes: e.target.value })}
-						placeholder="Notes"
-						className="min-h-24 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<div className="sm:col-span-2 flex items-center justify-end gap-2">
-						<Button variant="ghost" className="rounded-lg" onClick={() => onOpenChange(false)}>
-							Cancel
-						</Button>
-						<Button
-							className="rounded-lg"
-							onClick={onSubmit}
-							disabled={!values.name.trim() || !values.type.trim()}
-						>
-							Save credential
-						</Button>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
 }
 
 export default function ProjectDetailsPage() {
@@ -301,69 +200,7 @@ export default function ProjectDetailsPage() {
 
 	return (
 		<>
-				<div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
-					<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
-						<div className="pt-4 sm:pt-5 pb-3 animate-fade-in-up space-y-3">
-							{project === undefined ? (
-								<div className="text-sm text-muted-foreground">Loading project...</div>
-							) : project === null ? (
-								<div className="text-sm text-muted-foreground">Project not found.</div>
-							) : (
-								<div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-									<div>
-										<div className="flex items-center gap-2 flex-wrap">
-											<h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
-												{project.name}
-												<span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
-											</h2>
-											{project.archived && <Badge variant="outline">Archived</Badge>}
-										</div>
-										{project.location?.trim() ? (
-											<div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-												<MapPin className="h-3.5 w-3.5" />
-												<span>{project.location}</span>
-											</div>
-										) : null}
-										<p className="text-xs text-muted-foreground mt-1 max-w-3xl">
-											{project.description?.trim() || ""}
-										</p>
-									</div>
-
-									<div className="flex flex-wrap gap-2">
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<FolderKanban className="h-3.5 w-3.5" />
-											{project.taskCount} tasks
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<Archive className="h-3.5 w-3.5" />
-											{project.activeTaskCount} active
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<Archive className="h-3.5 w-3.5" />
-											{project.archivedTaskCount} archived
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<Server className="h-3.5 w-3.5" />
-											{project.deviceCount} devices
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<KeyRound className="h-3.5 w-3.5" />
-											{project.credentialCount} credentials
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<FileText className="h-3.5 w-3.5" />
-											{project.fileCount} files
-										</Badge>
-										<Badge variant="outline" className="h-7 px-2.5 gap-1.5">
-											<ImageIcon className="h-3.5 w-3.5" />
-											{project.photoCount} photos
-										</Badge>
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
+			<ProjectDetailsHeader project={project} />
 
 				<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-6 animate-fade-in-up stagger-3">
 					{project === null ? (

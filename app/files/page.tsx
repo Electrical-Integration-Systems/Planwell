@@ -4,7 +4,7 @@ import { useConvexAuth } from "convex/react";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 
-export default function FilesPage() {
+export default function Files() {
   const { isAuthenticated, isLoading } = useConvexAuth();
 
   if (isLoading) {

@@ -21,9 +21,9 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 const navigation = [
+  { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/files", label: "Files", icon: FileText },
-  { href: "/", label: "Projects", icon: FolderKanban },
   { href: "/audit-history", label: "Audit History", icon: History },
 ];
 

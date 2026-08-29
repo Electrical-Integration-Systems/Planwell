@@ -43,7 +43,7 @@ export function Header() {
             <>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/">Projects</Link>
+                  <Link href="/">~</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
