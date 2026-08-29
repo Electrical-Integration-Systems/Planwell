@@ -57,6 +57,10 @@ type ConfirmActionState = {
 
 const PAGE_SIZE = 50;
 
+function getTaskAccentColor(stateColor?: string) {
+  return stateColor ?? "#78716c";
+}
+
 export function TaskList({
   filters,
   sortKeys,
@@ -281,10 +285,16 @@ export function TaskList({
         <div key={task._id}>
           {/* Mobile card layout */}
           <div
-            className="md:hidden border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in p-3"
+            className="relative md:hidden border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in p-3 pl-5"
             style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
             onClick={() => onTaskSelect(task._id)}
           >
+            <span
+              className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+              style={{
+                backgroundColor: getTaskAccentColor(task.state?.color),
+              }}
+            />
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{task.title}</p>
@@ -387,13 +397,19 @@ export function TaskList({
 
           {/* Desktop grid layout */}
           <div
-            className="hidden md:grid items-center py-2.5 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in"
+            className="relative hidden md:grid items-center py-2.5 pl-5 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in"
             style={{
               gridTemplateColumns: TASK_GRID_COLS,
               animationDelay: `${Math.min(index, 20) * 25}ms`,
             }}
             onClick={() => onTaskSelect(task._id)}
           >
+            <span
+              className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+              style={{
+                backgroundColor: getTaskAccentColor(task.state?.color),
+              }}
+            />
             <div className="font-medium text-sm truncate pr-2">
               {task.title}
             </div>
