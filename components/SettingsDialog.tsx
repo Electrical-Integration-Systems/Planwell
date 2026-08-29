@@ -26,7 +26,7 @@ import {
 import type { Id } from "@/convex/_generated/dataModel";
 import { ColorPicker } from "@/components/ColorPicker";
 
-type Filters = {
+export type SettingsFilters = {
   stateIds?: Id<"taskStates">[];
   excludeStateIds?: Id<"taskStates">[];
   priorityIds?: Id<"priorities">[];
@@ -39,7 +39,7 @@ type Filters = {
   excludeTagIds?: Id<"tags">[];
 };
 
-type SortKey = {
+export type SettingsSortKey = {
   column: string;
   direction: "asc" | "desc";
 };
@@ -61,8 +61,8 @@ export function SettingsDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentFilters?: Filters;
-  currentSortKeys?: SortKey[];
+  currentFilters?: SettingsFilters;
+  currentSortKeys?: SettingsSortKey[];
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -831,8 +831,8 @@ function PresetsTab({
   currentFilters,
   currentSortKeys,
 }: {
-  currentFilters: Filters;
-  currentSortKeys: SortKey[];
+  currentFilters: SettingsFilters;
+  currentSortKeys: SettingsSortKey[];
 }) {
   const presets = useQuery(api.filterPresets.list) ?? [];
   const createPreset = useMutation(api.filterPresets.create);

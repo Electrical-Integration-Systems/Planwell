@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useConvexAuth } from "convex/react";
-import { Header } from "@/components/layout/Header";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
 
 export default function FilesPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -27,13 +23,7 @@ export default function FilesPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="h-dvh flex flex-col">
-      <Header
-        onSettingsOpen={() => setSettingsOpen(true)}
-        isSettingsOpen={settingsOpen}
-      />
-
-      <main className="flex-1 overflow-y-auto">
+    <>
         {/* Sticky toolbar: heading, search, upload controls */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
           <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
@@ -55,9 +45,6 @@ export default function FilesPage() {
           <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-0 pb-6">
             <FilesBrowser />
         </div>
-      </main>
-
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-    </div>
+    </>
   );
 }

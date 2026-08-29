@@ -8,13 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Header } from "@/components/layout/Header";
+import { useSettingsContext } from "@/components/layout/AppShell";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskSort } from "@/components/TaskSort";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 type SortKey = {
@@ -44,12 +43,13 @@ export default function Home() {
 
   const [filters, setFilters] = useState<Filters>({});
   const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [activePresetId, setActivePresetId] = useState<Id<"filterPresets"> | null>(null);
+
+  useSettingsContext(filters, sortKeys);
 
   // Auto-seed if states/priorities are empty
   const needsSeed =
@@ -101,10 +101,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-dvh flex flex-col">
-      <Header onSettingsOpen={() => setSettingsOpen(true)} isSettingsOpen={settingsOpen} />
-
-      <main className="flex-1 overflow-y-auto">
+    <>
         {/* Sticky toolbar: heading, tabs, search, filters, sort, presets, column headers */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
           <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
@@ -233,13 +230,6 @@ export default function Home() {
           />
         )}
 
-        <SettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          currentFilters={filters}
-          currentSortKeys={sortKeys}
-        />
-      </main>
-    </div>
+    </>
   );
 }

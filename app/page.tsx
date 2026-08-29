@@ -8,9 +8,7 @@ import { Archive, ArchiveRestore, ArrowRight, FolderKanban, ImageIcon, KeyRound,
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
-import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,7 +121,6 @@ export default function ProjectsPage() {
 	const deleteProject = useMutation(api.projects.remove);
 	const unarchiveProject = useMutation(api.projects.unarchive);
 
-	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
 	const [editorOpen, setEditorOpen] = useState(false);
@@ -205,13 +202,7 @@ export default function ProjectsPage() {
 	};
 
 	return (
-		<div className="h-dvh flex flex-col">
-			<Header
-				onSettingsOpen={() => setSettingsOpen(true)}
-				isSettingsOpen={settingsOpen}
-			/>
-
-			<main className="flex-1 overflow-y-auto">
+		<>
 				<div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
 					<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
 						<div className="flex items-end justify-between pt-4 sm:pt-5 pb-2 sm:pb-3 animate-fade-in-up gap-3">
@@ -424,7 +415,6 @@ export default function ProjectsPage() {
 						</div>
 					)}
 				</div>
-			</main>
 
 			<ProjectEditorDialog
 				open={editorOpen}
@@ -492,7 +482,6 @@ export default function ProjectsPage() {
 						: Promise.resolve()
 				}
 			/>
-			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-		</div>
+		</>
 	);
 }

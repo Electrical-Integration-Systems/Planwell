@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { AppShell } from "@/components/layout/AppShell";
 import ConvexClientProvider from "@/providers/ConvexClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -18,7 +19,9 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html lang="en" suppressHydrationWarning>
         <body className="antialiased">
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider>
+            <AppShell>{children}</AppShell>
+          </ConvexClientProvider>
           <Toaster richColors closeButton />
         </body>
       </html>

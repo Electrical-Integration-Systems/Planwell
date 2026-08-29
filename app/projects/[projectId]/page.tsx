@@ -1,20 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArrowLeft, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { FilesBrowser } from "@/components/FilesBrowser";
-import { Header } from "@/components/layout/Header";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { ProjectBanner } from "@/components/ProjectBanner";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { TaskFilters } from "@/components/TaskFilters";
@@ -280,7 +277,6 @@ export default function ProjectDetailsPage() {
 	const updateCredential = useMutation(api.credentials.update);
 	const removeCredential = useMutation(api.credentials.remove);
 
-	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
 	const [taskSearchQuery, setTaskSearchQuery] = useState("");
 	const [deviceSearchQuery, setDeviceSearchQuery] = useState("");
@@ -501,23 +497,10 @@ export default function ProjectDetailsPage() {
 	};
 
 	return (
-		<div className="h-dvh flex flex-col">
-			<Header
-				onSettingsOpen={() => setSettingsOpen(true)}
-				isSettingsOpen={settingsOpen}
-			/>
-
-			<main className="flex-1 overflow-y-auto">
+		<>
 				<div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
 					<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
 						<div className="pt-4 sm:pt-5 pb-3 animate-fade-in-up space-y-3">
-							<Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg text-xs gap-1.5" asChild>
-								<Link href="/projects">
-									<ArrowLeft className="h-3.5 w-3.5" />
-									Back to projects
-								</Link>
-							</Button>
-
 							{project === undefined ? (
 								<div className="text-sm text-muted-foreground">Loading project...</div>
 							) : project === null ? (
@@ -1006,7 +989,6 @@ export default function ProjectDetailsPage() {
 						<div className="p-8 text-center text-sm text-muted-foreground">Loading project details...</div>
 					)}
 				</div>
-			</main>
 
 			{selectedTaskId !== null && (
 				<TaskDetailDialog
@@ -1044,7 +1026,6 @@ export default function ProjectDetailsPage() {
 				confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
 				onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
 			/>
-			<SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-		</div>
+		</>
 	);
 }

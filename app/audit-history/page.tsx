@@ -5,9 +5,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/AuditHistoryList";
-import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,7 +17,6 @@ import {
 
 export default function AuditHistoryPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [entityFilter, setEntityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const logs =
@@ -44,13 +41,7 @@ export default function AuditHistoryPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="h-dvh flex flex-col">
-      <Header
-        onSettingsOpen={() => setSettingsOpen(true)}
-        isSettingsOpen={settingsOpen}
-      />
-
-      <main className="flex-1 overflow-y-auto">
+    <>
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
           <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between pt-4 sm:pt-5 pb-2 sm:pb-3 animate-fade-in-up">
@@ -109,9 +100,6 @@ export default function AuditHistoryPage() {
         <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-0 pb-6 animate-fade-in-up stagger-3">
           <AuditHistoryList logs={logs} searchQuery={searchQuery} />
         </div>
-      </main>
-
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-    </div>
+    </>
   );
 }
