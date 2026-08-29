@@ -207,30 +207,7 @@ export default function ProjectsPage() {
 		<>
 				<div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
 					<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
-						<div className="flex items-end justify-between pt-4 sm:pt-5 pb-2 sm:pb-3 animate-fade-in-up gap-3">
-							<div>
-								<h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
-									Projects
-									<span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
-								</h2>
-								<p className="text-xs text-muted-foreground mt-1">
-									Organize your workspaces, infrastructure, and access details by project
-								</p>
-							</div>
-							<Button
-								size="sm"
-								className="h-8 text-xs gap-1.5 rounded-lg px-3"
-								onClick={() => {
-									setEditingProjectId(null);
-									setProjectForm(EMPTY_PROJECT_FORM);
-									setEditorOpen(true);
-								}}
-							>
-								Add project
-							</Button>
-						</div>
-
-						<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
+						<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 py-3 animate-fade-in-up">
 							<div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
 								<button
 									className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
@@ -266,6 +243,17 @@ export default function ProjectsPage() {
 									/>
 								</div>
 							)}
+							<Button
+								size="sm"
+								className="h-8 text-xs gap-1.5 rounded-lg px-3 sm:ml-auto"
+								onClick={() => {
+									setEditingProjectId(null);
+									setProjectForm(EMPTY_PROJECT_FORM);
+									setEditorOpen(true);
+								}}
+							>
+								Add project
+							</Button>
 						</div>
 					</div>
 				</div>

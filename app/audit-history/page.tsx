@@ -44,19 +44,7 @@ export default function AuditHistoryPage() {
     <>
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
           <div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between pt-4 sm:pt-5 pb-2 sm:pb-3 animate-fade-in-up">
-              <div>
-                <h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
-                  Audit History
-                  <span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
-                </h2>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Search and navigate every recorded change across the workspace
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 py-3 animate-fade-in-up">
               {logs.length > 0 && (
                 <div className="relative w-full sm:flex-1 sm:max-w-xs">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
