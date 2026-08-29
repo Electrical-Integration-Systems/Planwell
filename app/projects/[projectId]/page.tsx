@@ -13,6 +13,7 @@ import { FilesBrowser } from "@/components/FilesBrowser";
 import { Header } from "@/components/layout/Header";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
+import { ProjectBanner } from "@/components/ProjectBanner";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
@@ -587,6 +588,11 @@ export default function ProjectDetailsPage() {
 						</Card>
 					) : project !== undefined ? (
 						<>
+							<ProjectBanner
+								projectId={projectId}
+								projectName={project.name}
+								bannerUrl={project.bannerUrl}
+							/>
 							<Tabs defaultValue="tasks" className="gap-4">
 								<TabsList variant="line" className="w-full justify-start overflow-x-auto rounded-none px-0">
 									<TabsTrigger value="tasks" className="text-xs sm:text-sm">Tasks</TabsTrigger>

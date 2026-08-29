@@ -297,6 +297,13 @@ export const deleteFile = mutation({
     if (userId === null) throw new Error("Not authenticated");
     const file = await ctx.db.get(args.fileId);
     if (!file) return;
+    const project = file.projectId ? await ctx.db.get(file.projectId) : null;
+    if (project?.bannerPhotoId === args.fileId) {
+      await ctx.db.patch(project._id, {
+        bannerPhotoId: undefined,
+        updatedAt: Date.now(),
+      });
+    }
     await ctx.storage.delete(file.storageId);
     await ctx.db.delete(args.fileId);
     await logAudit(ctx, {

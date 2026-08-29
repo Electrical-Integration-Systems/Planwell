@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Archive, ArchiveRestore, ArrowRight, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import BorderGlow from "@/components/BorderGlow";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
@@ -302,11 +304,34 @@ export default function ProjectsPage() {
 					) : (
 						<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 							{visibleProjects?.map((project) => (
-								<Card
+								<BorderGlow
 									key={project._id}
-									className="border-border/50 shadow-warm-sm hover:shadow-warm transition-all bg-card/60"
+									className="h-full"
+									animated
+									backgroundColor="var(--card)"
+									borderRadius={10}
+									edgeSensitivity={5}
+									glowColor="15 58 45"
+									glowRadius={28}
+									glowIntensity={1.1}
+									coneSpread={35}
+									colors={["#b84a30", "#d4922a", "#5c7a5c"]}
+									fillOpacity={0.35}
 								>
-									<CardHeader className="pb-3">
+									<Card className="h-full gap-0 overflow-hidden border-0 bg-transparent py-0 shadow-none">
+										{project.bannerUrl ? (
+											<div className="relative h-32 overflow-hidden bg-muted/40">
+												<Image
+													src={project.bannerUrl}
+													alt={`${project.name} banner`}
+													fill
+													unoptimized
+													sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+													className="object-cover"
+												/>
+											</div>
+										) : null}
+									<CardHeader className="pb-3 pt-6">
 										<div className="flex items-start justify-between gap-3">
 											<div className="min-w-0">
 												<CardTitle className="font-serif text-lg truncate">
@@ -331,7 +356,7 @@ export default function ProjectsPage() {
 											)}
 										</div>
 									</CardHeader>
-									<CardContent className="space-y-4">
+									<CardContent className="space-y-4 pb-6">
 										<div className="flex flex-wrap gap-1.5">
 											<Badge variant="outline" className="gap-1.5">
 												<FolderKanban className="h-3 w-3" />
@@ -419,7 +444,8 @@ export default function ProjectsPage() {
 											</div>
 										</div>
 									</CardContent>
-								</Card>
+									</Card>
+								</BorderGlow>
 							))}
 						</div>
 					)}

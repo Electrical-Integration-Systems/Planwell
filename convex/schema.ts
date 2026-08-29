@@ -9,6 +9,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     location: v.optional(v.string()),
+    bannerPhotoId: v.optional(v.id("files")),
     archived: v.boolean(),
     createdBy: v.id("users"),
     createdAt: v.number(),

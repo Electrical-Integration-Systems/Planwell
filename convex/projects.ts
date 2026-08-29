@@ -104,15 +104,24 @@ export const listWithStats = query({
         (fileCounts.get(file.projectId) ?? 0) + 1,
       );
     }
-    return visibleProjects.map((project) => {
+    const filesById = new Map(files.map((file) => [file._id, file]));
+
+    return await Promise.all(visibleProjects.map(async (project) => {
       const stats = taskStats.get(project._id) ?? {
         total: 0,
         active: 0,
         archived: 0,
       };
+      const bannerPhoto = project.bannerPhotoId
+        ? filesById.get(project.bannerPhotoId)
+        : undefined;
+      const bannerUrl = bannerPhoto
+        ? await ctx.storage.getUrl(bannerPhoto.storageId)
+        : null;
 
       return {
         ...project,
+        bannerUrl,
         taskCount: stats.total,
         activeTaskCount: stats.active,
         archivedTaskCount: stats.archived,
@@ -121,7 +130,7 @@ export const listWithStats = query({
         fileCount: fileCounts.get(project._id) ?? 0,
         photoCount: photoCounts.get(project._id) ?? 0,
       };
-    });
+    }));
   },
 });
 
@@ -166,9 +175,16 @@ export const get = query({
         photo.projectId === args.id ||
         (photo.taskId !== undefined && taskIds.has(photo.taskId)),
     ).length;
+    const bannerPhoto = project.bannerPhotoId
+      ? directFiles.find((file) => file._id === project.bannerPhotoId)
+      : undefined;
+    const bannerUrl = bannerPhoto
+      ? await ctx.storage.getUrl(bannerPhoto.storageId)
+      : null;
 
     return {
       ...project,
+      bannerUrl,
       taskCount: tasks.length,
       activeTaskCount: tasks.filter((task) => !(task.archived ?? false)).length,
       archivedTaskCount: tasks.filter((task) => task.archived ?? false).length,
@@ -246,6 +262,49 @@ export const update = mutation({
         metadata: { name: oldProject?.name ?? "Unknown" },
       });
     }
+  },
+});
+
+export const setBannerPhoto = mutation({
+  args: {
+    id: v.id("projects"),
+    fileId: v.optional(v.id("files")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireWhitelistedUser(ctx);
+    const project = await ctx.db.get(args.id);
+    if (project === null) throw new Error("Project not found");
+
+    const bannerPhoto = args.fileId ? await ctx.db.get(args.fileId) : null;
+    if (args.fileId !== undefined && bannerPhoto === null) {
+      throw new Error("Banner photo not found");
+    }
+    if (
+      bannerPhoto !== null &&
+      ((bannerPhoto.kind ?? "file") !== "photo" ||
+        bannerPhoto.projectId !== args.id ||
+        bannerPhoto.taskId !== undefined)
+    ) {
+      throw new Error("Banner must be a photo uploaded directly to this project");
+    }
+
+    await ctx.db.patch(args.id, {
+      bannerPhotoId: args.fileId,
+      updatedAt: Date.now(),
+    });
+    await logAudit(ctx, {
+      userId,
+      action: "update",
+      entityType: "project",
+      entityId: args.id,
+      changes: {
+        bannerPhotoId: {
+          old: project.bannerPhotoId ?? null,
+          new: args.fileId ?? null,
+        },
+      },
+      metadata: { name: project.name },
+    });
   },
 });
 
