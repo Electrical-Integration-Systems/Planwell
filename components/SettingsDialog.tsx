@@ -20,8 +20,6 @@ import {
   Pencil,
   Trash2,
   Plus,
-  Archive,
-  ArchiveRestore,
 } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ColorPicker } from "@/components/ColorPicker";
@@ -94,12 +92,6 @@ export function SettingsDialog({
               Tags
             </TabsTrigger>
             <TabsTrigger
-              value="projects"
-              className="text-xs rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
-            >
-              Projects
-            </TabsTrigger>
-            <TabsTrigger
               value="presets"
               className="text-xs rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
             >
@@ -114,9 +106,6 @@ export function SettingsDialog({
           </TabsContent>
           <TabsContent value="tags">
             <TagsTab />
-          </TabsContent>
-          <TabsContent value="projects">
-            <ProjectsTab />
           </TabsContent>
           <TabsContent value="presets">
             <PresetsTab currentFilters={currentFilters ?? {}} currentSortKeys={currentSortKeys ?? []} />
@@ -632,171 +621,6 @@ function TagsTab() {
         <ColorPicker
           value={newColor}
           onChange={(color) => setNewColor(color)}
-        />
-        <Button
-          size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
-          onClick={handleCreate}
-          disabled={!newName.trim()}
-        >
-          <Plus className="h-3 w-3" />
-          Add
-        </Button>
-      </div>
-
-      <ConfirmActionDialog
-        open={confirmAction !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setConfirmAction(null);
-          }
-        }}
-        title={confirmAction?.title ?? ""}
-        description={confirmAction?.description ?? ""}
-        confirmLabel={confirmAction?.confirmLabel ?? "Confirm"}
-        onConfirm={confirmAction?.onConfirm ?? (() => Promise.resolve())}
-        requiredText={confirmAction?.requiredText}
-        requiredTextLabel={confirmAction?.requiredTextLabel}
-      />
-    </div>
-  );
-}
-
-function ProjectsTab() {
-  const projects = useQuery(api.projects.list, { includeArchived: true }) ?? [];
-  const createProject = useMutation(api.projects.create);
-  const updateProject = useMutation(api.projects.update);
-  const archiveProject = useMutation(api.projects.archive);
-  const deleteProject = useMutation(api.projects.remove);
-  const unarchiveProject = useMutation(api.projects.unarchive);
-  const [newName, setNewName] = useState("");
-  const [editingId, setEditingId] = useState<Id<"projects"> | null>(null);
-  const [editName, setEditName] = useState("");
-  const [confirmAction, setConfirmAction] = useState<ConfirmActionState | null>(null);
-
-  const handleCreate = () => {
-    if (!newName.trim()) return;
-    void createProject({ name: newName.trim() }).then(() => setNewName(""));
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingId || !editName.trim()) return;
-    void updateProject({ id: editingId, name: editName.trim() }).then(() => {
-      setEditingId(null);
-    });
-  };
-
-  return (
-    <div className="flex flex-col gap-2 py-3">
-      {projects.map((project) => (
-        <div key={project._id} className="flex items-center gap-2 group">
-          {editingId === project._id ? (
-            <>
-              <Input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="flex-1 h-8 text-sm border-border/50 shadow-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveEdit();
-                  if (e.key === "Escape") setEditingId(null);
-                }}
-                autoFocus
-              />
-              <Button
-                size="sm"
-                className="h-7 text-xs rounded-lg"
-                onClick={handleSaveEdit}
-              >
-                Save
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
-                onClick={() => setEditingId(null)}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <>
-              <span
-                className={`flex-1 text-sm ${project.archived ? "text-muted-foreground line-through" : ""}`}
-              >
-                {project.name}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                onClick={() => {
-                  setEditingId(project._id);
-                  setEditName(project.name);
-                }}
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-              {project.archived ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    void unarchiveProject({ id: project._id });
-                  }}
-                >
-                  <ArchiveRestore className="h-3 w-3" />
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    setConfirmAction({
-                      title: "Archive project?",
-                      description: `Archive \"${project.name}\"? You can restore it later.`,
-                      confirmLabel: "Archive project",
-                      onConfirm: () => archiveProject({ id: project._id }),
-                    });
-                  }}
-                >
-                  <Archive className="h-3 w-3" />
-                </Button>
-              )}
-              {project.archived ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 rounded text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    setConfirmAction({
-                      title: "Delete project?",
-                      description: `Delete \"${project.name}\"? This permanently removes the project and its tasks, files, photos, devices, and credentials.`,
-                      requiredText: `Delete project ${project.name} and all its associated data.`,
-                      requiredTextLabel: "Type the exact sentence below to confirm this destructive action.",
-                      confirmLabel: "Delete project",
-                      onConfirm: () => deleteProject({ id: project._id }),
-                    });
-                  }}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              ) : null}
-            </>
-          )}
-        </div>
-      ))}
-      <Separator className="my-1" />
-      <div className="flex items-center gap-2">
-        <Input
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          placeholder="New project name"
-          className="flex-1 h-8 text-sm border-border/50 shadow-none"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleCreate();
-          }}
         />
         <Button
           size="sm"

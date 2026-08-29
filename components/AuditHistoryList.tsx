@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { Badge } from "@/components/ui/badge";
 import { History, Plus, Pencil, Trash2, Archive, ArchiveRestore, ArrowUpDown, UserPlus, MessageSquarePlus, MessageSquareX, Search, Upload } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -311,7 +312,7 @@ export function AuditHistoryList({
                       </div>
                       {typeof metadata.body === "string" && metadata.body && (
                         <div className="mt-1.5 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
-                          &quot;{metadata.body}&quot;
+                          &quot;<LinkifiedText>{metadata.body}</LinkifiedText>&quot;
                         </div>
                       )}
                       {log.changes && <ChangesDisplay changesJson={log.changes} />}
@@ -345,7 +346,7 @@ export function AuditHistoryList({
                   <p className="font-medium text-sm truncate">{displayName}</p>
                   {typeof metadata.body === "string" && metadata.body && (
                     <div className="mt-1 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
-                      &quot;{metadata.body}&quot;
+                      &quot;<LinkifiedText>{metadata.body}</LinkifiedText>&quot;
                     </div>
                   )}
                   {log.changes && <ChangesDisplay changesJson={log.changes} />}

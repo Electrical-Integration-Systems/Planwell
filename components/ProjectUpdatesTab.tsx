@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ACTION_CONFIG, formatRelative, parseAuditMetadata } from "@/components/AuditHistoryList";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -333,7 +334,7 @@ function CommentBubble({
             )}
           </div>
           <p className="px-3 py-2.5 text-sm whitespace-pre-wrap break-words">
-            {item.body}
+            <LinkifiedText>{item.body}</LinkifiedText>
           </p>
         </div>
       </div>

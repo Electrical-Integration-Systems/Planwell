@@ -12,6 +12,8 @@ import { FilesBrowser } from "@/components/FilesBrowser";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { ProjectBanner } from "@/components/ProjectBanner";
+import { SettingsDialog } from "@/components/SettingsDialog";
+import { DeviceSpreadsheet } from "@/components/DeviceSpreadsheet";
 import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { TaskFilters } from "@/components/TaskFilters";
@@ -48,15 +50,6 @@ type ProjectTaskFilters = {
 	excludeTagIds?: Id<"tags">[];
 };
 
-type DeviceFormState = {
-	name: string;
-	description: string;
-	ipAddress: string;
-	deviceType: string;
-	location: string;
-	notes: string;
-};
-
 type CredentialFormState = {
 	name: string;
 	type: string;
@@ -66,17 +59,7 @@ type CredentialFormState = {
 	notes: string;
 };
 
-const DEVICE_GRID_COLS = "minmax(0,1.5fr) 150px 130px 140px 120px 72px";
 const CREDENTIAL_GRID_COLS = "minmax(0,1.3fr) 120px 130px minmax(0,1fr) 120px 96px";
-
-const EMPTY_DEVICE_FORM: DeviceFormState = {
-	name: "",
-	description: "",
-	ipAddress: "",
-	deviceType: "",
-	location: "",
-	notes: "",
-};
 
 const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
 	name: "",
@@ -90,96 +73,6 @@ const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
 function normalizeOptionalText(value: string) {
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function formatDate(ts: number) {
-	return new Date(ts).toLocaleDateString("ro-RO", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-}
-
-function DeviceEditorDialog({
-	open,
-	onOpenChange,
-	values,
-	onValuesChange,
-	onSubmit,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	values: DeviceFormState;
-	onValuesChange: (values: DeviceFormState) => void;
-	onSubmit: () => void;
-}) {
-	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[640px] border-border/60 shadow-warm-lg">
-				<DialogHeader>
-					<DialogTitle className="font-serif text-xl tracking-tight">
-						Device entry
-					</DialogTitle>
-				</DialogHeader>
-				<div className="grid gap-3 sm:grid-cols-2">
-					<Input
-						value={values.name}
-						onChange={(e) => onValuesChange({ ...values, name: e.target.value })}
-						placeholder="Device name"
-						className="h-10 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<Input
-						value={values.ipAddress}
-						onChange={(e) =>
-							onValuesChange({ ...values, ipAddress: e.target.value })
-						}
-						placeholder="IP address"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.deviceType}
-						onChange={(e) =>
-							onValuesChange({ ...values, deviceType: e.target.value })
-						}
-						placeholder="Device type"
-						className="h-10 border-border/50 shadow-none"
-					/>
-					<Input
-						value={values.location}
-						onChange={(e) =>
-							onValuesChange({ ...values, location: e.target.value })
-						}
-						placeholder="Location"
-						className="h-10 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<Textarea
-						value={values.description}
-						onChange={(e) =>
-							onValuesChange({ ...values, description: e.target.value })
-						}
-						placeholder="Description"
-						className="min-h-24 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<Textarea
-						value={values.notes}
-						onChange={(e) => onValuesChange({ ...values, notes: e.target.value })}
-						placeholder="Operational notes"
-						className="min-h-24 border-border/50 shadow-none sm:col-span-2"
-					/>
-					<div className="sm:col-span-2 flex items-center justify-end gap-2">
-						<Button variant="ghost" className="rounded-lg" onClick={() => onOpenChange(false)}>
-							Cancel
-						</Button>
-						<Button className="rounded-lg" onClick={onSubmit} disabled={!values.name.trim()}>
-							Save device
-						</Button>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
 }
 
 function CredentialEditorDialog({
@@ -279,17 +172,13 @@ export default function ProjectDetailsPage() {
 
 	const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
 	const [taskSearchQuery, setTaskSearchQuery] = useState("");
-	const [deviceSearchQuery, setDeviceSearchQuery] = useState("");
 	const [credentialSearchQuery, setCredentialSearchQuery] = useState("");
 	const [activeTaskTab, setActiveTaskTab] = useState<"active" | "archived">("active");
 	const [projectTaskFilters, setProjectTaskFilters] = useState<ProjectTaskFilters>({});
 	const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
 	const [isAddingTask, setIsAddingTask] = useState(false);
-	const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
 	const [credentialDialogOpen, setCredentialDialogOpen] = useState(false);
-	const [editingDeviceId, setEditingDeviceId] = useState<Id<"projectDevices"> | null>(null);
 	const [editingCredentialId, setEditingCredentialId] = useState<Id<"projectCredentials"> | null>(null);
-	const [deviceForm, setDeviceForm] = useState<DeviceFormState>(EMPTY_DEVICE_FORM);
 	const [credentialForm, setCredentialForm] = useState<CredentialFormState>(EMPTY_CREDENTIAL_FORM);
 	const [revealedCredentials, setRevealedCredentials] = useState<Record<string, boolean>>({});
 	const [confirmAction, setConfirmAction] = useState<{
@@ -320,27 +209,6 @@ export default function ProjectDetailsPage() {
 		excludeProjectIds: undefined,
 	};
 
-	const filteredDevices =
-		devices === undefined
-			? undefined
-			: devices.filter((device) => {
-					const query = deviceSearchQuery.toLowerCase().trim();
-					if (query.length === 0) return true;
-
-					return [
-						device.name,
-						device.description,
-						device.ipAddress,
-						device.deviceType,
-						device.location,
-						device.notes,
-					]
-						.filter((value): value is string => typeof value === "string")
-						.join(" ")
-						.toLowerCase()
-						.includes(query);
-				});
-
 	const filteredCredentials =
 		credentials === undefined
 			? undefined
@@ -361,24 +229,6 @@ export default function ProjectDetailsPage() {
 						.includes(query);
 				});
 
-	const openDeviceDialog = (device?: NonNullable<typeof devices>[number]) => {
-		if (device) {
-			setEditingDeviceId(device._id);
-			setDeviceForm({
-				name: device.name,
-				description: device.description ?? "",
-				ipAddress: device.ipAddress ?? "",
-				deviceType: device.deviceType ?? "",
-				location: device.location ?? "",
-				notes: device.notes ?? "",
-			});
-		} else {
-			setEditingDeviceId(null);
-			setDeviceForm(EMPTY_DEVICE_FORM);
-		}
-		setDeviceDialogOpen(true);
-	};
-
 	const openCredentialDialog = (
 		credential?: NonNullable<typeof credentials>[number],
 	) => {
@@ -397,37 +247,6 @@ export default function ProjectDetailsPage() {
 			setCredentialForm(EMPTY_CREDENTIAL_FORM);
 		}
 		setCredentialDialogOpen(true);
-	};
-
-	const handleSaveDevice = () => {
-		const payload = {
-			name: deviceForm.name.trim(),
-			description: normalizeOptionalText(deviceForm.description),
-			ipAddress: normalizeOptionalText(deviceForm.ipAddress),
-			deviceType: normalizeOptionalText(deviceForm.deviceType),
-			location: normalizeOptionalText(deviceForm.location),
-			notes: normalizeOptionalText(deviceForm.notes),
-		};
-
-		if (editingDeviceId === null) {
-			void createDevice({ projectId, ...payload })
-				.then(() => {
-					toast.success("Device saved");
-					setDeviceDialogOpen(false);
-					setDeviceForm(EMPTY_DEVICE_FORM);
-				})
-				.catch(() => toast.error("Failed to save device"));
-			return;
-		}
-
-		void updateDevice({ id: editingDeviceId, ...payload })
-			.then(() => {
-				toast.success("Device updated");
-				setDeviceDialogOpen(false);
-				setEditingDeviceId(null);
-				setDeviceForm(EMPTY_DEVICE_FORM);
-			})
-			.catch(() => toast.error("Failed to update device"));
 	};
 
 	const handleSaveCredential = () => {
@@ -459,22 +278,6 @@ export default function ProjectDetailsPage() {
 				setCredentialForm(EMPTY_CREDENTIAL_FORM);
 			})
 			.catch(() => toast.error("Failed to update credential"));
-	};
-
-	const confirmDeleteDevice = (deviceId: Id<"projectDevices">, deviceName: string) => {
-		setConfirmAction({
-			title: "Delete device?",
-			description: `Delete \"${deviceName}\"? This cannot be undone.`,
-			confirmLabel: "Delete device",
-			onConfirm: () =>
-				removeDevice({ id: deviceId })
-					.then(() => {
-						toast.success("Device deleted");
-					})
-					.catch(() => {
-						toast.error("Failed to delete device");
-					}),
-		});
 	};
 
 	const confirmDeleteCredential = (
@@ -683,132 +486,14 @@ export default function ProjectDetailsPage() {
 									/>
 								</TabsContent>
 
-								<TabsContent value="devices" className="space-y-4">
-									<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2">
-										{devices !== undefined && devices.length > 0 && (
-											<div className="relative w-full sm:flex-1 sm:max-w-xs">
-												<Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-												<Input
-													value={deviceSearchQuery}
-													onChange={(e) => setDeviceSearchQuery(e.target.value)}
-													placeholder="Search devices..."
-													className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
-												/>
-											</div>
-										)}
-
-										<Button
-											size="sm"
-											className="h-8 text-xs gap-1.5 rounded-lg px-3"
-											onClick={() => openDeviceDialog()}
-										>
-											<Plus className="h-3.5 w-3.5" />
-											Add device
-										</Button>
-									</div>
-
-									{filteredDevices !== undefined && filteredDevices.length > 0 && (
-										<div
-											className="hidden md:grid items-center py-2.5 border-t border-border/30 gap-3"
-											style={{ gridTemplateColumns: DEVICE_GRID_COLS }}
-										>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Device</div>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">IP Address</div>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</div>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</div>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Updated</div>
-											<div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">Actions</div>
-										</div>
-									)}
-
-									{devices === undefined ? (
-										<div className="p-8 text-center text-sm text-muted-foreground">Loading devices...</div>
-									) : filteredDevices !== undefined && filteredDevices.length === 0 ? (
-										<div className="py-16 text-center border border-dashed border-primary/30 rounded-lg bg-primary/5">
-											<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-												<Server className="h-5 w-5 text-primary/60" />
-											</div>
-											<p className="text-sm text-muted-foreground">
-												{deviceSearchQuery.trim().length > 0 ? "No matching devices" : "No devices yet"}
-											</p>
-											<p className="text-xs text-muted-foreground/60 mt-1">
-												Start tracking firewalls, PLCs, routers, gateways, and other project equipment
-											</p>
-										</div>
-									) : (
-										<div>
-											{filteredDevices?.map((device, index) => (
-												<div key={device._id}>
-													<div
-														className="md:hidden border-b border-border/50 transition-colors hover:bg-muted/50 animate-fade-in p-3"
-														style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
-													>
-														<div className="flex items-start justify-between gap-3">
-															<div className="min-w-0 flex-1">
-																<p className="font-medium text-sm truncate">{device.name}</p>
-																{device.description && (
-																	<p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{device.description}</p>
-																)}
-																<div className="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] text-muted-foreground">
-																	<span>{device.ipAddress || "No IP"}</span>
-																	<span>{device.deviceType || "No type"}</span>
-																	<span>{device.location || "No location"}</span>
-																</div>
-															</div>
-															<div className="flex items-center gap-1 shrink-0">
-																<Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDeviceDialog(device)}>
-																	<Pencil className="h-3.5 w-3.5" />
-																</Button>
-																<Button
-																	variant="ghost"
-																	size="icon"
-																	className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																	onClick={() => confirmDeleteDevice(device._id, device.name)}
-																>
-																	<Trash2 className="h-3.5 w-3.5" />
-																</Button>
-															</div>
-														</div>
-													</div>
-
-													<div
-														className="hidden md:grid items-start py-2.5 border-b border-border/50 transition-colors hover:bg-muted/50 animate-fade-in gap-3"
-														style={{
-															gridTemplateColumns: DEVICE_GRID_COLS,
-															animationDelay: `${Math.min(index, 20) * 25}ms`,
-														}}
-													>
-														<div className="min-w-0 pr-2">
-															<p className="font-medium text-sm truncate">{device.name}</p>
-															{device.description && (
-																<p className="mt-1 text-xs text-muted-foreground line-clamp-2">{device.description}</p>
-															)}
-															{device.notes && (
-																<p className="mt-1 text-[11px] text-muted-foreground/80 line-clamp-2">{device.notes}</p>
-															)}
-														</div>
-														<div className="text-xs text-muted-foreground pt-1">{device.ipAddress || "—"}</div>
-														<div className="text-xs text-muted-foreground pt-1">{device.deviceType || "—"}</div>
-														<div className="text-xs text-muted-foreground pt-1">{device.location || "—"}</div>
-														<div className="text-xs text-muted-foreground tabular-nums pt-1">{formatDate(device.updatedAt)}</div>
-														<div className="flex items-center justify-end gap-1">
-															<Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDeviceDialog(device)}>
-																<Pencil className="h-3.5 w-3.5" />
-															</Button>
-															<Button
-																variant="ghost"
-																size="icon"
-																className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
-																onClick={() => confirmDeleteDevice(device._id, device.name)}
-															>
-																<Trash2 className="h-3.5 w-3.5" />
-															</Button>
-														</div>
-													</div>
-												</div>
-											))}
-										</div>
-									)}
+								<TabsContent value="devices">
+									<DeviceSpreadsheet
+										projectId={projectId}
+										devices={devices ?? []}
+										onCreate={(args) => createDevice(args)}
+										onUpdate={(args) => updateDevice(args)}
+										onDelete={(args) => removeDevice(args)}
+									/>
 								</TabsContent>
 
 								<TabsContent value="credentials" className="space-y-4">
@@ -1000,13 +685,6 @@ export default function ProjectDetailsPage() {
 				/>
 			)}
 
-			<DeviceEditorDialog
-				open={deviceDialogOpen}
-				onOpenChange={setDeviceDialogOpen}
-				values={deviceForm}
-				onValuesChange={setDeviceForm}
-				onSubmit={handleSaveDevice}
-			/>
 			<CredentialEditorDialog
 				open={credentialDialogOpen}
 				onOpenChange={setCredentialDialogOpen}
