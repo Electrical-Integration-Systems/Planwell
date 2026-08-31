@@ -346,6 +346,18 @@ export default function ProjectDetailsPage() {
 			.catch(() => toast.error("Failed to copy credential"));
 	};
 
+	const handleCopySecret = (secret: string) => {
+		if (!navigator.clipboard) {
+			toast.error("Clipboard access is unavailable");
+			return;
+		}
+
+		void navigator.clipboard
+			.writeText(secret)
+			.then(() => toast.success("Secret copied"))
+			.catch(() => toast.error("Failed to copy secret"));
+	};
+
 	return (
 		<div className="h-dvh flex flex-col">
 			<Header
@@ -670,8 +682,21 @@ export default function ProjectDetailsPage() {
 																	</Button>
 																</div>
 															</div>
-															<div className="mt-2 text-[11px] text-muted-foreground">
-																Secret: {displayedSecret}
+																<div className="mt-2 flex min-w-0 items-center text-[11px] text-muted-foreground">
+																	<span className="shrink-0">Secret:&nbsp;</span>
+																	<span className="min-w-0 flex-1 truncate">{displayedSecret}</span>
+																	{credential.secret && (
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-6 w-6 shrink-0 rounded-lg"
+																			onClick={() => handleCopySecret(credential.secret!)}
+																			aria-label={`Copy ${credential.name} secret`}
+																			title="Copy secret"
+																		>
+																			<Copy className="h-3 w-3" />
+																		</Button>
+																	)}
 															</div>
 														</div>
 
@@ -691,22 +716,34 @@ export default function ProjectDetailsPage() {
 															<div className="text-xs text-muted-foreground pt-1">{credential.type}</div>
 															<div className="text-xs text-muted-foreground pt-1 truncate pr-2">{credential.username || "—"}</div>
 															<div className="text-xs text-muted-foreground pt-1 truncate pr-2">{credential.endpoint || "—"}</div>
-															<div className="flex items-center gap-1 text-xs text-muted-foreground pt-1">
-																<span>{displayedSecret}</span>
+															<div className="flex min-w-0 items-center gap-1 overflow-hidden text-xs text-muted-foreground pt-1">
+																<span className="min-w-0 flex-1 truncate">{displayedSecret}</span>
 																{credential.secret && (
-																	<Button
-																		variant="ghost"
-																		size="icon"
-																		className="h-6 w-6 rounded-lg"
-																		onClick={() =>
-																			setRevealedCredentials((current) => ({
-																				...current,
-																				[credential._id]: !isRevealed,
-																			}))
-																		}
-																	>
-																		{isRevealed ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-																	</Button>
+																	<>
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-6 w-6 shrink-0 rounded-lg"
+																			onClick={() => handleCopySecret(credential.secret!)}
+																			aria-label={`Copy ${credential.name} secret`}
+																			title="Copy secret"
+																		>
+																			<Copy className="h-3 w-3" />
+																		</Button>
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-6 w-6 shrink-0 rounded-lg"
+																			onClick={() =>
+																				setRevealedCredentials((current) => ({
+																					...current,
+																					[credential._id]: !isRevealed,
+																				}))
+																			}
+																		>
+																			{isRevealed ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+																		</Button>
+																	</>
 																)}
 															</div>
 															<div className="flex items-center justify-end gap-1">
