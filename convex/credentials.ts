@@ -63,10 +63,10 @@ export const update = mutation({
     id: v.id("projectCredentials"),
     name: v.optional(v.string()),
     type: v.optional(v.string()),
-    username: v.optional(v.string()),
-    secret: v.optional(v.string()),
-    endpoint: v.optional(v.string()),
-    notes: v.optional(v.string()),
+    username: v.optional(v.union(v.string(), v.null())),
+    secret: v.optional(v.union(v.string(), v.null())),
+    endpoint: v.optional(v.union(v.string(), v.null())),
+    notes: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
     const userId = await requireWhitelistedUser(ctx);
@@ -80,17 +80,18 @@ export const update = mutation({
     for (const [key, value] of Object.entries(fields)) {
       if (value === undefined) continue;
 
-      patch[key] = value;
+      const nextValue = value === null ? undefined : value;
+      patch[key] = nextValue;
       const oldVal = (credential as Record<string, unknown>)[key];
-      if (oldVal === value) continue;
+      if (oldVal === nextValue) continue;
 
       if (key === "secret") {
         changes[key] = {
           old: maskSecret(oldVal),
-          new: maskSecret(value),
+          new: maskSecret(nextValue),
         };
       } else {
-        changes[key] = { old: oldVal, new: value };
+        changes[key] = { old: oldVal, new: nextValue ?? null };
       }
     }
 

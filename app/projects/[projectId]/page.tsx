@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArrowLeft, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, Copy, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -60,7 +60,7 @@ type CredentialFormState = {
 	notes: string;
 };
 
-const CREDENTIAL_GRID_COLS = "minmax(0,1.3fr) 120px 130px minmax(0,1fr) 120px 96px";
+const CREDENTIAL_GRID_COLS = "minmax(0,1.3fr) 120px 130px minmax(0,1fr) 120px 124px";
 
 const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
 	name: "",
@@ -74,6 +74,29 @@ const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
 function normalizeOptionalText(value: string) {
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function formatCredentialForClipboard(credential: {
+	name: string;
+	type: string;
+	username?: string;
+	endpoint?: string;
+	secret?: string;
+	notes?: string;
+}) {
+	const fields = [
+		{ label: "NAME", value: credential.name },
+		{ label: "TYPE", value: credential.type },
+		{ label: "USERNAME", value: credential.username },
+		{ label: "ENDPOINT", value: credential.endpoint },
+		{ label: "SECRET", value: credential.secret },
+		{ label: "NOTES", value: credential.notes },
+	];
+
+	return fields
+		.filter(({ value }) => value?.trim())
+		.map(({ label, value }) => `${label}: ${value}`)
+		.join("\n");
 }
 
 function CredentialEditorDialog({
@@ -272,7 +295,15 @@ export default function ProjectDetailsPage() {
 			return;
 		}
 
-		void updateCredential({ id: editingCredentialId, ...payload })
+		void updateCredential({
+			id: editingCredentialId,
+			name: payload.name,
+			type: payload.type,
+			username: payload.username ?? null,
+			endpoint: payload.endpoint ?? null,
+			secret: payload.secret ?? null,
+			notes: payload.notes ?? null,
+		})
 			.then(() => {
 				toast.success("Credential updated");
 				setCredentialDialogOpen(false);
@@ -299,6 +330,20 @@ export default function ProjectDetailsPage() {
 						toast.error("Failed to delete credential");
 					}),
 		});
+	};
+
+	const handleCopyCredential = (
+		credential: NonNullable<typeof credentials>[number],
+	) => {
+		if (!navigator.clipboard) {
+			toast.error("Clipboard access is unavailable");
+			return;
+		}
+
+		void navigator.clipboard
+			.writeText(formatCredentialForClipboard(credential))
+			.then(() => toast.success("Credential copied"))
+			.catch(() => toast.error("Failed to copy credential"));
 	};
 
 	return (
@@ -589,6 +634,16 @@ export default function ProjectDetailsPage() {
 																	)}
 																</div>
 																<div className="flex items-center gap-1 shrink-0">
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-7 w-7 rounded-lg"
+																			onClick={() => handleCopyCredential(credential)}
+																			aria-label={`Copy ${credential.name} credential`}
+																			title="Copy credential"
+																		>
+																			<Copy className="h-3.5 w-3.5" />
+																		</Button>
 																	<Button
 																		variant="ghost"
 																		size="icon"
@@ -655,6 +710,16 @@ export default function ProjectDetailsPage() {
 																)}
 															</div>
 															<div className="flex items-center justify-end gap-1">
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-7 w-7 rounded-lg"
+																			onClick={() => handleCopyCredential(credential)}
+																			aria-label={`Copy ${credential.name} credential`}
+																			title="Copy credential"
+																		>
+																			<Copy className="h-3.5 w-3.5" />
+																		</Button>
 																<Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openCredentialDialog(credential)}>
 																	<Pencil className="h-3.5 w-3.5" />
 																</Button>
