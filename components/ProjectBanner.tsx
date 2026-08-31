@@ -97,7 +97,13 @@ export function ProjectBanner({
         </div>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 bg-gradient-to-t from-black/65 to-transparent p-3 pt-10">
+      <div
+        className={`absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 p-3 pt-10 transition-opacity ${
+          bannerUrl
+            ? "bg-gradient-to-t from-black/65 to-transparent opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
+            : "bg-gradient-to-t from-black/50 to-transparent opacity-100"
+        }`}
+      >
         <Button
           size="sm"
           variant="secondary"

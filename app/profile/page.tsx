@@ -105,7 +105,7 @@ export default function ProfilePage() {
 				<CardContent className="relative px-5 pb-6 pt-0 sm:px-6">
 					<div className="-mt-10 flex flex-col gap-5 sm:-mt-12 sm:flex-row sm:items-end sm:justify-between">
 						<div className="flex items-end gap-4">
-							<Avatar size="lg" className="h-20 w-20 border-4 border-card shadow-warm-sm">
+							<Avatar size="xl" className="h-20 w-20 border-4 border-card shadow-warm-sm">
 								{avatarSrc ? <AvatarImage src={avatarSrc} alt={displayName} /> : null}
 								<AvatarFallback className="bg-primary text-xl font-semibold text-primary-foreground">
 									{getInitials(viewer.name, viewer.email)}

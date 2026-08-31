@@ -33,18 +33,11 @@ export function ProjectDetailsHeader({
           ) : (
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
-                    {project.name}
-                    <span className="h-[2px] flex-1 max-w-[80px] bg-gradient-to-r from-primary/60 to-transparent rounded-full" />
-                  </h2>
-                  {project.archived ? <Badge variant="outline">Archived</Badge> : null}
-                </div>
                 {project.location?.trim() ? (
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
+                  <h2 className="font-serif text-xl sm:text-2xl tracking-tight flex items-center gap-2">
+                    <MapPin className="h-6 w-6" />
                     <span>{project.location}</span>
-                  </div>
+                  </h2>
                 ) : null}
                 <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
                   {project.description?.trim() || ""}

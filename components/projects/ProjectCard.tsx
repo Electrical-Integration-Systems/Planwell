@@ -51,11 +51,11 @@ export function ProjectCard({
       backgroundColor="var(--card)"
       borderRadius={10}
       edgeSensitivity={5}
-      glowColor="15 58 45"
+      glowColor="37 99 235"
       glowRadius={28}
       glowIntensity={1.1}
       coneSpread={35}
-      colors={["#b84a30", "#d4922a", "#5c7a5c"]}
+      colors={["#1d4ed8", "#60a5fa", "#93c5fd"]}
       fillOpacity={0.35}
     >
       <Card className="h-full gap-0 overflow-hidden border-0 bg-transparent py-0 shadow-none">

@@ -9,6 +9,7 @@ import {
   ListTodo,
   LogOut,
   Moon,
+  UserRound,
   Settings,
   Sun,
 } from "lucide-react";
@@ -58,7 +59,7 @@ export function Sidebar({
 
   return (
     <aside className="relative z-40 flex h-dvh w-14 shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground md:w-56">
-      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary via-[#d4922a] to-primary/30" />
+      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary via-[#60a5fa] to-primary/30" />
 
       <div className="flex h-16 shrink-0 items-center justify-center border-b border-sidebar-border px-2 md:justify-start md:px-5">
         <Link
@@ -101,6 +102,22 @@ export function Sidebar({
 
       <div className="space-y-1 p-2 pb-3">
         <Separator className="mb-3 bg-sidebar-border" />
+        <Button
+          variant={pathname === "/profile" ? "secondary" : "ghost"}
+          className={cn(
+            itemClassName,
+            pathname === "/profile"
+              ? "text-sidebar-accent-foreground shadow-sm"
+              : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          )}
+          title="Profile"
+          asChild
+        >
+          <Link href="/profile" aria-current={pathname === "/profile" ? "page" : undefined}>
+            <UserRound className="h-4 w-4 shrink-0" />
+            <span className="hidden text-sm md:block">Profile</span>
+          </Link>
+        </Button>
         <Button
           variant={isSettingsOpen ? "secondary" : "ghost"}
           className={cn(

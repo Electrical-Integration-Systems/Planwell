@@ -20,6 +20,7 @@ const routeLabels: Record<string, string> = {
   "/files": "Files",
   "/projects": "Projects",
   "/audit-history": "Audit History",
+  "/profile": "Profile",
 };
 
 export function Header() {
