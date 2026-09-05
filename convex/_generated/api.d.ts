@@ -11,6 +11,9 @@
 import type * as auditLog from "../auditLog.js";
 import type * as auth from "../auth.js";
 import type * as authz from "../authz.js";
+import type * as credentialShareActions from "../credentialShareActions.js";
+import type * as credentialShareInternal from "../credentialShareInternal.js";
+import type * as credentialShares from "../credentialShares.js";
 import type * as credentials from "../credentials.js";
 import type * as crons from "../crons.js";
 import type * as devices from "../devices.js";
@@ -37,6 +40,9 @@ declare const fullApi: ApiFromModules<{
   auditLog: typeof auditLog;
   auth: typeof auth;
   authz: typeof authz;
+  credentialShareActions: typeof credentialShareActions;
+  credentialShareInternal: typeof credentialShareInternal;
+  credentialShares: typeof credentialShares;
   credentials: typeof credentials;
   crons: typeof crons;
   devices: typeof devices;

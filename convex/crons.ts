@@ -11,4 +11,10 @@ crons.daily(
   internal.tasks.autoArchiveDone,
 );
 
+crons.interval(
+  "cleanup-credential-shares",
+  { hours: 1 },
+  internal.credentialShareInternal.cleanup,
+);
+
 export default crons;

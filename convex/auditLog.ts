@@ -130,11 +130,17 @@ export const listForProject = query({
     const taskFiles = taskFileArrays.flat();
 
     // Fetch audit logs for each entity type in parallel
-    const [projectLogs, ...rest] = await Promise.all([
+    const [projectLogs, credentialShareLogs, ...rest] = await Promise.all([
       ctx.db
         .query("auditLogs")
         .withIndex("by_entity", (q) =>
           q.eq("entityType", "project").eq("entityId", args.projectId),
+        )
+        .collect(),
+      ctx.db
+        .query("auditLogs")
+        .withIndex("by_entity", (q) =>
+          q.eq("entityType", "credentialShare"),
         )
         .collect(),
       ...tasks.map((t) =>
@@ -171,9 +177,15 @@ export const listForProject = query({
       ),
     ]);
 
+    const projectCredentialShareLogs = credentialShareLogs.filter((log) => {
+      if (log.metadata === undefined) return false;
+      const metadata = JSON.parse(log.metadata) as { projectId?: string };
+      return metadata.projectId === args.projectId;
+    });
+
     // Merge, deduplicate, and sort oldest-first
     const seen = new Set<string>();
-    const allLogs = [projectLogs, ...rest]
+    const allLogs = [projectLogs, projectCredentialShareLogs, ...rest]
       .flat()
       .filter((log) => {
         if (seen.has(log._id)) return false;

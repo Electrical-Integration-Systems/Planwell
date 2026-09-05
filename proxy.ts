@@ -17,6 +17,7 @@ type ConvexQueryResult =
     };
 
 const isSignInPage = createRouteMatcher(["/signin"]);
+const isSharePage = createRouteMatcher(["/share"]);
 
 function normalizeEmail(email: string | null | undefined): string | null {
   if (typeof email !== "string") return null;
@@ -87,6 +88,8 @@ async function isWhitelistedToken(token: string): Promise<boolean> {
 }
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+  if (isSharePage(request)) return NextResponse.next();
+
   if (getNextAllowedEmails().size === 0) {
     if (!isSignInPage(request)) {
       return redirectToConfigError(request);

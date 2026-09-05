@@ -22,12 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-type ProjectFormState = {
-	name: string;
-	description: string;
-	location: string;
-};
+import type { ProjectFormState } from "@/types/projects";
 
 const EMPTY_PROJECT_FORM: ProjectFormState = {
 	name: "",

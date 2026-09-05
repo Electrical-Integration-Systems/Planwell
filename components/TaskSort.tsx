@@ -10,11 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, X, Plus, ChevronUp, ChevronDown } from "lucide-react";
-
-type SortKey = {
-  column: string;
-  direction: "asc" | "desc";
-};
+import type { TaskSortKey } from "@/types/tasks";
 
 const SORTABLE_COLUMNS = [
   { value: "title", label: "Title" },
@@ -29,8 +25,8 @@ export function TaskSort({
   sortKeys,
   onSortKeysChange,
 }: {
-  sortKeys: SortKey[];
-  onSortKeysChange: (keys: SortKey[]) => void;
+  sortKeys: TaskSortKey[];
+  onSortKeysChange: (keys: TaskSortKey[]) => void;
 }) {
   const addSortKey = () => {
     const usedColumns = new Set(sortKeys.map((k) => k.column));
@@ -47,7 +43,7 @@ export function TaskSort({
     onSortKeysChange(sortKeys.filter((_, i) => i !== index));
   };
 
-  const updateSortKey = (index: number, updates: Partial<SortKey>) => {
+  const updateSortKey = (index: number, updates: Partial<TaskSortKey>) => {
     onSortKeysChange(
       sortKeys.map((key, i) => (i === index ? { ...key, ...updates } : key)),
     );
