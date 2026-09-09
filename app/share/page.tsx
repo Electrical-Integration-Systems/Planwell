@@ -159,7 +159,7 @@ export default function SharedCredentialsPage() {
 
   return (
     <main className="default min-h-dvh overflow-x-hidden bg-[var(--background)] text-[var(--foreground)]">
-      <Toast.Provider placement="bottom-end" />
+      <Toast.Provider placement="bottom end" />
       <div className="h-1.5 bg-[var(--accent)]" />
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-14">
         <header className="mb-8 max-w-2xl sm:mb-10">
