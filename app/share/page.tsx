@@ -170,9 +170,11 @@ export default function SharedCredentialsPage() {
           <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
             Shared credentials
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)] sm:text-base">
-            Enter the access PIN to reveal the credentials prepared for you.
-          </p>
+          {pageState !== "revealed" ? (
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)] sm:text-base">
+              Enter the access PIN to reveal the credentials prepared for you.
+            </p>
+          ) : null}
         </header>
 
         {pageState === "loading" ? (
@@ -270,22 +272,18 @@ export default function SharedCredentialsPage() {
         ) : (
           <div className="space-y-6">
             <Surface className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-              <div>
-                <h2 className="text-xl font-semibold">Credential entries</h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">
-                  {credentials.length} {credentials.length === 1 ? "entry" : "entries"} shared
-                </p>
-              </div>
-              <Chip color="accent" variant="soft">
-                {mode === "one_time" ? (
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                ) : (
-                  <Clock3 className="h-3.5 w-3.5" />
-                )}
-                <Chip.Label>
-                  {mode === "one_time" ? "One-time access" : "Time limited"}
-                </Chip.Label>
-              </Chip>
+              <h2 className="text-xl font-semibold">Credential entries
+                <Chip color="accent" variant="soft">
+                  {mode === "one_time" ? (
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                  ) : (
+                    <Clock3 className="h-3.5 w-3.5" />
+                  )}
+                  <Chip.Label>
+                    {mode === "one_time" ? "One-time access" : "Time limited"}
+                  </Chip.Label>
+                </Chip>
+              </h2>
             </Surface>
 
             {mode === "one_time" ? (
@@ -338,56 +336,55 @@ export default function SharedCredentialsPage() {
                         <Table.ScrollContainer>
                           <Table.Content>
                             <Table.Header>
-                              <Table.Column isRowHeader className="w-32">Field</Table.Column>
+                              <Table.Column isRowHeader className="w-20 sm:w-32">Field</Table.Column>
                               <Table.Column>Value</Table.Column>
-                              <Table.Column className="w-28 text-right">Actions</Table.Column>
                             </Table.Header>
                             <Table.Body>
                               {rows.map((row) => (
                                 <Table.Row key={row.id} id={row.id}>
-                                  <Table.Cell className="font-medium text-[var(--muted)]">
+                                  <Table.Cell className="align-top font-medium text-[var(--muted)]">
                                     {row.label}
                                   </Table.Cell>
                                   <Table.Cell>
-                                    <span className={`block max-w-xl whitespace-pre-wrap break-all ${row.id === "secret" ? "font-mono text-sm" : ""}`}>
-                                      {row.id === "secret" && !secretRevealed
-                                        ? "••••••••••••"
-                                        : row.value}
-                                    </span>
-                                  </Table.Cell>
-                                  <Table.Cell>
                                     {row.id === "secret" ? (
-                                      <div className="flex justify-end gap-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          isIconOnly
-                                          onPress={() => copyText(row.value, "Secret copied")}
-                                          aria-label={`Copy ${credential.name} secret`}
-                                        >
-                                          <Copy className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          isIconOnly
-                                          onPress={() =>
-                                            setRevealedSecrets((current) => ({
-                                              ...current,
-                                              [index]: !secretRevealed,
-                                            }))
-                                          }
-                                          aria-label={secretRevealed ? "Hide secret" : "Reveal secret"}
-                                        >
-                                          {secretRevealed ? (
-                                            <EyeOff className="h-4 w-4" />
-                                          ) : (
-                                            <Eye className="h-4 w-4" />
-                                          )}
-                                        </Button>
+                                      <div className="flex items-start justify-between gap-2">
+                                        <span className="block min-w-0 flex-1 whitespace-pre-wrap break-all font-mono text-sm">
+                                          {secretRevealed ? row.value : "••••••••••••"}
+                                        </span>
+                                        <div className="flex shrink-0 gap-1">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            isIconOnly
+                                            onPress={() => copyText(row.value, "Secret copied")}
+                                            aria-label={`Copy ${credential.name} secret`}
+                                          >
+                                            <Copy className="h-4 w-4" />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            isIconOnly
+                                            onPress={() =>
+                                              setRevealedSecrets((current) => ({
+                                                ...current,
+                                                [index]: !secretRevealed,
+                                              }))
+                                            }
+                                            aria-label={secretRevealed ? "Hide secret" : "Reveal secret"}
+                                          >
+                                            {secretRevealed ? (
+                                              <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                              <Eye className="h-4 w-4" />
+                                            )}
+                                          </Button>
+                                        </div>
                                       </div>
                                     ) : (
-                                      <span className="block text-right text-[var(--muted)]">—</span>
+                                      <span className="block whitespace-pre-wrap break-all">
+                                        {row.value}
+                                      </span>
                                     )}
                                   </Table.Cell>
                                 </Table.Row>
