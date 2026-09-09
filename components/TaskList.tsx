@@ -27,26 +27,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MoreHorizontal, Eye, Trash2, Plus, UserPlus, Archive, ArchiveRestore, Loader2 } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
 export const TASK_GRID_COLS = "1fr 150px 140px 130px 110px 100px 85px 85px 48px";
-
-type Filters = {
-  stateIds?: Id<"taskStates">[];
-  excludeStateIds?: Id<"taskStates">[];
-  priorityIds?: Id<"priorities">[];
-  excludePriorityIds?: Id<"priorities">[];
-  projectIds?: Id<"projects">[];
-  excludeProjectIds?: Id<"projects">[];
-  assigneeIds?: Id<"users">[];
-  excludeAssigneeIds?: Id<"users">[];
-  tagIds?: Id<"tags">[];
-  excludeTagIds?: Id<"tags">[];
-};
-
-type SortKey = {
-  column: string;
-  direction: "asc" | "desc";
-};
 
 type ConfirmActionState = {
   title: string;
@@ -66,8 +49,8 @@ export function TaskList({
   archived = false,
   searchQuery = "",
 }: {
-  filters: Filters;
-  sortKeys: SortKey[];
+  filters: TaskFilterState;
+  sortKeys: TaskSortKey[];
   onTaskSelect: (id: Id<"tasks">) => void;
   isAddingTask: boolean;
   onIsAddingTaskChange: (v: boolean) => void;

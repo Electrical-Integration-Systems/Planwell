@@ -85,6 +85,18 @@ function formatActivityText(log: {
       return `updated credential "${name}"`;
     case "credential:delete":
       return `deleted credential "${name}"`;
+    case "credentialShare:create":
+      return "created a credential share link";
+    case "credentialShare:access":
+      return "credential share link opened by a recipient";
+    case "credentialShare:pin_failed":
+      return "credential share PIN rejected";
+    case "credentialShare:redeem":
+      return "credential share PIN accepted";
+    case "credentialShare:revoke":
+      return "revoked a credential share link";
+    case "credentialShare:delete":
+      return "deleted a credential share link";
 
     default:
       return `${log.action} ${log.entityType}`;
@@ -100,6 +112,7 @@ function entityIcon(entityType: string) {
     case "device":
       return <Server className="h-3 w-3" />;
     case "credential":
+    case "credentialShare":
       return <KeyRound className="h-3 w-3" />;
     default:
       return <Pencil className="h-3 w-3" />;

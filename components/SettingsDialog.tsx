@@ -25,24 +25,7 @@ import {
 } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ColorPicker } from "@/components/ColorPicker";
-
-type Filters = {
-  stateIds?: Id<"taskStates">[];
-  excludeStateIds?: Id<"taskStates">[];
-  priorityIds?: Id<"priorities">[];
-  excludePriorityIds?: Id<"priorities">[];
-  projectIds?: Id<"projects">[];
-  excludeProjectIds?: Id<"projects">[];
-  assigneeIds?: Id<"users">[];
-  excludeAssigneeIds?: Id<"users">[];
-  tagIds?: Id<"tags">[];
-  excludeTagIds?: Id<"tags">[];
-};
-
-type SortKey = {
-  column: string;
-  direction: "asc" | "desc";
-};
+import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
 type ConfirmActionState = {
   title: string;
@@ -61,8 +44,8 @@ export function SettingsDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentFilters?: Filters;
-  currentSortKeys?: SortKey[];
+  currentFilters?: TaskFilterState;
+  currentSortKeys?: TaskSortKey[];
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -831,8 +814,8 @@ function PresetsTab({
   currentFilters,
   currentSortKeys,
 }: {
-  currentFilters: Filters;
-  currentSortKeys: SortKey[];
+  currentFilters: TaskFilterState;
+  currentSortKeys: TaskSortKey[];
 }) {
   const presets = useQuery(api.filterPresets.list) ?? [];
   const createPreset = useMutation(api.filterPresets.create);

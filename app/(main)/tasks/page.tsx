@@ -16,24 +16,7 @@ import { TaskSort } from "@/components/TaskSort";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import type { Id } from "@/convex/_generated/dataModel";
-
-type SortKey = {
-  column: string;
-  direction: "asc" | "desc";
-};
-
-type Filters = {
-  stateIds?: Id<"taskStates">[];
-  excludeStateIds?: Id<"taskStates">[];
-  priorityIds?: Id<"priorities">[];
-  excludePriorityIds?: Id<"priorities">[];
-  projectIds?: Id<"projects">[];
-  excludeProjectIds?: Id<"projects">[];
-  assigneeIds?: Id<"users">[];
-  excludeAssigneeIds?: Id<"users">[];
-  tagIds?: Id<"tags">[];
-  excludeTagIds?: Id<"tags">[];
-};
+import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -42,8 +25,8 @@ export default function Home() {
   const priorities = useQuery(api.priorities.list);
   const presets = useQuery(api.filterPresets.list) ?? [];
 
-  const [filters, setFilters] = useState<Filters>({});
-  const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
+  const [filters, setFilters] = useState<TaskFilterState>({});
+  const [sortKeys, setSortKeys] = useState<TaskSortKey[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
@@ -91,8 +74,8 @@ export default function Home() {
 
     setActivePresetId(presetId);
     try {
-      const parsedFilters = JSON.parse(preset.filters) as Filters;
-      const parsedSortKeys = JSON.parse(preset.sortKeys) as SortKey[];
+      const parsedFilters = JSON.parse(preset.filters) as TaskFilterState;
+      const parsedSortKeys = JSON.parse(preset.sortKeys) as TaskSortKey[];
       setFilters(parsedFilters);
       setSortKeys(parsedSortKeys);
     } catch {

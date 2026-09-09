@@ -14,6 +14,7 @@ export const ENTITY_TYPES = [
   { value: "project", label: "Projects" },
   { value: "device", label: "Devices" },
   { value: "credential", label: "Credentials" },
+  { value: "credentialShare", label: "Credential shares" },
   { value: "taskState", label: "States" },
   { value: "priority", label: "Priorities" },
   { value: "tag", label: "Tags" },
@@ -25,6 +26,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   project: "Project",
   device: "Device",
   credential: "Credential",
+  credentialShare: "Credential share",
   taskState: "State",
   priority: "Priority",
   tag: "Tag",
@@ -99,6 +101,21 @@ export const ACTION_CONFIG: Record<
     icon: <Upload className="h-3 w-3" />,
     label: "Uploaded",
     color: "hsl(210, 80%, 60%)",
+  },
+  access: {
+    icon: <Search className="h-3 w-3" />,
+    label: "Accessed",
+    color: "hsl(200, 70%, 55%)",
+  },
+  pin_failed: {
+    icon: <Search className="h-3 w-3" />,
+    label: "PIN rejected",
+    color: "hsl(0, 84%, 60%)",
+  },
+  redeem: {
+    icon: <Search className="h-3 w-3" />,
+    label: "PIN accepted",
+    color: "hsl(142, 71%, 45%)",
   },
 };
 

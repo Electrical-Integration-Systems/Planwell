@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Archive, ArrowLeft, Copy, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, Copy, Eye, EyeOff, FileText, FolderKanban, ImageIcon, KeyRound, Link2, MapPin, Pencil, Plus, Search, Server, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { CredentialShareDialog } from "@/components/CredentialShareDialog";
+import { CredentialSharedLinks } from "@/components/CredentialSharedLinks";
 import { FilesBrowser } from "@/components/FilesBrowser";
 import { Header } from "@/components/layout/Header";
 import { PhotoBrowser } from "@/components/PhotoBrowser";
@@ -23,6 +25,7 @@ import { TaskSort } from "@/components/TaskSort";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -32,35 +35,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import type { CredentialFields, CredentialFormState } from "@/types/credentials";
+import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
-type SortKey = {
-	column: string;
-	direction: "asc" | "desc";
-};
-
-type ProjectTaskFilters = {
-	projectIds?: Id<"projects">[];
-	excludeProjectIds?: Id<"projects">[];
-	stateIds?: Id<"taskStates">[];
-	excludeStateIds?: Id<"taskStates">[];
-	priorityIds?: Id<"priorities">[];
-	excludePriorityIds?: Id<"priorities">[];
-	assigneeIds?: Id<"users">[];
-	excludeAssigneeIds?: Id<"users">[];
-	tagIds?: Id<"tags">[];
-	excludeTagIds?: Id<"tags">[];
-};
-
-type CredentialFormState = {
-	name: string;
-	type: string;
-	username: string;
-	endpoint: string;
-	secret: string;
-	notes: string;
-};
-
-const CREDENTIAL_GRID_COLS = "minmax(0,1.3fr) 120px 130px minmax(0,1fr) 120px 124px";
+const CREDENTIAL_GRID_COLS = "minmax(180px,1fr) 100px 120px minmax(140px,0.75fr) minmax(260px,2fr) 152px";
 
 const EMPTY_CREDENTIAL_FORM: CredentialFormState = {
 	name: "",
@@ -76,14 +54,7 @@ function normalizeOptionalText(value: string) {
 	return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function formatCredentialForClipboard(credential: {
-	name: string;
-	type: string;
-	username?: string;
-	endpoint?: string;
-	secret?: string;
-	notes?: string;
-}) {
+function formatCredentialForClipboard(credential: CredentialFields) {
 	const fields = [
 		{ label: "NAME", value: credential.name },
 		{ label: "TYPE", value: credential.type },
@@ -105,12 +76,16 @@ function CredentialEditorDialog({
 	values,
 	onValuesChange,
 	onSubmit,
+	secretVisible,
+	onSecretVisibleChange,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	values: CredentialFormState;
 	onValuesChange: (values: CredentialFormState) => void;
 	onSubmit: () => void;
+	secretVisible: boolean;
+	onSecretVisibleChange: (visible: boolean) => void;
 }) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -149,12 +124,26 @@ function CredentialEditorDialog({
 						placeholder="Endpoint / URL / Host"
 						className="h-10 border-border/50 shadow-none"
 					/>
-					<Input
-						value={values.secret}
-						onChange={(e) => onValuesChange({ ...values, secret: e.target.value })}
-						placeholder="Secret / Password / Token"
-						className="h-10 border-border/50 shadow-none sm:col-span-2"
-					/>
+					<div className="relative sm:col-span-2">
+						<Input
+							type={secretVisible ? "text" : "password"}
+							value={values.secret}
+							onChange={(e) => onValuesChange({ ...values, secret: e.target.value })}
+							placeholder="Secret / Password / Token"
+							className="h-10 border-border/50 pr-10 shadow-none"
+						/>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon"
+							className="absolute right-1 top-1 h-8 w-8"
+							onClick={() => onSecretVisibleChange(!secretVisible)}
+							aria-label={secretVisible ? "Hide secret" : "Reveal secret"}
+							title={secretVisible ? "Hide secret" : "Reveal secret"}
+						>
+							{secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+						</Button>
+					</div>
 					<Textarea
 						value={values.notes}
 						onChange={(e) => onValuesChange({ ...values, notes: e.target.value })}
@@ -199,13 +188,18 @@ export default function ProjectDetailsPage() {
 	const [taskSearchQuery, setTaskSearchQuery] = useState("");
 	const [credentialSearchQuery, setCredentialSearchQuery] = useState("");
 	const [activeTaskTab, setActiveTaskTab] = useState<"active" | "archived">("active");
-	const [projectTaskFilters, setProjectTaskFilters] = useState<ProjectTaskFilters>({});
-	const [sortKeys, setSortKeys] = useState<SortKey[]>([]);
+	const [activeCredentialView, setActiveCredentialView] = useState<"entries" | "shared-links">("entries");
+	const [projectTaskFilters, setProjectTaskFilters] = useState<TaskFilterState>({});
+	const [sortKeys, setSortKeys] = useState<TaskSortKey[]>([]);
 	const [isAddingTask, setIsAddingTask] = useState(false);
 	const [credentialDialogOpen, setCredentialDialogOpen] = useState(false);
+	const [credentialShareDialogOpen, setCredentialShareDialogOpen] = useState(false);
+	const [credentialSecretVisible, setCredentialSecretVisible] = useState(false);
 	const [editingCredentialId, setEditingCredentialId] = useState<Id<"projectCredentials"> | null>(null);
 	const [credentialForm, setCredentialForm] = useState<CredentialFormState>(EMPTY_CREDENTIAL_FORM);
 	const [revealedCredentials, setRevealedCredentials] = useState<Record<string, boolean>>({});
+	const [selectedCredentialIds, setSelectedCredentialIds] = useState<Id<"projectCredentials">[]>([]);
+	const [credentialIdsToShare, setCredentialIdsToShare] = useState<Id<"projectCredentials">[]>([]);
 	const [confirmAction, setConfirmAction] = useState<{
 		title: string;
 		description: string;
@@ -228,7 +222,7 @@ export default function ProjectDetailsPage() {
 
 	if (!isAuthenticated) return null;
 
-	const scopedTaskFilters: ProjectTaskFilters = {
+	const scopedTaskFilters: TaskFilterState = {
 		...projectTaskFilters,
 		projectIds: [projectId],
 		excludeProjectIds: undefined,
@@ -253,10 +247,35 @@ export default function ProjectDetailsPage() {
 						.toLowerCase()
 						.includes(query);
 				});
+	const selectedCredentials = (credentials ?? [])
+		.filter((credential) => credentialIdsToShare.includes(credential._id))
+		.map((credential) => ({ id: credential._id, name: credential.name }));
+
+	const setCredentialSelected = (
+		credentialId: Id<"projectCredentials">,
+		selected: boolean,
+	) => {
+		setSelectedCredentialIds((current) => {
+			if (!selected) return current.filter((id) => id !== credentialId);
+			if (current.includes(credentialId)) return current;
+			return [...current, credentialId];
+		});
+	};
+
+	const openCredentialShareDialog = (credentialIds: Id<"projectCredentials">[]) => {
+		if (credentialIds.length < 1) return;
+		if (credentialIds.length > 20) {
+			toast.error("A share can contain at most 20 credentials");
+			return;
+		}
+		setCredentialIdsToShare(credentialIds);
+		setCredentialShareDialogOpen(true);
+	};
 
 	const openCredentialDialog = (
 		credential?: NonNullable<typeof credentials>[number],
 	) => {
+		setCredentialSecretVisible(false);
 		if (credential) {
 			setEditingCredentialId(credential._id);
 			setCredentialForm({
@@ -324,10 +343,48 @@ export default function ProjectDetailsPage() {
 			onConfirm: () =>
 				removeCredential({ id: credentialId })
 					.then(() => {
+						setSelectedCredentialIds((current) =>
+							current.filter((id) => id !== credentialId),
+						);
 						toast.success("Credential deleted");
 					})
 					.catch(() => {
 						toast.error("Failed to delete credential");
+					}),
+		});
+	};
+
+	const handleCopySelectedCredentials = () => {
+		const selected = (credentials ?? []).filter((credential) =>
+			selectedCredentialIds.includes(credential._id),
+		);
+		if (selected.length === 0) return;
+		if (!navigator.clipboard) {
+			toast.error("Clipboard access is unavailable");
+			return;
+		}
+
+		void navigator.clipboard
+			.writeText(selected.map(formatCredentialForClipboard).join("\n\n---\n\n"))
+			.then(() => toast.success(`${selected.length} credentials copied`))
+			.catch(() => toast.error("Failed to copy credentials"));
+	};
+
+	const confirmDeleteSelectedCredentials = () => {
+		const ids = [...selectedCredentialIds];
+		if (ids.length === 0) return;
+		setConfirmAction({
+			title: `Delete ${ids.length} credentials?`,
+			description: "The selected credential entries will be permanently deleted. This cannot be undone.",
+			confirmLabel: "Delete credentials",
+			onConfirm: () =>
+				Promise.all(ids.map((id) => removeCredential({ id })))
+					.then(() => {
+						setSelectedCredentialIds([]);
+						toast.success(`${ids.length} credentials deleted`);
+					})
+					.catch(() => {
+						toast.error("Failed to delete selected credentials");
 					}),
 		});
 	};
@@ -564,6 +621,40 @@ export default function ProjectDetailsPage() {
 								</TabsContent>
 
 								<TabsContent value="credentials" className="space-y-4">
+									<div className="flex w-fit items-center gap-1 rounded-lg bg-muted/50 p-0.5">
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											className={`h-7 rounded-md px-3 text-xs font-medium ${
+												activeCredentialView === "entries"
+													? "bg-background text-foreground shadow-sm hover:bg-background"
+													: "text-muted-foreground hover:text-foreground"
+											}`}
+											onClick={() => setActiveCredentialView("entries")}
+											aria-pressed={activeCredentialView === "entries"}
+										>
+											Entries
+										</Button>
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											className={`h-7 gap-1.5 rounded-md px-3 text-xs font-medium ${
+												activeCredentialView === "shared-links"
+													? "bg-background text-foreground shadow-sm hover:bg-background"
+													: "text-muted-foreground hover:text-foreground"
+											}`}
+											onClick={() => setActiveCredentialView("shared-links")}
+											aria-pressed={activeCredentialView === "shared-links"}
+										>
+											<Link2 className="h-3 w-3" />
+											Shared links
+										</Button>
+									</div>
+
+									{activeCredentialView === "entries" ? (
+										<div className="space-y-4">
 									<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2">
 										{credentials !== undefined && credentials.length > 0 && (
 											<div className="relative w-full sm:flex-1 sm:max-w-xs">
@@ -586,6 +677,26 @@ export default function ProjectDetailsPage() {
 											Add credential
 										</Button>
 									</div>
+
+									{selectedCredentialIds.length > 0 && (
+										<div className="flex flex-wrap items-center gap-2 border-y border-border/50 py-2">
+											<span className="mr-auto text-xs font-medium">
+												{selectedCredentialIds.length} selected
+											</span>
+											<Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={handleCopySelectedCredentials}>
+												<Copy className="h-3.5 w-3.5" />
+												Copy
+											</Button>
+											<Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => openCredentialShareDialog(selectedCredentialIds)}>
+												<Link2 className="h-3.5 w-3.5" />
+												Share
+											</Button>
+											<Button variant="outline" size="sm" className="h-8 gap-1.5 text-destructive hover:text-destructive" onClick={confirmDeleteSelectedCredentials}>
+												<Trash2 className="h-3.5 w-3.5" />
+												Delete
+											</Button>
+										</div>
+									)}
 
 									{filteredCredentials !== undefined && filteredCredentials.length > 0 && (
 										<div
@@ -632,7 +743,16 @@ export default function ProjectDetailsPage() {
 															style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
 														>
 															<div className="flex items-start justify-between gap-3">
-																<div className="min-w-0 flex-1">
+																<div className="flex min-w-0 flex-1 items-start gap-2">
+																	<Checkbox
+																		className="mt-0.5"
+																		checked={selectedCredentialIds.includes(credential._id)}
+																		onCheckedChange={(checked) =>
+																			setCredentialSelected(credential._id, checked === true)
+																		}
+																		aria-label={`Select ${credential.name}`}
+																	/>
+																	<div className="min-w-0 flex-1">
 																	<p className="font-medium text-sm truncate">{credential.name}</p>
 																	<div className="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] text-muted-foreground">
 																		<span>{credential.type}</span>
@@ -644,8 +764,19 @@ export default function ProjectDetailsPage() {
 																	{credential.notes && (
 																		<p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{credential.notes}</p>
 																	)}
+																	</div>
 																</div>
 																<div className="flex items-center gap-1 shrink-0">
+																		<Button
+																			variant="ghost"
+																			size="icon"
+																			className="h-7 w-7 rounded-lg"
+																			onClick={() => openCredentialShareDialog([credential._id])}
+																			aria-label={`Share ${credential.name}`}
+																			title="Share credential"
+																		>
+																			<Link2 className="h-3.5 w-3.5" />
+																		</Button>
 																		<Button
 																			variant="ghost"
 																			size="icon"
@@ -707,11 +838,21 @@ export default function ProjectDetailsPage() {
 																animationDelay: `${Math.min(index, 20) * 25}ms`,
 															}}
 														>
-															<div className="min-w-0 pr-2">
-																<p className="font-medium text-sm truncate">{credential.name}</p>
-																{credential.notes && (
-																	<p className="mt-1 text-xs text-muted-foreground line-clamp-2">{credential.notes}</p>
-																)}
+															<div className="flex min-w-0 items-start gap-2 pr-2">
+																<Checkbox
+																	className="mt-0.5"
+																	checked={selectedCredentialIds.includes(credential._id)}
+																	onCheckedChange={(checked) =>
+																		setCredentialSelected(credential._id, checked === true)
+																	}
+																	aria-label={`Select ${credential.name}`}
+																/>
+																<div className="min-w-0 flex-1">
+																	<p className="font-medium text-sm truncate">{credential.name}</p>
+																	{credential.notes && (
+																		<p className="mt-1 text-xs text-muted-foreground line-clamp-2">{credential.notes}</p>
+																	)}
+																</div>
 															</div>
 															<div className="text-xs text-muted-foreground pt-1">{credential.type}</div>
 															<div className="text-xs text-muted-foreground pt-1 truncate pr-2">{credential.username || "—"}</div>
@@ -747,6 +888,16 @@ export default function ProjectDetailsPage() {
 																)}
 															</div>
 															<div className="flex items-center justify-end gap-1">
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="h-7 w-7 rounded-lg"
+																	onClick={() => openCredentialShareDialog([credential._id])}
+																	aria-label={`Share ${credential.name}`}
+																	title="Share credential"
+																>
+																	<Link2 className="h-3.5 w-3.5" />
+																</Button>
 																		<Button
 																			variant="ghost"
 																			size="icon"
@@ -774,6 +925,10 @@ export default function ProjectDetailsPage() {
 												);
 											})}
 										</div>
+									)}
+										</div>
+									) : (
+										<CredentialSharedLinks projectId={projectId} />
 									)}
 								</TabsContent>
 
@@ -804,6 +959,18 @@ export default function ProjectDetailsPage() {
 				values={credentialForm}
 				onValuesChange={setCredentialForm}
 				onSubmit={handleSaveCredential}
+				secretVisible={credentialSecretVisible}
+				onSecretVisibleChange={setCredentialSecretVisible}
+			/>
+			<CredentialShareDialog
+				projectId={projectId}
+				selectedCredentials={selectedCredentials}
+				open={credentialShareDialogOpen}
+				onOpenChange={(open) => {
+					setCredentialShareDialogOpen(open);
+					if (!open) setCredentialIdsToShare([]);
+				}}
+				onCreated={() => undefined}
 			/>
 			<ConfirmActionDialog
 				open={confirmAction !== null}

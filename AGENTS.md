@@ -4,17 +4,17 @@
 
 A collaborative task tracking application. List-based view (not kanban) with sortable/filterable columns. Multiple users can be assigned to tasks and post updates. Task states and priority levels are user-configurable.
 
-**Stack:** Next.js 16 (App Router) + Convex (serverless backend) + Convex Auth (Google OAuth) + Tailwind CSS v4 + shadcn/ui. React Compiler must be enabled. TypeScript throughout. Package manager is **npm**. Hosted on Vercel.
+**Stack:** Next.js 16 (App Router) + Convex (serverless backend) + Convex Auth (Google OAuth) + Tailwind CSS v4 + shadcn/ui. React Compiler must be enabled. TypeScript throughout. Package manager is **Bun**. Hosted on Vercel.
 
 ## Build / Lint / Test Commands
 
 ```bash
-npm install              # Install dependencies
-npm run dev              # Next.js frontend + Convex backend in parallel
-npm run dev:frontend     # next dev (frontend only)
-npm run dev:backend      # convex dev (backend only)
-npm run build            # next build (production)
-npm run lint             # eslint . --ignore-pattern "convex/_generated/**"
+bun install              # Install dependencies
+bun run dev              # Next.js frontend + Convex backend in parallel
+bun run dev:frontend     # next dev (frontend only)
+bun run dev:backend      # convex dev (backend only)
+bun run build            # next build (production)
+bun run lint             # eslint . --ignore-pattern "convex/_generated/**"
 ```
 
 **No test runner is configured. No test files should be created.** All testing is done manually by the developer. Do not install jest, vitest, or any test framework. Do not write test files.
@@ -129,7 +129,7 @@ proxy.ts                    # Next.js middleware (route protection)
 
 - **Tailwind CSS v4** (CSS-first config in `globals.css`, no `tailwind.config.*`).
 - **shadcn/ui is mandatory for ALL UI elements.** Never hand-write HTML buttons, inputs, cards, dialogs, tables, dropdowns, popovers, or any interactive/structural component. Always use the corresponding shadcn/ui component (`Button`, `Input`, `Card`, `Dialog`, `Table`, `Select`, `DropdownMenu`, `Popover`, `Badge`, `Label`, etc.).
-- Install shadcn components via `npx shadcn@latest add <component>`. They live in `components/ui/`.
+- Install shadcn components via `bunx --bun shadcn@latest add <component>`. They live in `components/ui/`.
 - The shadcn theme is configured in `globals.css` using CSS variables (`--background`, `--foreground`, `--primary`, `--card`, `--border`, etc.) and integrated via `@theme inline`.
 - Use the **`slate-*`** color palette consistently for any custom Tailwind classes outside of shadcn components.
 - Support dark mode via Tailwind's **`dark:`** variant prefix (class-based, not `prefers-color-scheme`).

@@ -42,6 +42,39 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
 
+  credentialShares: defineTable({
+    projectId: v.id("projects"),
+    createdBy: v.id("users"),
+    mode: v.union(v.literal("timed"), v.literal("one_time")),
+    tokenHash: v.string(),
+    pinHash: v.string(),
+    pinSalt: v.string(),
+    credentialCount: v.number(),
+    expiresAt: v.optional(v.number()),
+    usedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+    failedAttempts: v.number(),
+    failureWindowStartedAt: v.optional(v.number()),
+    lockedUntil: v.optional(v.number()),
+    lastAccessedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_token_hash", ["tokenHash"])
+    .index("by_project", ["projectId"])
+    .index("by_expires_at", ["expiresAt"]),
+
+  credentialShareItems: defineTable({
+    shareId: v.id("credentialShares"),
+    sourceCredentialId: v.id("projectCredentials"),
+    order: v.number(),
+    name: v.string(),
+    type: v.string(),
+    username: v.optional(v.string()),
+    endpoint: v.optional(v.string()),
+    secret: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  }).index("by_share", ["shareId"]),
+
   taskStates: defineTable({
     name: v.string(),
     color: v.optional(v.string()),

@@ -2,11 +2,12 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun",
   "scripts": {
-    "dev": "npm-run-all --parallel dev:frontend dev:backend",
+    "dev": "bun run --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev",
     "dev:backend": "convex dev",
-    "predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
+    "predev": "convex dev --until-success && convex dev --once --run-sh \"bun setup.mjs --once\" && convex dashboard",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ignore-pattern \"convex/_generated/**\""
@@ -14,6 +15,8 @@
   "dependencies": {
     "@auth/core": "^0.37.0",
     "@convex-dev/auth": "^0.0.90",
+    "@heroui/react": "^3.2.4",
+    "@heroui/styles": "^3.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.31.7",
@@ -41,7 +44,6 @@
     "dotenv": "^17.2.4",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.6",
-    "npm-run-all2": "^8.0.4",
     "prettier": "^3.8.1",
     "shadcn": "^3.8.4",
     "tailwindcss": "^4.1.18",

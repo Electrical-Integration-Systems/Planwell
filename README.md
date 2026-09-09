@@ -24,12 +24,12 @@ shadcn/ui. Planwell is designed for deployment on Vercel.
 
 ## Development
 
-Requirements: Node.js 20 or later, npm, a Convex deployment, and Google OAuth
+Requirements: Bun, a Convex deployment, and Google OAuth
 credentials configured for Convex Auth.
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Set `NEXT_PUBLIC_CONVEX_URL` in `.env.local`. Configure authentication secrets
@@ -38,11 +38,11 @@ in the Convex deployment environment.
 ## Commands
 
 ```bash
-npm run dev           # Start Next.js and Convex
-npm run dev:frontend  # Start Next.js only
-npm run dev:backend   # Start Convex only
-npm run lint          # Run ESLint
-npm run build         # Create a production build
+bun run dev           # Start Next.js and Convex
+bun run dev:frontend  # Start Next.js only
+bun run dev:backend   # Start Convex only
+bun run lint          # Run ESLint
+bun run build         # Create a production build
 ```
 
 ## Security

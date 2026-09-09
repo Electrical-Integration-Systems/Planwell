@@ -12,26 +12,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Filter, X, ChevronDown } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
-
-type Filters = {
-  stateIds?: Id<"taskStates">[];
-  excludeStateIds?: Id<"taskStates">[];
-  priorityIds?: Id<"priorities">[];
-  excludePriorityIds?: Id<"priorities">[];
-  projectIds?: Id<"projects">[];
-  excludeProjectIds?: Id<"projects">[];
-  assigneeIds?: Id<"users">[];
-  excludeAssigneeIds?: Id<"users">[];
-  tagIds?: Id<"tags">[];
-  excludeTagIds?: Id<"tags">[];
-};
+import type { TaskFilterState } from "@/types/tasks";
 
 function StateFilterDropdown({
   filters,
   onFiltersChange,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
 }) {
   const states = useQuery(api.taskStates.list) ?? [];
   const selectedIds = filters.stateIds ?? [];
@@ -160,8 +148,8 @@ function PriorityFilterDropdown({
   filters,
   onFiltersChange,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
 }) {
   const priorities = useQuery(api.priorities.list) ?? [];
   const selectedIds = filters.priorityIds ?? [];
@@ -290,8 +278,8 @@ function ProjectFilterDropdown({
   filters,
   onFiltersChange,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
 }) {
   const projects = useQuery(api.projects.list, {}) ?? [];
   const selectedIds = filters.projectIds ?? [];
@@ -416,8 +404,8 @@ function AssigneeFilterDropdown({
   filters,
   onFiltersChange,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
 }) {
   const users = useQuery(api.users.list) ?? [];
   const selectedIds = filters.assigneeIds ?? [];
@@ -541,8 +529,8 @@ function TagFilterDropdown({
   filters,
   onFiltersChange,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
 }) {
   const tags = useQuery(api.tags.list) ?? [];
   const selectedIds = filters.tagIds ?? [];
@@ -672,8 +660,8 @@ export function TaskFilters({
   onFiltersChange,
   showProjectFilter = true,
 }: {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: TaskFilterState;
+  onFiltersChange: (filters: TaskFilterState) => void;
   showProjectFilter?: boolean;
 }) {
   const activeFilterCount =

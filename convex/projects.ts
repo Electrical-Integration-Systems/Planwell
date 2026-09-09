@@ -325,7 +325,7 @@ export const remove = mutation({
       throw new Error("Only archived projects can be deleted");
     }
 
-    const [tasks, devices, credentials, directFiles] = await Promise.all([
+    const [tasks, devices, credentials, directFiles, credentialShares] = await Promise.all([
       ctx.db
         .query("tasks")
         .withIndex("by_project", (q) => q.eq("projectId", args.id))
@@ -340,6 +340,10 @@ export const remove = mutation({
         .collect(),
       ctx.db
         .query("files")
+        .withIndex("by_project", (q) => q.eq("projectId", args.id))
+        .collect(),
+      ctx.db
+        .query("credentialShares")
         .withIndex("by_project", (q) => q.eq("projectId", args.id))
         .collect(),
     ]);
@@ -379,6 +383,17 @@ export const remove = mutation({
 
     for (const credential of credentials) {
       await ctx.db.delete(credential._id);
+    }
+
+    for (const share of credentialShares) {
+      const shareItems = await ctx.db
+        .query("credentialShareItems")
+        .withIndex("by_share", (q) => q.eq("shareId", share._id))
+        .collect();
+      for (const item of shareItems) {
+        await ctx.db.delete(item._id);
+      }
+      await ctx.db.delete(share._id);
     }
 
     await ctx.db.delete(args.id);
