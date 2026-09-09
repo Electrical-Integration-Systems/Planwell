@@ -320,9 +320,9 @@ This repository has no automated test runner, so verify these cases manually:
 Run these checks after implementation:
 
 ```bash
-npm run lint
-npm run build
-npx convex dev --once
+bun run lint
+bun run build
+bunx convex dev --once
 ```
 
 ## Suggested Delivery Order

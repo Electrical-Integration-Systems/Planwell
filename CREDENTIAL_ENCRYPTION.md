@@ -399,9 +399,9 @@ actions, dual-read query, value-free audit events, migration state, verification
 functions, and audit UI fallback together:
 
 ```bash
-npm run lint
-npm run build
-npx convex deploy
+bun run lint
+bun run build
+bunx convex deploy
 ```
 
 Immediately verify that new credentials and edits create encrypted-only
@@ -414,7 +414,7 @@ Do not proceed if any new write stores a plaintext credential field.
 Start the internal migration against production:
 
 ```bash
-npx convex run --prod credentialEncryptionMigration:start '{"batchSize":25}'
+bunx convex run --prod credentialEncryptionMigration:start '{"batchSize":25}'
 ```
 
 Monitor the persisted migration state and Convex function failures. Do not print
@@ -423,13 +423,13 @@ terminal. If the migration reports conflicts, allow normal writes to settle and
 run a new scan:
 
 ```bash
-npx convex run --prod credentialEncryptionMigration:restartScan '{}'
+bunx convex run --prod credentialEncryptionMigration:restartScan '{}'
 ```
 
 Run the count-only verification after every full pass:
 
 ```bash
-npx convex run --prod credentialEncryptionInternal:verifyMigration '{}'
+bunx convex run --prod credentialEncryptionInternal:verifyMigration '{}'
 ```
 
 The required gate is:
@@ -451,7 +451,7 @@ Deploy and run the resumable audit scrub only after the audit UI no longer
 depends on credential values:
 
 ```bash
-npx convex run --prod credentialAuditMigration:start '{"batchSize":50}'
+bunx convex run --prod credentialAuditMigration:start '{"batchSize":50}'
 ```
 
 Verify no credential audit `changes` or `metadata` contains `name`, `type`,
