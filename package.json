@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "bun",
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "bun run --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev",
