@@ -1,9 +1,63 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { reportCompanyValidator, reportFormValidator, reportStatusValidator, reportFormatValidator, reportLogoValidator } from "./reportValidators";
 
 export default defineSchema({
   ...authTables,
+
+  technicalReportSettings: defineTable({
+    key: v.string(),
+    company: reportCompanyValidator,
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+
+  technicalReportCounters: defineTable({
+    year: v.string(),
+    value: v.number(),
+  }).index("by_year", ["year"]),
+
+  technicalReportLogos: defineTable({
+    logo: reportLogoValidator,
+    uploadedBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_storage", ["logo.storageId"]),
+
+  technicalReports: defineTable({
+    number: v.string(),
+    title: v.string(),
+    beneficiary: v.string(),
+    interventionDate: v.string(),
+    status: reportStatusValidator,
+    version: v.number(),
+    createdBy: v.id("users"),
+    updatedBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_updated_at", ["updatedAt"]),
+
+  technicalReportVersions: defineTable({
+    reportId: v.id("technicalReports"),
+    number: v.string(),
+    version: v.number(),
+    status: reportStatusValidator,
+    form: reportFormValidator,
+    company: reportCompanyValidator,
+    templateVersion: v.string(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_report_version", ["reportId", "version"]),
+
+  technicalReportExports: defineTable({
+    versionId: v.id("technicalReportVersions"),
+    format: reportFormatValidator,
+    rendererVersion: v.optional(v.string()),
+    storageId: v.id("_storage"),
+    name: v.string(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_version", ["versionId"]),
 
   projects: defineTable({
     name: v.string(),

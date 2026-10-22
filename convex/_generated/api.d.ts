@@ -23,10 +23,12 @@ import type * as http from "../http.js";
 import type * as priorities from "../priorities.js";
 import type * as projectUpdates from "../projectUpdates.js";
 import type * as projects from "../projects.js";
+import type * as reportValidators from "../reportValidators.js";
 import type * as seed from "../seed.js";
 import type * as tags from "../tags.js";
 import type * as taskStates from "../taskStates.js";
 import type * as tasks from "../tasks.js";
+import type * as technicalReports from "../technicalReports.js";
 import type * as updates from "../updates.js";
 import type * as users from "../users.js";
 
@@ -52,10 +54,12 @@ declare const fullApi: ApiFromModules<{
   priorities: typeof priorities;
   projectUpdates: typeof projectUpdates;
   projects: typeof projects;
+  reportValidators: typeof reportValidators;
   seed: typeof seed;
   tags: typeof tags;
   taskStates: typeof taskStates;
   tasks: typeof tasks;
+  technicalReports: typeof technicalReports;
   updates: typeof updates;
   users: typeof users;
 }>;

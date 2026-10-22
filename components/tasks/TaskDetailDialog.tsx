@@ -27,7 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Trash2, Clock, History, ImageIcon } from "lucide-react";
-import { TaskAuditTimeline } from "@/components/audi-history/AuditHistoryDialog";
+import { TaskAuditTimeline } from "@/components/audit-history/AuditHistoryDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export function TaskDetailDialog({
@@ -446,7 +446,7 @@ export function TaskDetailDialog({
                     {taskUpdates?.map((update) => (
                       <div
                         key={update._id}
-                        className="bg-card rounded-full p-3 border border-border/40 shadow-warm-sm animate-fade-in"
+                        className="bg-card rounded-4xl p-3 border border-border/40 shadow-warm-sm animate-fade-in"
                       >
                         <div className="flex items-start justify-between mb-1.5">
                           <div className="flex items-center gap-2 min-w-0">
@@ -489,7 +489,7 @@ export function TaskDetailDialog({
                       onChange={(e) => setUpdateBody(e.target.value)}
                       placeholder="Write an update..."
                       rows={2}
-                      className="flex-1 text-sm border-border/50 bg-card shadow-none resize-none rounded-full"
+                      className="flex-1 text-sm border-border/50 bg-card shadow-none resize-none rounded-4xl"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                           handleAddUpdate();

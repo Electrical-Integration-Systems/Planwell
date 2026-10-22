@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ACTION_CONFIG, formatRelative, parseAuditMetadata } from "@/components/audi-history/AuditHistoryList";
+import { ACTION_CONFIG, formatRelative, parseAuditMetadata } from "@/components/audit-history/AuditHistoryList";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

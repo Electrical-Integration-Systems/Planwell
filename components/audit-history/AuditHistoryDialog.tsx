@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { AuditHistoryList, ENTITY_TYPES, ACTION_CONFIG, ChangesDisplay, formatRelative, parseAuditMetadata } from "@/components/audi-history/AuditHistoryList";
+import { AuditHistoryList, ENTITY_TYPES, ACTION_CONFIG, ChangesDisplay, formatRelative, parseAuditMetadata } from "@/components/audit-history/AuditHistoryList";
 import {
     Pencil,
     History,

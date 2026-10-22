@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/audi-history/AuditHistoryList";
+import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/audit-history/AuditHistoryList";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";

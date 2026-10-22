@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { Badge } from "@/components/ui/badge";
-import { History, Plus, Pencil, Trash2, Archive, ArchiveRestore, ArrowUpDown, UserPlus, MessageSquarePlus, MessageSquareX, Search, Upload } from "lucide-react";
+import { History, Plus, Pencil, Trash2, Archive, ArchiveRestore, ArrowUpDown, UserPlus, MessageSquarePlus, MessageSquareX, Search, Upload, FileDown } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export const AUDIT_GRID_COLS = "minmax(0, 1.8fr) 120px 100px 150px 120px";
@@ -19,6 +19,8 @@ export const ENTITY_TYPES = [
   { value: "priority", label: "Priorities" },
   { value: "tag", label: "Tags" },
   { value: "user", label: "Users" },
+  { value: "technical_report", label: "Technical reports" },
+  { value: "report_settings", label: "Report settings" },
 ];
 
 export const ENTITY_LABELS: Record<string, string> = {
@@ -31,6 +33,8 @@ export const ENTITY_LABELS: Record<string, string> = {
   priority: "Priority",
   tag: "Tag",
   user: "User",
+  technical_report: "Technical report",
+  report_settings: "Report settings",
 };
 
 export type AuditLogItem = {
@@ -61,6 +65,11 @@ export const ACTION_CONFIG: Record<
     icon: <Pencil className="h-3 w-3" />,
     label: "Updated",
     color: "hsl(38, 92%, 50%)",
+  },
+  export: {
+    icon: <FileDown className="h-3 w-3" />,
+    label: "Exported",
+    color: "hsl(215, 20%, 45%)",
   },
   delete: {
     icon: <Trash2 className="h-3 w-3" />,

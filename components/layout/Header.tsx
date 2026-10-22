@@ -65,6 +65,12 @@ export function Header({
       icon: History,
       isActive: pathname.startsWith("/audit-history"),
     },
+    {
+      href: "/raport-interventie-tehnica",
+      label: "Rapoarte tehnice",
+      icon: FileText,
+      isActive: pathname.startsWith("/raport-interventie-tehnica"),
+    },
   ];
 
   if (!isAuthenticated) return null;
