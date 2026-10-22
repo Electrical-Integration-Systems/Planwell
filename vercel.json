@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "bunx --verbose bun@1.4.2 install --frozen-lockfile --verbose",
+  "installCommand": "npx --yes --package=bun@1.4.2 -- bun install --frozen-lockfile --verbose",
   "buildCommand": "bunx convex deploy --cmd \"bun run build\""
 }
