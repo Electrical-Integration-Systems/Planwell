@@ -66,7 +66,7 @@ function StateFilterDropdown({
         <Button
           variant={hasSelection ? "secondary" : "outline"}
           size="sm"
-          className={`h-7 text-xs gap-1 rounded-lg border-border/50 bg-transparent shadow-none ${
+          className={`h-7 text-xs gap-1 rounded-full border-border/50 bg-transparent shadow-none ${
             hasSelection ? "bg-secondary" : ""
           }`}
         >
@@ -196,7 +196,7 @@ function PriorityFilterDropdown({
         <Button
           variant={hasSelection ? "secondary" : "outline"}
           size="sm"
-          className={`h-7 text-xs gap-1 rounded-lg border-border/50 bg-transparent shadow-none ${
+          className={`h-7 text-xs gap-1 rounded-full border-border/50 bg-transparent shadow-none ${
             hasSelection ? "bg-secondary" : ""
           }`}
         >
@@ -326,7 +326,7 @@ function ProjectFilterDropdown({
         <Button
           variant={hasSelection ? "secondary" : "outline"}
           size="sm"
-          className={`h-7 text-xs gap-1 rounded-lg border-border/50 bg-transparent shadow-none ${
+          className={`h-7 text-xs gap-1 rounded-full border-border/50 bg-transparent shadow-none ${
             hasSelection ? "bg-secondary" : ""
           }`}
         >
@@ -452,7 +452,7 @@ function AssigneeFilterDropdown({
         <Button
           variant={hasSelection ? "secondary" : "outline"}
           size="sm"
-          className={`h-7 text-xs gap-1 rounded-lg border-border/50 bg-transparent shadow-none ${
+          className={`h-7 text-xs gap-1 rounded-full border-border/50 bg-transparent shadow-none ${
             hasSelection ? "bg-secondary" : ""
           }`}
         >
@@ -577,7 +577,7 @@ function TagFilterDropdown({
         <Button
           variant={hasSelection ? "secondary" : "outline"}
           size="sm"
-          className={`h-7 text-xs gap-1 rounded-lg border-border/50 bg-transparent shadow-none ${
+          className={`h-7 text-xs gap-1 rounded-full border-border/50 bg-transparent shadow-none ${
             hasSelection ? "bg-secondary" : ""
           }`}
         >
@@ -709,7 +709,7 @@ export function TaskFilters({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground rounded-lg"
+          className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground rounded-full"
           onClick={() => onFiltersChange({})}
         >
           <X className="h-3 w-3" />

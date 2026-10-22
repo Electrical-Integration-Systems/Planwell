@@ -24,7 +24,7 @@ import {
   ArchiveRestore,
 } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ColorPicker } from "@/components/ColorPicker";
+import { ColorPicker } from "@/components/settings/ColorPicker";
 import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
 type ConfirmActionState = {
@@ -186,7 +186,7 @@ function StatesTab() {
               />
               <Button
                 size="sm"
-                className="h-7 text-xs rounded-lg"
+                className="h-7 text-xs rounded-full"
                 onClick={handleSaveEdit}
               >
                 Save
@@ -194,7 +194,7 @@ function StatesTab() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
+                className="h-7 text-xs rounded-full text-muted-foreground"
                 onClick={() => setEditingId(null)}
               >
                 Cancel
@@ -276,7 +276,7 @@ function StatesTab() {
         />
         <Button
           size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
+          className="h-8 text-xs rounded-full gap-1"
           onClick={handleCreate}
           disabled={!newName.trim()}
         >
@@ -379,7 +379,7 @@ function PrioritiesTab() {
               />
               <Button
                 size="sm"
-                className="h-7 text-xs rounded-lg"
+                className="h-7 text-xs rounded-full"
                 onClick={handleSaveEdit}
               >
                 Save
@@ -387,7 +387,7 @@ function PrioritiesTab() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
+                className="h-7 text-xs rounded-full text-muted-foreground"
                 onClick={() => setEditingId(null)}
               >
                 Cancel
@@ -469,7 +469,7 @@ function PrioritiesTab() {
         />
         <Button
           size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
+          className="h-8 text-xs rounded-full gap-1"
           onClick={handleCreate}
           disabled={!newName.trim()}
         >
@@ -549,7 +549,7 @@ function TagsTab() {
               />
               <Button
                 size="sm"
-                className="h-7 text-xs rounded-lg"
+                className="h-7 text-xs rounded-full"
                 onClick={handleSaveEdit}
               >
                 Save
@@ -557,7 +557,7 @@ function TagsTab() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
+                className="h-7 text-xs rounded-full text-muted-foreground"
                 onClick={() => setEditingId(null)}
               >
                 Cancel
@@ -618,7 +618,7 @@ function TagsTab() {
         />
         <Button
           size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
+          className="h-8 text-xs rounded-full gap-1"
           onClick={handleCreate}
           disabled={!newName.trim()}
         >
@@ -687,7 +687,7 @@ function ProjectsTab() {
               />
               <Button
                 size="sm"
-                className="h-7 text-xs rounded-lg"
+                className="h-7 text-xs rounded-full"
                 onClick={handleSaveEdit}
               >
                 Save
@@ -695,7 +695,7 @@ function ProjectsTab() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
+                className="h-7 text-xs rounded-full text-muted-foreground"
                 onClick={() => setEditingId(null)}
               >
                 Cancel
@@ -783,7 +783,7 @@ function ProjectsTab() {
         />
         <Button
           size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
+          className="h-8 text-xs rounded-full gap-1"
           onClick={handleCreate}
           disabled={!newName.trim()}
         >
@@ -882,7 +882,7 @@ function PresetsTab({
               />
               <Button
                 size="sm"
-                className="h-7 text-xs rounded-lg"
+                className="h-7 text-xs rounded-full"
                 onClick={handleSaveEdit}
               >
                 Save
@@ -890,7 +890,7 @@ function PresetsTab({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs rounded-lg text-muted-foreground"
+                className="h-7 text-xs rounded-full text-muted-foreground"
                 onClick={() => setEditingId(null)}
               >
                 Cancel
@@ -951,7 +951,7 @@ function PresetsTab({
         />
         <Button
           size="sm"
-          className="h-8 text-xs rounded-lg gap-1"
+          className="h-8 text-xs rounded-full gap-1"
           onClick={handleCreate}
           disabled={!newName.trim()}
           title={

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useConvexAuth } from "convex/react";
 import { Header } from "@/components/layout/Header";
-import { FilesBrowser } from "@/components/FilesBrowser";
+import { FilesBrowser } from "@/components/files/FilesBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 
 export default function FilesPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();

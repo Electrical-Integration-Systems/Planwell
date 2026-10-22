@@ -9,19 +9,19 @@ import { Archive, ArrowLeft, Copy, Eye, EyeOff, FileText, FolderKanban, ImageIco
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
-import { CredentialShareDialog } from "@/components/CredentialShareDialog";
+import { CredentialShareDialog } from "@/components/projects/CredentialShareDialog";
 import { CredentialSharedLinks } from "@/components/CredentialSharedLinks";
-import { FilesBrowser } from "@/components/FilesBrowser";
+import { FilesBrowser } from "@/components/files/FilesBrowser";
 import { Header } from "@/components/layout/Header";
-import { PhotoBrowser } from "@/components/PhotoBrowser";
+import { PhotoBrowser } from "@/components/projects/PhotoBrowser";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
-import { DeviceSpreadsheet } from "@/components/DeviceSpreadsheet";
-import { ProjectUpdatesTab } from "@/components/ProjectUpdatesTab";
-import { TaskDetailDialog } from "@/components/TaskDetailDialog";
-import { TaskFilters } from "@/components/TaskFilters";
-import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
-import { TaskSort } from "@/components/TaskSort";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
+import { DeviceSpreadsheet } from "@/components/projects/DeviceSpreadsheet";
+import { ProjectUpdatesTab } from "@/components/projects/ProjectUpdatesTab";
+import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
+import { TaskFilters } from "@/components/tasks/TaskFilters";
+import { TaskList, TASK_GRID_COLS } from "@/components/tasks/TaskList";
+import { TaskSort } from "@/components/tasks/TaskSort";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -151,11 +151,11 @@ function CredentialEditorDialog({
 						className="min-h-24 border-border/50 shadow-none sm:col-span-2"
 					/>
 					<div className="sm:col-span-2 flex items-center justify-end gap-2">
-						<Button variant="ghost" className="rounded-lg" onClick={() => onOpenChange(false)}>
+						<Button variant="ghost" className="rounded-full" onClick={() => onOpenChange(false)}>
 							Cancel
 						</Button>
 						<Button
-							className="rounded-lg"
+							className="rounded-full"
 							onClick={onSubmit}
 							disabled={!values.name.trim() || !values.type.trim()}
 						>
@@ -426,7 +426,7 @@ export default function ProjectDetailsPage() {
 				<div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
 					<div className="max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
 						<div className="pt-4 sm:pt-5 pb-3 animate-fade-in-up space-y-3">
-							<Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg text-xs gap-1.5" asChild>
+							<Button variant="ghost" size="sm" className="h-7 px-2 rounded-full text-xs gap-1.5" asChild>
 								<Link href="/projects">
 									<ArrowLeft className="h-3.5 w-3.5" />
 									Back to projects
@@ -515,9 +515,9 @@ export default function ProjectDetailsPage() {
 
 								<TabsContent value="tasks" className="space-y-4">
 									<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2">
-										<div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+										<div className="flex items-center gap-1 bg-muted/50 rounded-full p-0.5">
 											<button
-												className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+												className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors ${
 													activeTaskTab === "active"
 														? "bg-background text-foreground shadow-sm"
 														: "text-muted-foreground hover:text-foreground"
@@ -527,7 +527,7 @@ export default function ProjectDetailsPage() {
 												Active
 											</button>
 											<button
-												className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+												className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5 ${
 													activeTaskTab === "archived"
 														? "bg-background text-foreground shadow-sm"
 														: "text-muted-foreground hover:text-foreground"
@@ -545,12 +545,12 @@ export default function ProjectDetailsPage() {
 												value={taskSearchQuery}
 												onChange={(e) => setTaskSearchQuery(e.target.value)}
 												placeholder="Search project tasks..."
-												className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+												className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
 											/>
 										</div>
 										<Button
 											size="sm"
-											className="h-8 text-xs gap-1.5 rounded-lg px-3"
+											className="h-8 text-xs gap-1.5 rounded-full px-3"
 											onClick={() => setIsAddingTask(true)}
 										>
 											<Plus className="h-3.5 w-3.5" />
@@ -621,12 +621,12 @@ export default function ProjectDetailsPage() {
 								</TabsContent>
 
 								<TabsContent value="credentials" className="space-y-4">
-									<div className="flex w-fit items-center gap-1 rounded-lg bg-muted/50 p-0.5">
+									<div className="flex w-fit items-center gap-1 rounded-full bg-muted/50 p-0.5">
 										<Button
 											type="button"
 											variant="ghost"
 											size="sm"
-											className={`h-7 rounded-md px-3 text-xs font-medium ${
+											className={`h-7 rounded-xl px-3 text-xs font-medium ${
 												activeCredentialView === "entries"
 													? "bg-background text-foreground shadow-sm hover:bg-background"
 													: "text-muted-foreground hover:text-foreground"
@@ -640,7 +640,7 @@ export default function ProjectDetailsPage() {
 											type="button"
 											variant="ghost"
 											size="sm"
-											className={`h-7 gap-1.5 rounded-md px-3 text-xs font-medium ${
+											className={`h-7 gap-1.5 rounded-xl px-3 text-xs font-medium ${
 												activeCredentialView === "shared-links"
 													? "bg-background text-foreground shadow-sm hover:bg-background"
 													: "text-muted-foreground hover:text-foreground"
@@ -663,14 +663,14 @@ export default function ProjectDetailsPage() {
 													value={credentialSearchQuery}
 													onChange={(e) => setCredentialSearchQuery(e.target.value)}
 													placeholder="Search credentials..."
-													className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+													className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
 												/>
 											</div>
 										)}
 
 										<Button
 											size="sm"
-											className="h-8 text-xs gap-1.5 rounded-lg px-3"
+											className="h-8 text-xs gap-1.5 rounded-full px-3"
 											onClick={() => openCredentialDialog()}
 										>
 											<Plus className="h-3.5 w-3.5" />
@@ -715,7 +715,7 @@ export default function ProjectDetailsPage() {
 									{credentials === undefined ? (
 										<div className="p-8 text-center text-sm text-muted-foreground">Loading credentials...</div>
 									) : filteredCredentials !== undefined && filteredCredentials.length === 0 ? (
-										<div className="py-16 text-center border border-dashed border-primary/30 rounded-lg bg-primary/5">
+										<div className="py-16 text-center border border-dashed border-primary/30 rounded-full bg-primary/5">
 											<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
 												<KeyRound className="h-5 w-5 text-primary/60" />
 											</div>
@@ -770,7 +770,7 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-7 w-7 rounded-lg"
+																			className="h-7 w-7 rounded-full"
 																			onClick={() => openCredentialShareDialog([credential._id])}
 																			aria-label={`Share ${credential.name}`}
 																			title="Share credential"
@@ -780,7 +780,7 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-7 w-7 rounded-lg"
+																			className="h-7 w-7 rounded-full"
 																			onClick={() => handleCopyCredential(credential)}
 																			aria-label={`Copy ${credential.name} credential`}
 																			title="Copy credential"
@@ -790,7 +790,7 @@ export default function ProjectDetailsPage() {
 																	<Button
 																		variant="ghost"
 																		size="icon"
-																		className="h-7 w-7 rounded-lg"
+																		className="h-7 w-7 rounded-full"
 																		onClick={() =>
 																			setRevealedCredentials((current) => ({
 																				...current,
@@ -800,13 +800,13 @@ export default function ProjectDetailsPage() {
 																	>
 																		{isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
 																	</Button>
-																	<Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openCredentialDialog(credential)}>
+																	<Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => openCredentialDialog(credential)}>
 																		<Pencil className="h-3.5 w-3.5" />
 																	</Button>
 																	<Button
 																		variant="ghost"
 																		size="icon"
-																		className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
+																		className="h-7 w-7 rounded-full text-destructive hover:text-destructive"
 																		onClick={() => confirmDeleteCredential(credential._id, credential.name)}
 																	>
 																		<Trash2 className="h-3.5 w-3.5" />
@@ -820,7 +820,7 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-6 w-6 shrink-0 rounded-lg"
+																			className="h-6 w-6 shrink-0 rounded-full"
 																			onClick={() => handleCopySecret(credential.secret!)}
 																			aria-label={`Copy ${credential.name} secret`}
 																			title="Copy secret"
@@ -864,7 +864,7 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-6 w-6 shrink-0 rounded-lg"
+																			className="h-6 w-6 shrink-0 rounded-full"
 																			onClick={() => handleCopySecret(credential.secret!)}
 																			aria-label={`Copy ${credential.name} secret`}
 																			title="Copy secret"
@@ -874,7 +874,7 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-6 w-6 shrink-0 rounded-lg"
+																			className="h-6 w-6 shrink-0 rounded-full"
 																			onClick={() =>
 																				setRevealedCredentials((current) => ({
 																					...current,
@@ -891,7 +891,7 @@ export default function ProjectDetailsPage() {
 																<Button
 																	variant="ghost"
 																	size="icon"
-																	className="h-7 w-7 rounded-lg"
+																	className="h-7 w-7 rounded-full"
 																	onClick={() => openCredentialShareDialog([credential._id])}
 																	aria-label={`Share ${credential.name}`}
 																	title="Share credential"
@@ -901,20 +901,20 @@ export default function ProjectDetailsPage() {
 																		<Button
 																			variant="ghost"
 																			size="icon"
-																			className="h-7 w-7 rounded-lg"
+																			className="h-7 w-7 rounded-full"
 																			onClick={() => handleCopyCredential(credential)}
 																			aria-label={`Copy ${credential.name} credential`}
 																			title="Copy credential"
 																		>
 																			<Copy className="h-3.5 w-3.5" />
 																		</Button>
-																<Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openCredentialDialog(credential)}>
+																<Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => openCredentialDialog(credential)}>
 																	<Pencil className="h-3.5 w-3.5" />
 																</Button>
 																<Button
 																	variant="ghost"
 																	size="icon"
-																	className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
+																	className="h-7 w-7 rounded-full text-destructive hover:text-destructive"
 																	onClick={() => confirmDeleteCredential(credential._id, credential.name)}
 																>
 																	<Trash2 className="h-3.5 w-3.5" />

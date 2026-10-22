@@ -71,7 +71,7 @@ export function ConfirmActionDialog({
               {requiredTextLabel ?? "Type the confirmation text to continue."}
             </p>
             <div
-              className="rounded-lg border border-border/60 bg-muted/40 px-3 py-2 select-none"
+              className="rounded-full border border-border/60 bg-muted/40 px-3 py-2 select-none"
               onCopy={(event) => event.preventDefault()}
               onCut={(event) => event.preventDefault()}
               onContextMenu={(event) => event.preventDefault()}
@@ -92,7 +92,7 @@ export function ConfirmActionDialog({
         <DialogFooter>
           <Button
             variant="ghost"
-            className="rounded-lg"
+            className="rounded-full"
             onClick={() => handleOpenChange(false)}
             disabled={submitting}
           >
@@ -100,7 +100,7 @@ export function ConfirmActionDialog({
           </Button>
           <Button
             variant={tone}
-            className="rounded-lg"
+            className="rounded-full"
             onClick={handleConfirm}
             disabled={submitting || !isConfirmationMatched}
           >

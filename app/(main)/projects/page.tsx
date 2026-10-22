@@ -10,7 +10,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,13 +90,13 @@ function ProjectEditorDialog({
 					<div className="flex items-center justify-end gap-2">
 						<Button
 							variant="ghost"
-							className="rounded-lg"
+							className="rounded-full"
 							onClick={() => onOpenChange(false)}
 						>
 							Cancel
 						</Button>
 						<Button
-							className="rounded-lg"
+							className="rounded-full"
 							onClick={onSubmit}
 							disabled={!values.name.trim()}
 						>
@@ -221,7 +221,7 @@ export default function ProjectsPage() {
 							</div>
 							<Button
 								size="sm"
-								className="h-8 text-xs gap-1.5 rounded-lg px-3"
+								className="h-8 text-xs gap-1.5 rounded-full px-3"
 								onClick={() => {
 									setEditingProjectId(null);
 									setProjectForm(EMPTY_PROJECT_FORM);
@@ -233,9 +233,9 @@ export default function ProjectsPage() {
 						</div>
 
 						<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
-							<div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+							<div className="flex items-center gap-1 bg-muted/50 rounded-full p-0.5">
 								<button
-									className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+									className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors ${
 										activeTab === "active"
 											? "bg-background text-foreground shadow-sm"
 											: "text-muted-foreground hover:text-foreground"
@@ -245,7 +245,7 @@ export default function ProjectsPage() {
 									Active
 								</button>
 								<button
-									className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+									className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5 ${
 										activeTab === "archived"
 											? "bg-background text-foreground shadow-sm"
 											: "text-muted-foreground hover:text-foreground"
@@ -264,7 +264,7 @@ export default function ProjectsPage() {
 										value={searchQuery}
 										onChange={(e) => setSearchQuery(e.target.value)}
 										placeholder="Search projects..."
-										className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+										className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
 									/>
 								</div>
 							)}
@@ -278,7 +278,7 @@ export default function ProjectsPage() {
 							Loading projects...
 						</div>
 					) : projects.length === 0 ? (
-						<div className="py-16 text-center border border-dashed border-primary/30 rounded-lg bg-primary/5">
+						<div className="py-16 text-center border border-dashed border-primary/30 rounded-full bg-primary/5">
 							<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
 								<FolderKanban className="h-5 w-5 text-primary/60" />
 							</div>
@@ -351,7 +351,7 @@ export default function ProjectsPage() {
 										</div>
 
 										<div className="flex items-center justify-between gap-2">
-											<Button asChild className="rounded-lg gap-1.5">
+											<Button asChild className="rounded-full gap-1.5">
 												<Link href={`/projects/${project._id}`}>
 													Open project
 													<ArrowRight className="h-3.5 w-3.5" />
@@ -361,7 +361,7 @@ export default function ProjectsPage() {
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-8 w-8 rounded-lg"
+													className="h-8 w-8 rounded-full"
 													onClick={() => {
 														setEditingProjectId(project._id);
 														setProjectForm({
@@ -378,7 +378,7 @@ export default function ProjectsPage() {
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-8 w-8 rounded-lg"
+														className="h-8 w-8 rounded-full"
 														onClick={() => {
 															void unarchiveProject({ id: project._id })
 																.then(() => toast.success("Project restored"))
@@ -391,7 +391,7 @@ export default function ProjectsPage() {
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
+														className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
 														onClick={() => {
 															setPendingArchive({ id: project._id, name: project.name });
 														}}
@@ -403,7 +403,7 @@ export default function ProjectsPage() {
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
+														className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
 														onClick={() => {
 															setPendingDelete({ id: project._id, name: project.name });
 														}}

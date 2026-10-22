@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { LinkifiedText } from "@/components/LinkifiedText";
-import { PhotoBrowser } from "@/components/PhotoBrowser";
+import { PhotoBrowser } from "@/components/projects/PhotoBrowser";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Trash2, Clock, History, ImageIcon } from "lucide-react";
-import { TaskAuditTimeline } from "@/components/AuditHistoryDialog";
+import { TaskAuditTimeline } from "@/components/audi-history/AuditHistoryDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export function TaskDetailDialog({
@@ -160,7 +160,7 @@ export function TaskDetailDialog({
                 />
                 <Button
                   size="sm"
-                  className="h-8 text-xs rounded-lg"
+                  className="h-8 text-xs rounded-full"
                   onClick={handleTitleSave}
                 >
                   Save
@@ -227,7 +227,7 @@ export function TaskDetailDialog({
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              className="h-7 text-xs rounded-lg"
+                              className="h-7 text-xs rounded-full"
                               onClick={handleDescSave}
                             >
                               Save
@@ -235,7 +235,7 @@ export function TaskDetailDialog({
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 text-xs rounded-lg text-muted-foreground"
+                              className="h-7 text-xs rounded-full text-muted-foreground"
                               onClick={() => setEditingDesc(false)}
                             >
                               Cancel
@@ -244,7 +244,7 @@ export function TaskDetailDialog({
                         </div>
                       ) : (
                         <div
-                          className="mt-2 text-sm leading-relaxed cursor-pointer hover:bg-accent/50 rounded-lg p-3 -mx-3 transition-colors min-h-[80px]"
+                          className="mt-2 text-sm leading-relaxed cursor-pointer hover:bg-accent/50 rounded-full p-3 -mx-3 transition-colors min-h-[80px]"
                           onClick={() => {
                             setDescValue(task.description ?? "");
                             setEditingDesc(true);
@@ -286,7 +286,7 @@ export function TaskDetailDialog({
                             });
                           }}
                         >
-                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.state?.name}>
+                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-full w-full" title={task.state?.name}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -312,7 +312,7 @@ export function TaskDetailDialog({
                             });
                           }}
                         >
-                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.priority?.name}>
+                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-full w-full" title={task.priority?.name}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -338,7 +338,7 @@ export function TaskDetailDialog({
                             });
                           }}
                         >
-                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-lg w-full" title={task.projectId ? projects.find(p => p._id === task.projectId)?.name : "N/A"}>
+                          <SelectTrigger className="h-8 text-xs border-border/50 bg-transparent shadow-none rounded-full w-full" title={task.projectId ? projects.find(p => p._id === task.projectId)?.name : "N/A"}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -446,7 +446,7 @@ export function TaskDetailDialog({
                     {taskUpdates?.map((update) => (
                       <div
                         key={update._id}
-                        className="bg-card rounded-lg p-3 border border-border/40 shadow-warm-sm animate-fade-in"
+                        className="bg-card rounded-full p-3 border border-border/40 shadow-warm-sm animate-fade-in"
                       >
                         <div className="flex items-start justify-between mb-1.5">
                           <div className="flex items-center gap-2 min-w-0">
@@ -489,7 +489,7 @@ export function TaskDetailDialog({
                       onChange={(e) => setUpdateBody(e.target.value)}
                       placeholder="Write an update..."
                       rows={2}
-                      className="flex-1 text-sm border-border/50 bg-card shadow-none resize-none rounded-lg"
+                      className="flex-1 text-sm border-border/50 bg-card shadow-none resize-none rounded-full"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                           handleAddUpdate();
@@ -498,7 +498,7 @@ export function TaskDetailDialog({
                     />
                     <Button
                       size="icon"
-                      className="h-8 w-8 rounded-lg self-end shrink-0"
+                      className="h-8 w-8 rounded-full self-end shrink-0"
                       onClick={handleAddUpdate}
                       disabled={!updateBody.trim()}
                     >

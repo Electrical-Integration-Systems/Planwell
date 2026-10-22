@@ -202,11 +202,11 @@ export function DeviceSpreadsheet({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search devices…"
-              className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+              className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
             />
           </div>
         )}
-        <Button size="sm" className="h-8 text-xs gap-1.5 rounded-lg px-3" onClick={addRow}>
+        <Button size="sm" className="h-8 text-xs gap-1.5 rounded-full px-3" onClick={addRow}>
           <Plus className="h-3.5 w-3.5" />
           Add device
         </Button>
@@ -266,7 +266,7 @@ export function DeviceSpreadsheet({
 
             {/* Empty state */}
             {filtered.length === 0 && editingId !== NEW_ROW && (
-              <div className="py-14 text-center border border-dashed border-primary/30 rounded-lg bg-primary/5 mt-2">
+              <div className="py-14 text-center border border-dashed border-primary/30 rounded-full bg-primary/5 mt-2">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Server className="h-5 w-5 text-primary/60" />
                 </div>
@@ -341,7 +341,7 @@ function ReadOnlyRow({
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+          className="h-6 w-6 rounded-xl opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -380,7 +380,7 @@ function EditingRow({
             value={draft[f.key]}
             onChange={(e) => onDraftChange({ ...draft, [f.key]: e.target.value })}
             placeholder={f.placeholder}
-            className="h-7 text-xs border-border/50 shadow-none rounded-md focus-visible:ring-1 focus-visible:ring-primary/40"
+            className="h-7 text-xs border-border/50 shadow-none rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40"
           />
         </div>
       ))}

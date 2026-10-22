@@ -130,7 +130,7 @@ export function CredentialShareDialog({
                   <div>
                     <Label className="text-xs text-muted-foreground">Share link</Label>
                     <div className="mt-1 flex min-w-0 items-center gap-2">
-                      <code className="min-w-0 flex-1 truncate rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-xs">
+                      <code className="min-w-0 flex-1 truncate rounded-xl border border-border/60 bg-muted/40 px-3 py-2 text-xs">
                         {shareUrl}
                       </code>
                       <Button
@@ -149,7 +149,7 @@ export function CredentialShareDialog({
                   <div>
                     <Label className="text-xs text-muted-foreground">PIN</Label>
                     <div className="mt-1 flex items-center gap-2">
-                      <code className="flex-1 rounded-md border border-border/60 bg-muted/40 px-3 py-2 font-mono text-base tracking-[0.2em]">
+                      <code className="flex-1 rounded-xl border border-border/60 bg-muted/40 px-3 py-2 font-mono text-base tracking-[0.2em]">
                         {generatedShare.pin}
                       </code>
                       <Button

@@ -102,7 +102,7 @@ export function Header({
                   variant={isActive ? "secondary" : "ghost"}
                   size="sm"
                   className={cn(
-                    "h-8 rounded-lg px-3 text-xs whitespace-nowrap",
+                    "h-8 rounded-full px-3 text-xs whitespace-nowrap",
                     isActive
                       ? "text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
@@ -123,7 +123,7 @@ export function Header({
               variant={isSettingsOpen ? "secondary" : "ghost"}
               size="icon"
               className={cn(
-                "h-8 w-8 rounded-lg transition-colors",
+                "h-8 w-8 rounded-full transition-colors",
                 isSettingsOpen
                   ? "text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -137,7 +137,7 @@ export function Header({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground transition-colors"
               onClick={handleThemeToggle}
               aria-label="Toggle theme"
             >
@@ -151,7 +151,7 @@ export function Header({
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-muted-foreground hover:text-foreground gap-1.5 h-8 px-2.5 rounded-lg transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground gap-1.5 h-8 px-2.5 rounded-full transition-colors"
               onClick={handleSignOut}
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -165,7 +165,7 @@ export function Header({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
                   aria-label="Open menu"
                 >
                   <MenuIcon className="h-4 w-4" />
@@ -176,7 +176,7 @@ export function Header({
                   <DropdownMenuItem
                     key={href}
                     className={cn(
-                      "rounded-lg px-3 py-2",
+                      "rounded-full px-3 py-2",
                       isActive ? "bg-accent text-accent-foreground" : undefined,
                     )}
                     onSelect={() => {
@@ -189,14 +189,14 @@ export function Header({
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="rounded-lg px-3 py-2"
+                  className="rounded-full px-3 py-2"
                   onSelect={onSettingsOpen}
                 >
                   <SettingsIcon className="h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="rounded-lg px-3 py-2"
+                  className="rounded-full px-3 py-2"
                   onSelect={handleThemeToggle}
                 >
                   {theme === "dark" ? (
@@ -209,7 +209,7 @@ export function Header({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  className="rounded-lg px-3 py-2"
+                  className="rounded-full px-3 py-2"
                   onSelect={handleSignOut}
                 >
                   <LogOut className="h-4 w-4" />

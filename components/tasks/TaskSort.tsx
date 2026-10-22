@@ -69,7 +69,7 @@ export function TaskSort({
             value={key.column}
             onValueChange={(val) => updateSortKey(index, { column: val })}
           >
-            <SelectTrigger className="w-[100px] h-7 text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+            <SelectTrigger className="w-[100px] h-7 text-xs border-border/50 bg-transparent shadow-none rounded-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -83,7 +83,7 @@ export function TaskSort({
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-xs px-2 border-border/50 shadow-none rounded-lg gap-1"
+            className="h-7 text-xs px-2 border-border/50 shadow-none rounded-full gap-1"
             onClick={() =>
               updateSortKey(index, {
                 direction: key.direction === "asc" ? "desc" : "asc",
@@ -105,7 +105,7 @@ export function TaskSort({
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-6 w-6 rounded-full text-muted-foreground hover:text-foreground"
             onClick={() => removeSortKey(index)}
           >
             <X className="h-3 w-3" />
@@ -117,7 +117,7 @@ export function TaskSort({
         <Button
           variant="outline"
           size="sm"
-          className="h-7 text-xs gap-1 border-border/50 shadow-none rounded-lg border-dashed"
+          className="h-7 text-xs gap-1 border-border/50 shadow-none rounded-full border-dashed"
           onClick={addSortKey}
         >
           <Plus className="h-3 w-3" />
@@ -129,7 +129,7 @@ export function TaskSort({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-lg"
+          className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-full"
           onClick={() => onSortKeysChange([])}
         >
           Clear

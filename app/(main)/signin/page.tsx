@@ -85,7 +85,7 @@ export default function SignIn() {
       <Button
         variant="ghost"
         size="icon"
-        className={`fixed top-4 right-4 z-50 h-8 w-8 rounded-lg backdrop-blur-md transition-colors ${
+        className={`fixed top-4 right-4 z-50 h-8 w-8 rounded-full backdrop-blur-md transition-colors ${
           isDark
             ? "border border-white/15 bg-white/8 text-white/75 hover:bg-white/14 hover:text-white"
             : "border border-slate-900/10 bg-white/40 text-slate-700 hover:bg-white/70 hover:text-slate-950"

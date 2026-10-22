@@ -252,7 +252,7 @@ export function PhotoBrowser({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search photos..."
-              className="h-8 rounded-lg border-border/50 bg-transparent pl-8 text-xs shadow-none"
+              className="h-8 rounded-full border-border/50 bg-transparent pl-8 text-xs shadow-none"
             />
           </div>
         )}
@@ -261,7 +261,7 @@ export function PhotoBrowser({
           onClick={handleUploadClick}
           disabled={uploading}
           size="sm"
-          className="h-8 rounded-lg px-3 text-xs gap-1.5"
+          className="h-8 rounded-full px-3 text-xs gap-1.5"
         >
           <Upload className="h-3.5 w-3.5" />
           {uploading ? "Uploading..." : uploadLabel}
@@ -282,7 +282,7 @@ export function PhotoBrowser({
           Loading photos...
         </div>
       ) : photos.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 py-16 text-center">
+        <div className="rounded-full border border-dashed border-primary/30 bg-primary/5 py-16 text-center">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Camera className="h-5 w-5 text-primary/60" />
           </div>
@@ -350,7 +350,7 @@ export function PhotoBrowser({
 
                 <div className="flex items-center justify-end gap-1">
                   {photo.url && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" asChild>
                       <a href={photo.url} target="_blank" rel="noopener noreferrer" title="Open full size">
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
@@ -360,7 +360,7 @@ export function PhotoBrowser({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg"
+                      className="h-8 w-8 rounded-full"
                       onClick={() => handleDownload(photo._id, photo.url!, photo.name)}
                       title="Download"
                     >
@@ -370,7 +370,7 @@ export function PhotoBrowser({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-lg text-destructive hover:text-destructive"
+                    className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
                     onClick={() =>
                       setPendingDelete({ photoId: photo._id, name: photo.name })
                     }

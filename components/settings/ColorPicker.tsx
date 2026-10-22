@@ -186,14 +186,14 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
       <button
         type="button"
         onClick={() => updateShowPicker(!showPicker)}
-        className="w-8 h-8 rounded-lg border border-border/50 cursor-pointer transition-transform hover:scale-105"
+        className="w-8 h-8 rounded-full border border-border/50 cursor-pointer transition-transform hover:scale-105"
         style={{ backgroundColor: displayValue }}
       />
       {showPicker && (
         <div className="absolute z-50 top-full mt-2 left-0 bg-card rounded-xl shadow-lg border border-border p-3 w-[220px]">
           <div
             ref={svRef}
-            className="w-full h-32 rounded-lg cursor-cross mb-3 relative select-none"
+            className="w-full h-32 rounded-full cursor-cross mb-3 relative select-none"
             style={{
               backgroundColor: `hsl(${currentHsv.h}, 100%, 50%)`,
               backgroundImage:
@@ -234,7 +234,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
 
           <div className="flex items-center gap-2 mb-3">
             <div
-              className="w-8 h-8 rounded-lg border border-border"
+              className="w-8 h-8 rounded-full border border-border"
               style={{ backgroundColor: hexValue }}
             />
             <input
@@ -247,7 +247,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                 }
               }}
               onBlur={() => onChange(hexValue)}
-              className="w-full flex-1 h-8 px-2 text-xs font-mono bg-background border border-border rounded-lg"
+              className="w-full flex-1 h-8 px-2 text-xs font-mono bg-background border border-border rounded-full"
             />
           </div>
 
@@ -260,7 +260,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                   setHsv(hexToHsv(color));
                   onChange(color);
                 }}
-                className="w-5 h-5 rounded-md transition-transform hover:scale-110 relative"
+                className="w-5 h-5 rounded-xl transition-transform hover:scale-110 relative"
                 style={{ backgroundColor: color }}
               >
                 {hexValue.toLowerCase() === color && (

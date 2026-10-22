@@ -449,14 +449,14 @@ export function FilesBrowser({
               placeholder={fixedProjectId ? "Search project files..." : "Search files..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+              className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
             />
           </div>
         )}
 
         {showProjectControls && (
           <Select value={projectFilter} onValueChange={setProjectFilter}>
-            <SelectTrigger className="h-8 w-full sm:w-[170px] text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+            <SelectTrigger className="h-8 w-full sm:w-[170px] text-xs border-border/50 bg-transparent shadow-none rounded-full">
               <SelectValue placeholder="Filter project" />
             </SelectTrigger>
             <SelectContent>
@@ -472,7 +472,7 @@ export function FilesBrowser({
         )}
 
         <Select value={sortValue} onValueChange={(value) => setSortValue(value as FileSortValue)}>
-          <SelectTrigger className="h-8 w-full sm:w-[160px] text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+          <SelectTrigger className="h-8 w-full sm:w-[160px] text-xs border-border/50 bg-transparent shadow-none rounded-full">
             <SelectValue placeholder="Sort files" />
           </SelectTrigger>
           <SelectContent>
@@ -487,7 +487,7 @@ export function FilesBrowser({
 
         {showProjectControls && (
           <Select value={uploadProjectId} onValueChange={setUploadProjectId}>
-            <SelectTrigger className="h-8 w-full sm:w-[170px] text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+            <SelectTrigger className="h-8 w-full sm:w-[170px] text-xs border-border/50 bg-transparent shadow-none rounded-full">
               <SelectValue placeholder="Upload target" />
             </SelectTrigger>
             <SelectContent>
@@ -507,7 +507,7 @@ export function FilesBrowser({
             disabled={uploading}
             size="sm"
             variant="outline"
-            className="h-8 text-xs gap-1.5 rounded-lg px-3"
+            className="h-8 text-xs gap-1.5 rounded-full px-3"
           >
             <FolderUp className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Folder</span>
@@ -516,7 +516,7 @@ export function FilesBrowser({
             onClick={handleUpload}
             disabled={uploading}
             size="sm"
-            className="h-8 text-xs gap-1.5 rounded-lg px-3"
+            className="h-8 text-xs gap-1.5 rounded-full px-3"
           >
             <Upload className="h-3.5 w-3.5" />
             {uploading
@@ -677,7 +677,7 @@ export function FilesBrowser({
                             value={file.projectId ?? "__none__"}
                             onValueChange={(value) => handleProjectChange(file._id, value)}
                           >
-                            <SelectTrigger className="h-7 w-full text-[11px] border-border/50 bg-transparent shadow-none rounded-lg">
+                            <SelectTrigger className="h-7 w-full text-[11px] border-border/50 bg-transparent shadow-none rounded-full">
                               <SelectValue placeholder="Assign project" />
                             </SelectTrigger>
                             <SelectContent>
@@ -694,7 +694,7 @@ export function FilesBrowser({
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {file.url && isPreviewableType(file.type) && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
                           <a href={file.url} target="_blank" rel="noopener noreferrer" title="Preview">
                             <Eye className="h-3.5 w-3.5" />
                           </a>
@@ -704,7 +704,7 @@ export function FilesBrowser({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 rounded-lg"
+                          className="h-7 w-7 rounded-full"
                           onClick={() => handleDownload(file._id, file.url!, file.name)}
                           title="Download"
                         >
@@ -714,7 +714,7 @@ export function FilesBrowser({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
+                        className="h-7 w-7 rounded-full text-destructive hover:text-destructive"
                         onClick={() =>
                           setPendingDelete({ fileId: file._id, name: file.name })
                         }
@@ -743,7 +743,7 @@ export function FilesBrowser({
                         value={file.projectId ?? "__none__"}
                         onValueChange={(value) => handleProjectChange(file._id, value)}
                       >
-                        <SelectTrigger className="h-7 w-[140px] text-xs border-border/50 bg-transparent shadow-none rounded-lg overflow-hidden">
+                        <SelectTrigger className="h-7 w-[140px] text-xs border-border/50 bg-transparent shadow-none rounded-full overflow-hidden">
                           <SelectValue placeholder="Assign project" />
                         </SelectTrigger>
                         <SelectContent>
@@ -771,7 +771,7 @@ export function FilesBrowser({
                   </div>
                   <div className="flex items-center justify-end gap-1">
                     {file.url && isPreviewableType(file.type) && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
                         <a href={file.url} target="_blank" rel="noopener noreferrer" title="Preview">
                           <Eye className="h-3.5 w-3.5" />
                         </a>
@@ -781,7 +781,7 @@ export function FilesBrowser({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 rounded-lg"
+                        className="h-7 w-7 rounded-full"
                         onClick={() => handleDownload(file._id, file.url!, file.name)}
                         title="Download"
                       >
@@ -791,7 +791,7 @@ export function FilesBrowser({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-lg text-destructive hover:text-destructive"
+                      className="h-7 w-7 rounded-full text-destructive hover:text-destructive"
                       onClick={() =>
                         setPendingDelete({ fileId: file._id, name: file.name })
                       }

@@ -258,7 +258,7 @@ export function AuditHistoryList({
     }
 
     return (
-      <div className="py-16 text-center border border-dashed border-primary/30 rounded-lg w-full bg-primary/5">
+      <div className="py-16 text-center border border-dashed border-primary/30 rounded-full w-full bg-primary/5">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
           <History className="h-5 w-5 text-primary/60" />
         </div>
@@ -309,7 +309,7 @@ export function AuditHistoryList({
                       <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <Badge
                           variant="outline"
-                          className="h-5 text-[10px] px-1.5 rounded-md font-normal"
+                          className="h-5 text-[10px] px-1.5 rounded-xl font-normal"
                           style={{
                             borderColor: config.color + "40",
                             color: config.color,
@@ -319,7 +319,7 @@ export function AuditHistoryList({
                         </Badge>
                         <Badge
                           variant="outline"
-                          className="h-5 text-[10px] px-1.5 rounded-md font-normal text-muted-foreground"
+                          className="h-5 text-[10px] px-1.5 rounded-xl font-normal text-muted-foreground"
                         >
                           {entityLabel}
                         </Badge>
@@ -328,7 +328,7 @@ export function AuditHistoryList({
                         </span>
                       </div>
                       {typeof metadata.body === "string" && metadata.body && (
-                        <div className="mt-1.5 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
+                        <div className="mt-1.5 p-2 bg-muted/50 rounded-xl border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
                           &quot;<LinkifiedText>{metadata.body}</LinkifiedText>&quot;
                         </div>
                       )}
@@ -362,7 +362,7 @@ export function AuditHistoryList({
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm truncate">{displayName}</p>
                   {typeof metadata.body === "string" && metadata.body && (
-                    <div className="mt-1 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
+                    <div className="mt-1 p-2 bg-muted/50 rounded-xl border border-border/30 text-xs text-muted-foreground italic break-words line-clamp-2">
                       &quot;<LinkifiedText>{metadata.body}</LinkifiedText>&quot;
                     </div>
                   )}
@@ -372,7 +372,7 @@ export function AuditHistoryList({
               <div className="pt-0.5">
                 <Badge
                   variant="outline"
-                  className="h-5 text-[10px] px-1.5 rounded-md font-normal"
+                  className="h-5 text-[10px] px-1.5 rounded-xl font-normal"
                   style={{
                     borderColor: config.color + "40",
                     color: config.color,
@@ -384,7 +384,7 @@ export function AuditHistoryList({
               <div className="pt-0.5">
                 <Badge
                   variant="outline"
-                  className="h-5 text-[10px] px-1.5 rounded-md font-normal text-muted-foreground"
+                  className="h-5 text-[10px] px-1.5 rounded-xl font-normal text-muted-foreground"
                 >
                   {entityLabel}
                 </Badge>

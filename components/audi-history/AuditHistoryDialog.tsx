@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { AuditHistoryList, ENTITY_TYPES, ACTION_CONFIG, ChangesDisplay, formatRelative, parseAuditMetadata } from "@/components/AuditHistoryList";
+import { AuditHistoryList, ENTITY_TYPES, ACTION_CONFIG, ChangesDisplay, formatRelative, parseAuditMetadata } from "@/components/audi-history/AuditHistoryList";
 import {
     Pencil,
     History,
@@ -54,7 +54,7 @@ export function AuditHistoryDialog({
                         </DialogTitle>
                         <div className="flex items-center gap-2 w-full sm:w-auto">
                             <Select value={entityFilter} onValueChange={setEntityFilter}>
-                                <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+                                <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs border-border/50 bg-transparent shadow-none rounded-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -68,7 +68,7 @@ export function AuditHistoryDialog({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 text-xs gap-1.5 rounded-lg px-3"
+                                className="h-8 text-xs gap-1.5 rounded-full px-3"
                                 onClick={() => {
                                     onOpenChange(false);
                                     router.push("/audit-history");
@@ -130,7 +130,7 @@ export function TaskAuditTimeline({ taskId }: { taskId: string }) {
                 return (
                     <div
                         key={log._id}
-                        className="bg-card rounded-lg p-3 border border-border/40 shadow-warm-sm animate-fade-in"
+                        className="bg-card rounded-full p-3 border border-border/40 shadow-warm-sm animate-fade-in"
                     >
                         <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-2.5 min-w-0 flex-1">
@@ -165,7 +165,7 @@ export function TaskAuditTimeline({ taskId }: { taskId: string }) {
                                         </Badge>
                                     </div>
                                     {typeof meta.body === "string" && meta.body && (
-                                        <div className="mt-1.5 p-2 bg-muted/50 rounded-md border border-border/30 text-xs text-muted-foreground italic text-wrap break-words">
+                                        <div className="mt-1.5 p-2 bg-muted/50 rounded-xl border border-border/30 text-xs text-muted-foreground italic text-wrap break-words">
                                             &quot;{meta.body}&quot;
                                         </div>
                                     )}

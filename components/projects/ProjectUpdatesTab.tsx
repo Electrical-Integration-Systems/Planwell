@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ACTION_CONFIG, formatRelative, parseAuditMetadata } from "@/components/AuditHistoryList";
+import { ACTION_CONFIG, formatRelative, parseAuditMetadata } from "@/components/audi-history/AuditHistoryList";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -232,7 +232,7 @@ export function ProjectUpdatesTab({
             Loading…
           </div>
         ) : feed.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-primary/30 rounded-lg bg-primary/5">
+          <div className="py-16 text-center border border-dashed border-primary/30 rounded-full bg-primary/5">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
               <MessageSquare className="h-5 w-5 text-primary/60" />
             </div>
@@ -277,12 +277,12 @@ export function ProjectUpdatesTab({
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
               }}
               placeholder="Leave an update…"
-              className="min-h-[72px] resize-none text-sm border-border/50 shadow-none rounded-lg"
+              className="min-h-[72px] resize-none text-sm border-border/50 shadow-none rounded-4xl"
             />
             <div className="flex justify-end">
               <Button
                 size="sm"
-                className="h-8 text-xs gap-1.5 rounded-lg px-3"
+                className="h-8 text-xs gap-1.5 rounded-full px-3"
                 onClick={handleSubmit}
                 disabled={!body.trim() || submitting}
               >
@@ -327,7 +327,7 @@ function CommentBubble({
     <div className="flex items-start gap-3 pl-0 group animate-fade-in">
       <UserAvatar user={item.user} size="md" />
       <div className="flex-1 min-w-0">
-        <div className="rounded-lg border border-border/50 bg-card shadow-warm-sm overflow-hidden">
+        <div className="rounded-4xl border border-border/50 bg-card shadow-warm-sm overflow-hidden">
           <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/40 border-b border-border/40">
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium">{displayName}</span>
@@ -339,7 +339,7 @@ function CommentBubble({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                className="h-6 w-6 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                 onClick={onDelete}
               >
                 <Trash2 className="h-3.5 w-3.5" />

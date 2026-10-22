@@ -10,11 +10,11 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { TaskList, TASK_GRID_COLS } from "@/components/TaskList";
-import { TaskFilters } from "@/components/TaskFilters";
-import { TaskSort } from "@/components/TaskSort";
-import { TaskDetailDialog } from "@/components/TaskDetailDialog";
-import { SettingsDialog } from "@/components/SettingsDialog";
+import { TaskList, TASK_GRID_COLS } from "@/components/tasks/TaskList";
+import { TaskFilters } from "@/components/tasks/TaskFilters";
+import { TaskSort } from "@/components/tasks/TaskSort";
+import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { TaskFilterState, TaskSortKey } from "@/types/tasks";
 
@@ -104,7 +104,7 @@ export default function Home() {
             </div>
             <Button
               size="sm"
-              className="h-8 text-xs gap-1.5 rounded-lg px-3"
+              className="h-8 text-xs gap-1.5 rounded-full px-3"
               onClick={() => setIsAddingTask(true)}
             >
               <Plus className="h-3.5 w-3.5" />
@@ -114,9 +114,9 @@ export default function Home() {
 
           {/* Tab row + Search */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-2 pb-2">
-            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-0.5">
               <button
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                   activeTab === "active"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -126,7 +126,7 @@ export default function Home() {
                 Active
               </button>
               <button
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1.5 ${
                   activeTab === "archived"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -144,7 +144,7 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tasks..."
-                className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+                className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
               />
             </div>
           </div>

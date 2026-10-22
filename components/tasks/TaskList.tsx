@@ -198,7 +198,7 @@ export function TaskList({
   if (sortedTasks.length === 0 && !isAddingTask) {
     return (
       <div className="flex flex-col items-center">
-        <div className="py-16 text-center border border-dashed border-primary/30 rounded-lg w-full bg-primary/5">
+        <div className="py-16 text-center border border-dashed border-primary/30 rounded-full w-full bg-primary/5">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             {archived ? (
               <Archive className="h-5 w-5 text-primary/60" />
@@ -240,7 +240,7 @@ export function TaskList({
           />
           <Button
             size="sm"
-            className="h-8 text-xs px-3 rounded-lg"
+            className="h-8 text-xs px-3 rounded-full"
             onClick={handleQuickCreate}
           >
             Add
@@ -248,7 +248,7 @@ export function TaskList({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-xs px-2 rounded-lg text-muted-foreground"
+            className="h-8 text-xs px-2 rounded-full text-muted-foreground"
             onClick={() => {
               onIsAddingTaskChange(false);
               setNewTaskTitle("");
@@ -261,16 +261,16 @@ export function TaskList({
 
       {/* Task rows */}
       {sortedTasks.map((task, index) => (
-        <div key={task._id}>
+        <div key={task._id} className="rounded-4xl overflow-hidden">
           {/* Mobile card layout */}
           <div
-            className="md:hidden border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in p-3"
+            className="md:hidden border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/50 hover:rounded-4xl animate-fade-in p-3"
             style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
             onClick={() => onTaskSelect(task._id)}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{task.title}</p>
+                <p className="font-medium text-sm truncate left-2">{task.title}</p>
                 <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                   {task.state && (
                     <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-medium gap-1">
@@ -318,7 +318,7 @@ export function TaskList({
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -559,7 +559,7 @@ export function TaskList({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground"
+                    className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>

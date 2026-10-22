@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/AuditHistoryList";
+import { AuditHistoryList, AUDIT_GRID_COLS, ENTITY_TYPES } from "@/components/audi-history/AuditHistoryList";
 import { Header } from "@/components/layout/Header";
 import { PlanwellLogoMark } from "@/components/PlanwellLogoMark";
-import { SettingsDialog } from "@/components/SettingsDialog";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -73,12 +73,12 @@ export default function AuditHistoryPage() {
                     placeholder="Search audit history..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-lg"
+                    className="h-8 text-xs pl-8 border-border/50 bg-transparent shadow-none rounded-full"
                   />
                 </div>
               )}
               <Select value={entityFilter} onValueChange={setEntityFilter}>
-                <SelectTrigger className="h-8 w-full sm:w-[160px] text-xs border-border/50 bg-transparent shadow-none rounded-lg">
+                <SelectTrigger className="h-8 w-full sm:w-[160px] text-xs border-border/50 bg-transparent shadow-none rounded-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

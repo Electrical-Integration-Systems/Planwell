@@ -156,7 +156,7 @@ export function CreateTaskDialog({
                 value={effectiveStateId}
                 onValueChange={(val) => setStateId(val as Id<"taskStates">)}
               >
-                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-lg">
+                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-full">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,7 +178,7 @@ export function CreateTaskDialog({
                 value={effectivePriorityId}
                 onValueChange={(val) => setPriorityId(val as Id<"priorities">)}
               >
-                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-lg">
+                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-full">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -200,7 +200,7 @@ export function CreateTaskDialog({
                 value={projectId}
                 onValueChange={(val) => setProjectId(val as Id<"projects">)}
               >
-                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-lg">
+                <SelectTrigger className="h-9 text-sm border-border/50 bg-transparent shadow-none rounded-full">
                   <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
@@ -279,14 +279,14 @@ export function CreateTaskDialog({
             <Button
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="rounded-lg text-sm"
+              className="rounded-full text-sm"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!canCreate}
-              className="rounded-lg shadow-warm-sm hover:shadow-warm transition-shadow text-sm px-5"
+              className="rounded-full shadow-warm-sm hover:shadow-warm transition-shadow text-sm px-5"
             >
               Create Task
             </Button>
