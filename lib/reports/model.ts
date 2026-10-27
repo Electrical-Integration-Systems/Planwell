@@ -2,7 +2,17 @@ import type { GenericId } from "convex/values";
 import template from "@/lib/reports/template.json";
 
 export const reportTemplate = template;
-export const reportRendererVersion = "final-without-version-v5";
+export const reportRendererVersion = "annex-images-v6";
+export const reportImageLimit = 10;
+export const reportImageMaxBytes = 1024 * 1024;
+
+export type ReportImage = {
+  storageId: GenericId<"_storage">;
+  name: string;
+  width: number;
+  height: number;
+  caption: string;
+};
 
 export type ReportLogo = {
   storageId: GenericId<"_storage">;
@@ -63,6 +73,7 @@ export type ReportForm = {
   recommendations: ReportRecommendation[];
   conclusions: string;
   note: string;
+  images?: ReportImage[];
 };
 
 export type ReportStatus = "draft" | "final";
@@ -75,6 +86,7 @@ export type ReportSnapshot = {
   company: ReportCompany;
   templateVersion: string;
   logoUrl?: string | null;
+  imageUrls?: Record<string, string | null>;
 };
 
 export const priorityLabels = {
@@ -129,6 +141,7 @@ export function reportGeneralRows(snapshot: ReportSnapshot): string[][] {
 }
 
 export type ReportBlock =
+  | { type: "image"; image: ReportImage; index: number }
   | { type: "heading"; text: string; level: 1 | 2 }
   | { type: "text"; text: string; size?: number }
   | { type: "table"; rows: string[][]; widths: number[]; header: boolean; keepTogether?: boolean; signatureRow?: number };
@@ -219,6 +232,10 @@ export function reportContent(snapshot: ReportSnapshot): ReportBlock[] {
   if (form.interventionDate.trim()) signatureRows.push(signers.map(() => `Data: ${formatReportDate(form.interventionDate)}`));
   // Signing areas are structural, even when optional names are not filled in yet.
   section(7, () => [{ type: "table", header: true, widths: [0.5, 0.5], rows: signatureRows, keepTogether: true, signatureRow }]);
+  if (form.images?.length) {
+    blocks.push({ type: "heading", text: `${sectionNumber + 1}. Anexe`, level: 1 });
+    form.images.forEach((image, index) => blocks.push({ type: "image", image, index }));
+  }
   return blocks;
 }
 

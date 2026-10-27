@@ -25,6 +25,14 @@ export const reportCompanyValidator = v.object({
 
 const section = v.object({ title: v.string(), body: v.string() });
 
+export const reportImageValidator = v.object({
+  storageId: v.id("_storage"),
+  name: v.string(),
+  width: v.number(),
+  height: v.number(),
+  caption: v.string(),
+});
+
 export const reportFormValidator = v.object({
   title: v.string(),
   beneficiary: v.string(),
@@ -46,6 +54,7 @@ export const reportFormValidator = v.object({
   })),
   conclusions: v.string(),
   note: v.string(),
+  images: v.optional(v.array(reportImageValidator)),
 });
 
 export const reportStatusValidator = v.union(v.literal("draft"), v.literal("final"));

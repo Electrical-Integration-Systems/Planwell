@@ -2,6 +2,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, rgb } from "pdf-lib";
 import type { PDFFont } from "pdf-lib";
 import { loadReportLogo } from "@/lib/reports/logo";
+import { loadReportImage, reportImageCaption } from "@/lib/reports/images";
 import { reportContent, reportIssuerLines, reportMetadata, reportTemplate } from "@/lib/reports/model";
 import type { ReportSnapshot } from "@/lib/reports/model";
 
@@ -183,6 +184,16 @@ export async function buildReportPdf(snapshot: ReportSnapshot, fontBytes?: Array
       sectionHeading(block.text, block.level);
     }
     else if (block.type === "text") text(block.text, block.size);
+    else if (block.type === "image") {
+      const image = await document.embedJpg(await loadReportImage(snapshot, block.image));
+      const caption = reportImageCaption(block.image, block.index);
+      const captionHeight = wrap(caption, 9, contentWidth).length * 13.5 + 8;
+      const size = image.scaleToFit(contentWidth, Math.max(1, bodyTop - bodyBottom - captionHeight - 85));
+      ensure(size.height + captionHeight + 16);
+      page.drawImage(image, { x: margin + (contentWidth - size.width) / 2, y: y - size.height, ...size });
+      y -= size.height + 8;
+      text(caption, 9, false, muted);
+    }
     else table(block.rows, block.widths, block.header, block.keepTogether, block.signatureRow);
   }
 

@@ -1,5 +1,6 @@
 import { AlignmentType, BorderStyle, Document, Footer, Header, HeadingLevel, HeightRule, ImageRun, Packer, PageNumber, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
 import { loadReportLogo } from "@/lib/reports/logo";
+import { loadReportImage, reportImageCaption } from "@/lib/reports/images";
 import { reportContent, reportIssuerLines, reportMetadata, reportTemplate } from "@/lib/reports/model";
 import type { ReportSnapshot } from "@/lib/reports/model";
 
@@ -34,6 +35,12 @@ export async function buildReportDocx(snapshot: ReportSnapshot): Promise<Blob> {
   const { form, company } = snapshot;
   const logoBytes = await loadReportLogo(snapshot);
   const logoScale = company.logo ? Math.min(140 / company.logo.width, 64 / company.logo.height) : 0;
+  const lineCount = (values: string[]) => values.reduce((count, value) => count + value.split(/\r?\n/).reduce((lines, line) => lines + Math.max(1, Math.ceil(line.length / 90)), 0), 0);
+  const headerText = reportIssuerLines(company);
+  const textHeaderLines = logoBytes ? headerText.reduce((count, value) => count + value.split(/\r?\n/).reduce((lines, line) => lines + Math.max(1, Math.ceil(line.length / 65)), 0), 0) : lineCount(headerText);
+  const topMargin = Math.max(1620, 450 + Math.max(textHeaderLines * 240, logoBytes ? 960 : 0) + 480);
+  const bottomMargin = Math.max(1440, 450 + lineCount(company.footer.trim() ? [company.footer.trim()] : []) * 240 + 700);
+  if (topMargin + bottomMargin > 12500) throw new Error("Antetul sau subsolul este prea lung pentru documentul Word. Scurtează-l în configurare.");
   const children: (Paragraph | Table)[] = [
     new Paragraph({ children: [new TextRun({ text: reportTemplate.title, size: 36, bold: true, color: "0F172A" })], heading: HeadingLevel.TITLE, spacing: { after: 160 } }),
     ...(form.title.trim() ? [new Paragraph({ children: [new TextRun({ text: form.title.trim(), size: 22, color: "64748B" })], spacing: { after: 160 } })] : []),
@@ -49,15 +56,20 @@ export async function buildReportDocx(snapshot: ReportSnapshot): Promise<Blob> {
       border: block.level === 1 ? { left: { style: BorderStyle.SINGLE, size: 18, color: "0F766E", space: 8 } } : undefined,
     }));
     else if (block.type === "text") children.push(...paragraphs(block.text, block.size));
+    else if (block.type === "image") {
+      const caption = reportImageCaption(block.image, block.index);
+      const captionHeight = Math.ceil(caption.length / 80) * 18 + 24;
+      const scale = Math.min(1, 642 / block.image.width, Math.max(1, (16838 - topMargin - bottomMargin) / 15 - captionHeight - 100) / block.image.height);
+      children.push(new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new ImageRun({ type: "jpg", data: await loadReportImage(snapshot, block.image), transformation: { width: Math.max(1, Math.round(block.image.width * scale)), height: Math.max(1, Math.round(block.image.height * scale)) } })],
+        keepNext: true,
+        spacing: { before: 160, after: 120 },
+      }), new Paragraph({ children: [new TextRun({ text: caption, size: 18, color: "64748B" })], spacing: { after: 240 }, widowControl: true }));
+    }
     else children.push(table(block.rows, block.widths, block.header, block.keepTogether, block.signatureRow));
   }
 
-  const headerText = reportIssuerLines(company);
-  const lineCount = (values: string[]) => values.reduce((count, value) => count + value.split(/\r?\n/).reduce((lines, line) => lines + Math.max(1, Math.ceil(line.length / 90)), 0), 0);
-  const textHeaderLines = logoBytes ? headerText.reduce((count, value) => count + value.split(/\r?\n/).reduce((lines, line) => lines + Math.max(1, Math.ceil(line.length / 65)), 0), 0) : lineCount(headerText);
-  const topMargin = Math.max(1620, 450 + Math.max(textHeaderLines * 240, logoBytes ? 960 : 0) + 480);
-  const bottomMargin = Math.max(1440, 450 + lineCount(company.footer.trim() ? [company.footer.trim()] : []) * 240 + 700);
-  if (topMargin + bottomMargin > 12500) throw new Error("Antetul sau subsolul este prea lung pentru documentul Word. Scurtează-l în configurare.");
   function smallParagraphs(text: string, bold = false): Paragraph[] {
     return text.split(/\r?\n/).map((line) => new Paragraph({ children: [new TextRun({ text: line, size: 16, bold, color: bold ? "0F172A" : "64748B" })], spacing: { after: 20, line: 220 } }));
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
+import Image from "next/image";
 import { Download, Eye, EyeOff, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
@@ -13,15 +14,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { prepareReportImage } from "@/lib/reports/images";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createReportForm, priorityLabels, reportFilename, reportRendererVersion, reportSigners, reportTemplate } from "@/lib/reports/model";
+import { createReportForm, priorityLabels, reportFilename, reportImageLimit, reportRendererVersion, reportSigners, reportTemplate } from "@/lib/reports/model";
 import type { ReportCompany, ReportFormat, ReportForm, ReportSection, ReportSnapshot, ReportStatus } from "@/lib/reports/model";
 import { normalizeReportForm, reportFinalRequiredFields, reportSaveErrorMessage, reportValidationIssues } from "@/lib/reports/validation";
 import type { ReportValidationIssue } from "@/lib/reports/validation";
 
 type StoredVersion = Doc<"technicalReportVersions"> & {
   logoUrl?: string | null;
+  imageUrls?: Record<string, string | null>;
   exports: (Doc<"technicalReportExports"> & { url: string | null })[];
 };
 type HistoryItem = { _id: Id<"technicalReportVersions">; version: number; status: ReportStatus; createdAt: number };
@@ -50,9 +54,11 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
   const save = useMutation(api.technicalReports.save);
   const generateUploadUrl = useMutation(api.technicalReports.generateUploadUrl);
   const attachExport = useMutation(api.technicalReports.attachExport);
+  const registerImage = useMutation(api.technicalReports.registerImage);
   const [form, setForm] = useState<ReportForm>(() => storedVersion?.form ?? createReportForm(currentCompany));
   const [company, setCompany] = useState(storedVersion?.company ?? currentCompany);
   const [logoUrl, setLogoUrl] = useState(storedVersion ? storedVersion.logoUrl : currentLogoUrl);
+  const [imageUrls, setImageUrls] = useState<Record<string, string | null>>(storedVersion?.imageUrls ?? {});
   const [expectedVersion] = useState(latestVersion);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +74,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
     form,
     company,
     logoUrl,
+    imageUrls,
     templateVersion: storedVersion?.templateVersion ?? reportTemplate.sourceSha256,
   };
 
@@ -83,7 +90,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
     setValidationIssues((current) => current.length ? reportValidationIssues({ ...form, [key]: value }, company, validationStatus) : current);
   }
 
-  function field(key: { [K in keyof ReportForm]: ReportForm[K] extends string ? K : never }[keyof ReportForm], label: string, multiline = false, required = false) {
+  function field(key: { [K in keyof ReportForm]-?: ReportForm[K] extends string ? K : never }[keyof ReportForm], label: string, multiline = false, required = false) {
     const hint = key === "technician" && company.defaultTechnician.trim()
       ? `Executant implicit: ${company.defaultTechnician.trim()}. Se folosește dacă lași câmpul gol.`
       : reportFinalRequiredFields.some((name) => name === key) ? "Necesar la finalizare." : undefined;
@@ -142,6 +149,22 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
     setBusy(format);
     setError(null);
     void exportVersion(format).then(() => toast.success("Documentul a fost arhivat și descărcat.")).catch((cause: Error) => setError(cause.message)).finally(() => setBusy(null));
+  }
+
+  async function uploadImages(files: File[]) {
+    if ((form.images?.length ?? 0) + files.length > reportImageLimit) throw new Error(`Poți adăuga cel mult ${reportImageLimit} imagini în anexe.`);
+    for (const file of files) {
+      const prepared = await prepareReportImage(file);
+      const uploadUrl = await generateUploadUrl({});
+      const response = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": "image/jpeg" }, body: prepared.blob });
+      if (!response.ok) throw new Error(`Imaginea „${file.name}” nu a putut fi încărcată.`);
+      const uploaded: unknown = await response.json();
+      if (!uploaded || typeof uploaded !== "object" || !("storageId" in uploaded) || typeof uploaded.storageId !== "string") throw new Error("Încărcarea nu a returnat o imagine validă.");
+      const result = await registerImage({ image: { storageId: uploaded.storageId as Id<"_storage">, name: prepared.name, width: prepared.width, height: prepared.height, caption: "" } });
+      if (!result.url) throw new Error("Imaginea încărcată nu este disponibilă.");
+      setImageUrls((previous) => ({ ...previous, [result.image.storageId]: result.url }));
+      setForm((previous) => ({ ...previous, images: [...(previous.images ?? []), result.image] }));
+    }
   }
 
   function navigate(versionId?: Id<"technicalReportVersions">) {
@@ -220,6 +243,24 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
           </CardContent></Card>
           <Card><CardHeader><CardTitle>{reportTemplate.headings[6]}</CardTitle></CardHeader><CardContent className="space-y-5">{field("conclusions", "Concluzii", true)}{field("note", "Notă", true)}</CardContent></Card>
           <Card><CardHeader><CardTitle>{reportTemplate.headings[7]}</CardTitle><CardDescription>Numele sunt preluate din datele generale și configurarea firmei. Beneficiarul apare și dacă reprezentantul nu este completat. Ambele spații pentru semnătură sunt incluse întotdeauna în document.</CardDescription></CardHeader><CardContent className="grid gap-3 text-sm sm:grid-cols-2">{reportSigners(snapshot).map((signer) => <div key={signer.label} className="space-y-2"><p className="font-medium">{signer.label}</p>{signer.name && <p className="whitespace-pre-wrap">{signer.name}</p>}<p>{signer.signature}</p></div>)}</CardContent></Card>
+          <Card><CardHeader><CardTitle>Anexe</CardTitle><CardDescription>Adaugă până la {reportImageLimit} imagini PNG, JPG sau WebP, de maximum 20 MB fiecare. Imaginile sunt optimizate pentru document. Secțiunea apare la finalul raportului doar dacă are imagini atașate.</CardDescription></CardHeader><CardContent className="space-y-5">
+            <div className="space-y-2"><Label htmlFor="report-images">Adaugă imagini</Label><Input id="report-images" type="file" accept="image/png,image/jpeg,image/webp" multiple disabled={busy !== null || (form.images?.length ?? 0) >= reportImageLimit} onChange={(event) => {
+              const files = Array.from(event.target.files ?? []);
+              event.target.value = "";
+              if (!files.length) return;
+              setBusy("images");
+              setError(null);
+              void uploadImages(files).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : "Imaginile nu au putut fi încărcate.")).finally(() => setBusy(null));
+            }} /></div>
+            {busy === "images" && <p role="status" className="text-sm text-muted-foreground">Se încarcă imaginile…</p>}
+            {!form.images?.length && <p className="text-sm text-muted-foreground">Nu sunt atașate imagini. Anexele nu vor fi incluse în document.</p>}
+            {form.images?.map((image, index) => <Card key={`${image.storageId}-${index}`}><CardContent className="space-y-4 pt-6">
+              <div className="flex items-center justify-between gap-3"><Label>Imaginea {index + 1}</Label><Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => update("images", form.images?.filter((_, row) => row !== index))}><Trash2 className="size-4" />Elimină</Button></div>
+              {imageUrls[image.storageId] && <Image src={imageUrls[image.storageId]!} alt={image.caption || image.name} width={image.width} height={image.height} unoptimized className="max-h-64 w-auto max-w-full rounded-md object-contain" />}
+              <p className="break-all text-xs text-muted-foreground">{image.name}</p>
+              <ReportField label="Descriere imagine (opțional)" value={image.caption} maxLength={1000} disabled={busy !== null} onChange={(value) => update("images", form.images?.map((item, row) => row === index ? { ...item, caption: value } : item))} />
+            </CardContent></Card>)}
+          </CardContent></Card>
           <div className="flex flex-wrap gap-3"><Button disabled={busy !== null} onClick={() => saveVersion("draft")}><Save className="size-4" />Salvează versiune</Button><Button variant="secondary" disabled={busy !== null} onClick={() => saveVersion("final")}>Finalizează raportul</Button></div>
         </section>
         <aside id="report-pdf-preview" aria-label="Previzualizarea PDF a raportului" hidden={!previewVisible} className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">

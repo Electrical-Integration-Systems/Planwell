@@ -1,12 +1,12 @@
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { MutationCtx } from "./_generated/server";
-import { requireWhitelistedUser } from "./authz";
-import { logAudit } from "./auditLog";
-import { reportCompanyValidator, reportFormValidator, reportStatusValidator, reportFormatValidator, reportLogoValidator } from "./reportValidators";
-import { defaultReportCompany, reportFilename, reportTemplate } from "../lib/reports/model";
-import type { ReportLogo } from "../lib/reports/model";
-import { normalizeReportForm, reportValidationIssues } from "../lib/reports/validation";
+import { mutation, query } from "@/convex/_generated/server";
+import type { MutationCtx } from "@/convex/_generated/server";
+import { requireWhitelistedUser } from "@/convex/authz";
+import { logAudit } from "@/convex/auditLog";
+import { reportCompanyValidator, reportFormValidator, reportStatusValidator, reportFormatValidator, reportLogoValidator, reportImageValidator } from "@/convex/reportValidators";
+import { defaultReportCompany, reportFilename, reportTemplate, reportImageLimit, reportImageMaxBytes } from "@/lib/reports/model";
+import type { ReportImage, ReportLogo } from "@/lib/reports/model";
+import { normalizeReportForm, reportValidationIssues } from "@/lib/reports/validation";
 
 async function validateLogo(ctx: MutationCtx, logo: ReportLogo | undefined) {
   if (!logo) return;
@@ -15,6 +15,25 @@ async function validateLogo(ctx: MutationCtx, logo: ReportLogo | undefined) {
     throw new ConvexError("Logo-ul nu este valid. Încarcă imaginea din nou în configurare.");
   }
 }
+
+async function validateImage(ctx: MutationCtx, image: ReportImage) {
+  const metadata = await ctx.db.system.get(image.storageId);
+  if (!metadata || metadata.contentType !== "image/jpeg" || metadata.size === 0 || metadata.size > reportImageMaxBytes) {
+    throw new ConvexError("Imaginea din anexă trebuie să fie JPEG de maximum 1 MB.");
+  }
+  if (!image.name.trim() || image.name.length > 200 || image.caption.length > 1000 || !Number.isInteger(image.width) || !Number.isInteger(image.height) || image.width < 1 || image.height < 1 || image.width > 1600 || image.height > 1600) {
+    throw new ConvexError("Datele imaginii din anexă nu sunt valide.");
+  }
+}
+
+export const registerImage = mutation({
+  args: { image: reportImageValidator },
+  handler: async (ctx, args) => {
+    await requireWhitelistedUser(ctx);
+    await validateImage(ctx, args.image);
+    return { image: args.image, url: await ctx.storage.getUrl(args.image.storageId) };
+  },
+});
 
 export const getSettings = query({
   args: {},
@@ -76,7 +95,8 @@ export const getVersion = query({
     const version = await ctx.db.get(args.versionId);
     if (!version) return null;
     const exports = await ctx.db.query("technicalReportExports").withIndex("by_version", (q) => q.eq("versionId", args.versionId)).collect();
-    return { ...version, logoUrl: version.company.logo ? await ctx.storage.getUrl(version.company.logo.storageId) : null, exports: await Promise.all(exports.map(async (file) => ({ ...file, url: await ctx.storage.getUrl(file.storageId) }))) };
+    const imageUrls = Object.fromEntries(await Promise.all((version.form.images ?? []).map(async (image) => [image.storageId, await ctx.storage.getUrl(image.storageId)])));
+    return { ...version, imageUrls, logoUrl: version.company.logo ? await ctx.storage.getUrl(version.company.logo.storageId) : null, exports: await Promise.all(exports.map(async (file) => ({ ...file, url: await ctx.storage.getUrl(file.storageId) }))) };
   },
 });
 
@@ -92,6 +112,8 @@ export const save = mutation({
     const userId = await requireWhitelistedUser(ctx);
     const form = normalizeReportForm(args.form, args.company);
     await validateLogo(ctx, args.company.logo);
+    if ((form.images?.length ?? 0) > reportImageLimit) throw new ConvexError(`Poți adăuga cel mult ${reportImageLimit} imagini în anexe.`);
+    await Promise.all((form.images ?? []).map((image) => validateImage(ctx, image)));
     const issues = reportValidationIssues(form, args.company, args.status);
     if (issues.length) throw new ConvexError(issues.map((issue) => issue.message).join(" "));
     if (JSON.stringify(form).length > 200000 || JSON.stringify(args.company).length > 30000) throw new ConvexError("Raportul este prea mare.");
