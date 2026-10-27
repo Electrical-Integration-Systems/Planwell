@@ -2,7 +2,7 @@ import type { GenericId } from "convex/values";
 import template from "@/lib/reports/template.json";
 
 export const reportTemplate = template;
-export const reportRendererVersion = "annex-images-v6";
+export const reportRendererVersion = "multiline-signers-v7";
 export const reportImageLimit = 10;
 export const reportImageMaxBytes = 1024 * 1024;
 
@@ -124,6 +124,8 @@ export function formatReportDate(value: string): string {
   return year && month && day ? `${day}.${month}.${year}` : value;
 }
 
+const formatNames = (value: string) => value.split(/[,\r\n]+/).map((name) => name.trim()).filter(Boolean).join("\n");
+
 export function reportGeneralRows(snapshot: ReportSnapshot): string[][] {
   const { form, company } = snapshot;
   return [
@@ -134,7 +136,7 @@ export function reportGeneralRows(snapshot: ReportSnapshot): string[][] {
     ["Tip intervenție", form.interventionType],
     ["Data intervenției", formatReportDate(form.interventionDate)],
     ["Durata intervenției", form.duration],
-    ["Executant", form.technician.trim() || company.defaultTechnician.trim()],
+    ["Executant", formatNames(form.technician.trim() || company.defaultTechnician.trim())],
     ["Reprezentant beneficiar", form.beneficiaryRepresentative],
     ["Stare la finalul intervenției", form.finalState],
   ].filter(([, value]) => value.trim()).map(([label, value]) => [label, value.trim()]);
@@ -151,8 +153,8 @@ export function reportSigners(snapshot: ReportSnapshot) {
   const beneficiary = form.beneficiary.trim();
   const representative = form.beneficiaryRepresentative.trim();
   return [
-    { label: "EXECUTANT / ÎNTOCMIT", name: form.technician.trim() || company.defaultTechnician.trim(), signature: "Semnătura:" },
-    { label: "BENEFICIAR", name: [beneficiary, representative && representative !== beneficiary ? `Reprezentant: ${representative}` : ""].filter(Boolean).join("\n"), signature: "Semnătura / ștampila:" },
+    { label: "EXECUTANT / ÎNTOCMIT", name: formatNames(form.technician.trim() || company.defaultTechnician.trim()), signature: "Semnătura:" },
+    { label: "BENEFICIAR", name: [beneficiary, representative && representative !== beneficiary ? `Reprezentant: ${formatNames(representative)}` : ""].filter(Boolean).join("\n"), signature: "Semnătura / ștampila:" },
   ];
 }
 
