@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { createReportForm, priorityLabels, reportFilename, reportImageLimit, reportRendererVersion, reportSigners, reportSigningDate, reportTemplate } from "@/lib/reports/model";
 import type { ReportCompany, ReportFormat, ReportForm, ReportSection, ReportSnapshot, ReportStatus } from "@/lib/reports/model";
-import { normalizeReportForm, reportFinalRequiredFields, reportSaveErrorMessage, reportValidationIssues } from "@/lib/reports/validation";
+import { normalizeReportForm, reportSaveErrorMessage, reportValidationIssues } from "@/lib/reports/validation";
 import type { ReportValidationIssue } from "@/lib/reports/validation";
 
 type StoredVersion = Doc<"technicalReportVersions"> & {
@@ -63,7 +63,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationIssues, setValidationIssues] = useState<ReportValidationIssue[]>([]);
-  const [validationStatus, setValidationStatus] = useState<ReportStatus>("draft");
+
   const [previewVisible, setPreviewVisible] = useState(true);
   const [pendingNavigation, setPendingNavigation] = useState<{ versionId?: Id<"technicalReportVersions"> } | null>(null);
   const dirty = storedVersion ? JSON.stringify(form) !== JSON.stringify(storedVersion.form) || JSON.stringify(company) !== JSON.stringify(storedVersion.company) : true;
@@ -87,20 +87,20 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
 
   function update<K extends keyof ReportForm>(key: K, value: ReportForm[K]) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setValidationIssues((current) => current.length ? reportValidationIssues({ ...form, [key]: value }, company, validationStatus) : current);
+    setValidationIssues((current) => current.length ? reportValidationIssues({ ...form, [key]: value }) : current);
   }
 
-  function field(key: { [K in keyof ReportForm]-?: ReportForm[K] extends string ? K : never }[keyof ReportForm], label: string, multiline = false, required = false) {
+  function field(key: { [K in keyof ReportForm]-?: ReportForm[K] extends string ? K : never }[keyof ReportForm], label: string, multiline = false) {
     const hint = key === "technician" && company.defaultTechnician.trim()
       ? `Executant implicit: ${company.defaultTechnician.trim()}. Se folosește dacă lași câmpul gol.`
-      : reportFinalRequiredFields.some((name) => name === key) ? "Necesar la finalizare." : undefined;
-    return <ReportField key={key} fieldName={key} label={label} value={form[key]} multiline={multiline} required={required} disabled={busy !== null} type={key === "interventionDate" ? "date" : "text"} hint={hint} error={validationIssues.find((issue) => issue.field === key)?.message} onChange={(value) => update(key, value)} />;
+      : undefined;
+    return <ReportField key={key} fieldName={key} label={label} value={form[key]} multiline={multiline} disabled={busy !== null} type={key === "interventionDate" ? "date" : "text"} hint={hint} error={validationIssues.find((issue) => issue.field === key)?.message} onChange={(value) => update(key, value)} />;
   }
 
   function saveVersion(status: ReportStatus) {
     setError(null);
-    setValidationStatus(status);
-    const issues = reportValidationIssues(form, company, status);
+
+    const issues = reportValidationIssues(form);
     setValidationIssues(issues);
     if (issues.length) {
       const target = document.querySelector<HTMLElement>(`[data-report-field="${issues[0].field}"]`);
@@ -177,7 +177,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
     function setSection(index: number, patch: Partial<ReportSection>) {
       update(key, form[key].map((section, row) => row === index ? { ...section, ...patch } : section));
     }
-    return <Card data-report-field={key} tabIndex={-1}><CardHeader><CardTitle>{title}</CardTitle><CardDescription>Adaugă câte o subsecțiune pentru fiecare echipament, constatare sau lucrare.{key === "work" && " Pentru finalizare este necesară descrierea pentru cel puțin o lucrare."}</CardDescription></CardHeader><CardContent className="space-y-5">
+    return <Card data-report-field={key} tabIndex={-1}><CardHeader><CardTitle>{title}</CardTitle><CardDescription>Adaugă câte o subsecțiune pentru fiecare echipament, constatare sau lucrare.</CardDescription></CardHeader><CardContent className="space-y-5">
       {validationIssues.find((issue) => issue.field === key) && <p role="alert" className="text-sm text-destructive">{validationIssues.find((issue) => issue.field === key)?.message}</p>}
       {form[key].map((section, index) => <Card key={index} className="gap-3 bg-muted/20 py-4"><CardContent className="space-y-4 px-4">
         <div className="flex items-center justify-between gap-3"><Label>{key === "findings" ? "3" : "4"}.{index + 1}</Label><Button type="button" variant="ghost" size="sm" disabled={busy !== null} onClick={() => update(key, form[key].filter((_, row) => row !== index))}><Trash2 className="size-4" />Elimină</Button></div>
@@ -205,7 +205,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
         {storedVersion && storedVersion.exports.length > 0 && <p className="w-full text-xs text-muted-foreground">Fișiere arhivate: {storedVersion.exports.map((file) => `${file.format.toUpperCase()} (${new Date(file.createdAt).toLocaleString("ro-RO")})${file.rendererVersion === reportRendererVersion ? "" : " – format precedent"}`).join(" · ")}</p>}
       </CardContent></Card>
       {error && <p role="alert" className="whitespace-pre-wrap text-sm text-destructive">{error}</p>}
-      {validationIssues.length > 0 && <Card role="alert" className="border-destructive/40"><CardHeader><CardTitle>{validationStatus === "final" ? "Raportul nu poate fi finalizat încă" : "Raportul nu poate fi salvat încă"}</CardTitle><CardDescription>{validationStatus === "final" ? "Completează câmpurile de mai jos. Poți salva raportul ca ciornă înainte de finalizare." : "Completează câmpurile de mai jos pentru a salva ciorna."}</CardDescription></CardHeader><CardContent><ul className="list-disc space-y-1 pl-5 text-sm text-destructive">{validationIssues.map((issue) => <li key={issue.field}>{issue.message}</li>)}</ul></CardContent></Card>}
+      {validationIssues.length > 0 && <Card role="alert" className="border-destructive/40"><CardHeader><CardTitle>Verifică valorile completate</CardTitle><CardDescription>Corectează valorile de mai jos sau lasă câmpurile goale.</CardDescription></CardHeader><CardContent><ul className="list-disc space-y-1 pl-5 text-sm text-destructive">{validationIssues.map((issue) => <li key={issue.field}>{issue.message}</li>)}</ul></CardContent></Card>}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">Completarea raportului</h2>
         <Button variant="outline" aria-expanded={previewVisible} aria-controls="report-pdf-preview" onClick={() => setPreviewVisible((visible) => !visible)}>
@@ -215,15 +215,15 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
       </div>
       <div className={cn("grid items-start gap-6", previewVisible && "lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]")}>
         <section aria-label="Formularul raportului" className="min-w-0 space-y-5">
-          <Card data-report-field="companyName" tabIndex={-1}><CardHeader><CardTitle>Antet și firmă</CardTitle><CardDescription>Raportul păstrează datele firmei și logo-ul folosite la salvare.</CardDescription></CardHeader><CardContent className="space-y-3"><p className="text-sm">{company.companyName || "Firma nu este încă configurată."}</p><p className="whitespace-pre-wrap text-sm text-muted-foreground">{company.header}</p>{company.logo && <p className="text-xs text-muted-foreground">Logo: {company.logo.name}</p>}{validationIssues.find((issue) => issue.field === "companyName") && <p role="alert" className="text-sm text-destructive">{validationIssues.find((issue) => issue.field === "companyName")?.message}</p>}<Button variant="outline" disabled={busy !== null || JSON.stringify(company) === JSON.stringify(currentCompany)} onClick={() => { setCompany(currentCompany); setLogoUrl(currentLogoUrl); setValidationIssues((current) => current.length ? reportValidationIssues(form, currentCompany, validationStatus) : current); }}>Aplică datele curente din configurare</Button></CardContent></Card>
-          <Card><CardHeader><CardTitle>{reportTemplate.headings[0]}</CardTitle><CardDescription>Titlul și beneficiarul sunt obligatorii pentru salvarea ciornei. Finalizarea necesită și locația, executantul, scopul, lucrările, starea finală și concluziile.</CardDescription></CardHeader><CardContent className="grid gap-5 sm:grid-cols-2">
-            {field("title", "Titlul / obiectul intervenției", false, true)}{field("beneficiary", "Beneficiar", false, true)}
+          <Card data-report-field="companyName" tabIndex={-1}><CardHeader><CardTitle>Antet și firmă</CardTitle><CardDescription>Raportul păstrează datele firmei și logo-ul folosite la salvare.</CardDescription></CardHeader><CardContent className="space-y-3"><p className="text-sm">{company.companyName || "Firma nu este încă configurată."}</p><p className="whitespace-pre-wrap text-sm text-muted-foreground">{company.header}</p>{company.logo && <p className="text-xs text-muted-foreground">Logo: {company.logo.name}</p>}{validationIssues.find((issue) => issue.field === "companyName") && <p role="alert" className="text-sm text-destructive">{validationIssues.find((issue) => issue.field === "companyName")?.message}</p>}<Button variant="outline" disabled={busy !== null || JSON.stringify(company) === JSON.stringify(currentCompany)} onClick={() => { setCompany(currentCompany); setLogoUrl(currentLogoUrl); setValidationIssues((current) => current.length ? reportValidationIssues(form) : current); }}>Aplică datele curente din configurare</Button></CardContent></Card>
+          <Card><CardHeader><CardTitle>{reportTemplate.headings[0]}</CardTitle><CardDescription>Toate câmpurile sunt opționale, atât pentru ciorne, cât și pentru rapoartele finalizate.</CardDescription></CardHeader><CardContent className="grid gap-5 sm:grid-cols-2">
+            {field("title", "Titlul / obiectul intervenției")}{field("beneficiary", "Beneficiar")}
             {field("location", "Locație intervenție")}{field("interventionType", "Tip intervenție")}
-            {field("interventionDate", "Data efectivă a intervenției", false, true)}
-            <ReportField fieldName="reportDate" label="Data întocmirii și semnării raportului" type="date" required value={reportSigningDate(form)} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "reportDate")?.message} onChange={(value) => update("reportDate", value)} />
+            {field("interventionDate", "Data efectivă a intervenției")}
+            <ReportField fieldName="reportDate" label="Data întocmirii și semnării raportului" type="date" value={reportSigningDate(form)} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "reportDate")?.message} onChange={(value) => update("reportDate", value)} />
             <div className="space-y-3 sm:col-span-2">
               {(form.additionalInterventionDates ?? []).map((date, index) => <div key={index} className="flex items-end gap-2">
-                <ReportField fieldName="additionalInterventionDates" label={`Zi suplimentară de intervenție ${index + 1}`} type="date" required value={date} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "additionalInterventionDates")?.message} onChange={(value) => update("additionalInterventionDates", form.additionalInterventionDates?.map((item, row) => row === index ? value : item))} />
+                <ReportField fieldName="additionalInterventionDates" label={`Zi suplimentară de intervenție ${index + 1}`} type="date" value={date} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "additionalInterventionDates")?.message} onChange={(value) => update("additionalInterventionDates", form.additionalInterventionDates?.map((item, row) => row === index ? value : item))} />
                 <Button variant="ghost" size="icon" aria-label={`Elimină ziua suplimentară ${index + 1}`} disabled={busy !== null} onClick={() => update("additionalInterventionDates", form.additionalInterventionDates?.filter((_, row) => row !== index))}><Trash2 className="size-4" /></Button>
               </div>)}
               <Button variant="outline" disabled={busy !== null || (form.additionalInterventionDates?.length ?? 0) >= 100} onClick={() => update("additionalInterventionDates", [...(form.additionalInterventionDates ?? []), ""])}><Plus className="size-4" />Adaugă zi de intervenție</Button>
@@ -238,7 +238,7 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
             {form.materials.length === 0 && <p className="text-sm text-muted-foreground">Nu sunt adăugate materiale.</p>}
             {form.materials.map((material, index) => <Card key={index} className="gap-3 bg-muted/20 py-4"><CardContent className="space-y-4 px-4"><div className="flex justify-between"><Label>Material {index + 1}</Label><Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => update("materials", form.materials.filter((_, row) => row !== index))}><Trash2 className="size-4" />Elimină</Button></div><div className="grid gap-4 sm:grid-cols-2">
               {([['name', 'Denumire'], ['code', 'Tip / cod'], ['unit', 'Unitate de măsură']] as const).map(([key, label]) => <ReportField key={key} label={label} value={material[key]} disabled={busy !== null} onChange={(value) => update("materials", form.materials.map((item, row) => row === index ? { ...item, [key]: value } : item))} />)}
-              <ReportField label="Cantitate" type="number" value={String(material.quantity)} disabled={busy !== null} onChange={(value) => { const quantity = Number(value.replace(",", ".")); if (Number.isFinite(quantity)) update("materials", form.materials.map((item, row) => row === index ? { ...item, quantity } : item)); }} />
+              <ReportField label="Cantitate" type="number" value={material.quantity === undefined ? "" : String(material.quantity)} disabled={busy !== null} onChange={(value) => { const quantity = value.trim() ? Number(value.replace(",", ".")) : undefined; if (quantity === undefined || Number.isFinite(quantity)) update("materials", form.materials.map((item, row) => row === index ? { ...item, quantity } : item)); }} />
             </div></CardContent></Card>)}
             <Button variant="outline" disabled={busy !== null || form.materials.length >= 100} onClick={() => update("materials", [...form.materials, { name: "", code: "", unit: "buc", quantity: 1 }])}><Plus className="size-4" />Adaugă material</Button>
           </CardContent></Card>

@@ -49,7 +49,7 @@ export const reportFormValidator = v.object({
   purpose: v.string(),
   findings: v.array(section),
   work: v.array(section),
-  materials: v.array(v.object({ name: v.string(), code: v.string(), unit: v.string(), quantity: v.number() })),
+  materials: v.array(v.object({ name: v.string(), code: v.string(), unit: v.string(), quantity: v.optional(v.number()) })),
   recommendations: v.array(v.object({
     description: v.string(),
     priority: v.union(v.literal("ridicata"), v.literal("medie"), v.literal("scazuta")),

@@ -2,7 +2,7 @@ import type { GenericId } from "convex/values";
 import template from "@/lib/reports/template.json";
 
 export const reportTemplate = template;
-export const reportRendererVersion = "intervention-report-dates-v8";
+export const reportRendererVersion = "optional-report-fields-v9";
 export const reportImageLimit = 10;
 export const reportImageMaxBytes = 1024 * 1024;
 
@@ -53,7 +53,7 @@ export const defaultReportCompany: ReportCompany = {
 };
 
 export type ReportSection = { title: string; body: string };
-export type ReportMaterial = { name: string; code: string; unit: string; quantity: number };
+export type ReportMaterial = { name: string; code: string; unit: string; quantity?: number };
 export type ReportRecommendation = { description: string; priority: "ridicata" | "medie" | "scazuta" };
 export type ReportForm = {
   title: string;
@@ -216,14 +216,14 @@ export function reportContent(snapshot: ReportSnapshot): ReportBlock[] {
     }));
   }
 
-  const materials = form.materials.filter((item) => item.name.trim());
+  const materials = form.materials.filter((item) => item.name.trim() || item.code.trim() || item.unit.trim() || item.quantity !== undefined);
   if (materials.length) {
     const columns = [
       { label: "Nr.", width: 0.07, value: (_item: ReportMaterial, index: number) => String(index + 1), include: true },
-      { label: "Denumire", width: 0.43, value: (item: ReportMaterial) => item.name.trim(), include: true },
+      { label: "Denumire", width: 0.43, value: (item: ReportMaterial) => item.name.trim(), include: materials.some((item) => item.name.trim()) },
       { label: "Tip / cod", width: 0.23, value: (item: ReportMaterial) => item.code.trim(), include: materials.some((item) => item.code.trim()) },
       { label: "UM", width: 0.1, value: (item: ReportMaterial) => item.unit.trim(), include: materials.some((item) => item.unit.trim()) },
-      { label: "Cantitate", width: 0.17, value: (item: ReportMaterial) => String(item.quantity), include: true },
+      { label: "Cantitate", width: 0.17, value: (item: ReportMaterial) => item.quantity === undefined ? "" : String(item.quantity), include: materials.some((item) => item.quantity !== undefined) },
     ].filter((column) => column.include);
     const totalWidth = columns.reduce((sum, column) => sum + column.width, 0);
     section(4, () => [{ type: "table", header: true, widths: columns.map((column) => column.width / totalWidth), rows: [

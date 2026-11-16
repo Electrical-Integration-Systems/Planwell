@@ -114,23 +114,22 @@ export const save = mutation({
     await validateLogo(ctx, args.company.logo);
     if ((form.images?.length ?? 0) > reportImageLimit) throw new ConvexError(`Poți adăuga cel mult ${reportImageLimit} imagini în anexe.`);
     await Promise.all((form.images ?? []).map((image) => validateImage(ctx, image)));
-    const issues = reportValidationIssues(form, args.company, args.status);
+    const issues = reportValidationIssues(form);
     if (issues.length) throw new ConvexError(issues.map((issue) => issue.message).join(" "));
     if (JSON.stringify(form).length > 200000 || JSON.stringify(args.company).length > 30000) throw new ConvexError("Raportul este prea mare.");
     if ([form.findings.length, form.work.length, form.materials.length, form.recommendations.length].some((length) => length > 100)) {
       throw new ConvexError("Poți adăuga cel mult 100 de rânduri în fiecare secțiune.");
     }
-    if (form.materials.some((material) => !Number.isFinite(material.quantity) || material.quantity <= 0 || !material.name.trim())) {
-      throw new ConvexError("Materialele trebuie să aibă denumire și cantitate pozitivă.");
+    if (form.materials.some((material) => material.quantity !== undefined && (!Number.isFinite(material.quantity) || material.quantity <= 0))) {
+      throw new ConvexError("Cantitățile completate trebuie să fie pozitive.");
     }
-    if (form.recommendations.some((recommendation) => !recommendation.description.trim())) throw new ConvexError("Completează sau elimină recomandările goale.");
     const existing = args.reportId ? await ctx.db.get(args.reportId) : null;
     if (args.reportId && !existing) throw new ConvexError("Raportul nu mai există.");
     if ((existing?.version ?? 0) !== args.expectedVersion) throw new ConvexError("Raportul a fost modificat de alt utilizator. Deschide ultima versiune înainte de a salva.");
     const now = Date.now();
     let number = existing?.number;
     if (!number) {
-      const year = reportSigningDate(form).slice(0, 4);
+      const year = reportSigningDate(form).slice(0, 4) || String(new Date(now).getFullYear());
       const counter = await ctx.db.query("technicalReportCounters").withIndex("by_year", (q) => q.eq("year", year)).unique();
       const value = (counter?.value ?? 0) + 1;
       if (counter) await ctx.db.patch(counter._id, { value });
