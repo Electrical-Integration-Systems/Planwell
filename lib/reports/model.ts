@@ -2,7 +2,7 @@ import type { GenericId } from "convex/values";
 import template from "@/lib/reports/template.json";
 
 export const reportTemplate = template;
-export const reportRendererVersion = "multiline-signers-v7";
+export const reportRendererVersion = "intervention-report-dates-v8";
 export const reportImageLimit = 10;
 export const reportImageMaxBytes = 1024 * 1024;
 
@@ -62,6 +62,8 @@ export type ReportForm = {
   equipment: string;
   interventionType: string;
   interventionDate: string;
+  additionalInterventionDates?: string[];
+  reportDate?: string;
   duration: string;
   technician: string;
   beneficiaryRepresentative: string;
@@ -105,6 +107,8 @@ export function createReportForm(company: ReportCompany): ReportForm {
     equipment: "",
     interventionType: "",
     interventionDate: localDate,
+    additionalInterventionDates: [],
+    reportDate: localDate,
     duration: "",
     technician: company.defaultTechnician,
     beneficiaryRepresentative: "",
@@ -124,6 +128,15 @@ export function formatReportDate(value: string): string {
   return year && month && day ? `${day}.${month}.${year}` : value;
 }
 
+export function formatInterventionDates(form: Pick<ReportForm, "interventionDate" | "additionalInterventionDates">): string {
+  return [...new Set([form.interventionDate, ...(form.additionalInterventionDates ?? [])])].filter(Boolean).sort().map(formatReportDate).join(", ");
+}
+
+export function reportSigningDate(form: ReportForm): string {
+  // Older versions used the intervention date for the report and signatures.
+  return form.reportDate ?? form.interventionDate;
+}
+
 const formatNames = (value: string) => value.split(/[,\r\n]+/).map((name) => name.trim()).filter(Boolean).join("\n");
 
 export function reportGeneralRows(snapshot: ReportSnapshot): string[][] {
@@ -134,7 +147,8 @@ export function reportGeneralRows(snapshot: ReportSnapshot): string[][] {
     ["Prestator", company.companyName],
     ["Echipamente", form.equipment],
     ["Tip intervenție", form.interventionType],
-    ["Data intervenției", formatReportDate(form.interventionDate)],
+    ["Data / zilele intervenției", formatInterventionDates(form)],
+    ["Data întocmirii și semnării raportului", formatReportDate(reportSigningDate(form))],
     ["Durata intervenției", form.duration],
     ["Executant", formatNames(form.technician.trim() || company.defaultTechnician.trim())],
     ["Reprezentant beneficiar", form.beneficiaryRepresentative],
@@ -170,7 +184,7 @@ export function reportIssuerLines(company: ReportCompany): string[] {
 
 export function reportMetadata(snapshot: ReportSnapshot): string {
   return [
-    [snapshot.number.trim() && `Nr. ${snapshot.number.trim()}`, formatReportDate(snapshot.form.interventionDate)].filter(Boolean).join(" / "),
+    [snapshot.number.trim() && `Nr. ${snapshot.number.trim()}`, formatReportDate(reportSigningDate(snapshot.form))].filter(Boolean).join(" / "),
     snapshot.status === "draft" ? `Versiunea ${snapshot.version}` : "",
     snapshot.status === "draft" ? "CIORNĂ" : "",
   ].filter(Boolean).join(" · ");
@@ -231,7 +245,7 @@ export function reportContent(snapshot: ReportSnapshot): ReportBlock[] {
   if (signers.some((signer) => signer.name)) signatureRows.push(signers.map((signer) => signer.name));
   const signatureRow = signatureRows.length;
   signatureRows.push(signers.map((signer) => signer.signature));
-  if (form.interventionDate.trim()) signatureRows.push(signers.map(() => `Data: ${formatReportDate(form.interventionDate)}`));
+  if (reportSigningDate(form).trim()) signatureRows.push(signers.map(() => `Data: ${formatReportDate(reportSigningDate(form))}`));
   // Signing areas are structural, even when optional names are not filled in yet.
   section(7, () => [{ type: "table", header: true, widths: [0.5, 0.5], rows: signatureRows, keepTogether: true, signatureRow }]);
   if (form.images?.length) {
@@ -260,7 +274,7 @@ export function reportFilename(snapshot: ReportSnapshot, format: ReportFormat): 
     "Raport-interventie",
     filenamePart(snapshot.number, 48),
     filenamePart(snapshot.form.location, 120),
-    filenamePart(snapshot.form.interventionDate, 10),
+    filenamePart(reportSigningDate(snapshot.form), 10),
   ].filter(Boolean);
   const revision = snapshot.status === "draft" ? `-v${snapshot.version}` : "";
   return `${parts.join("-")}${revision}.${format}`;

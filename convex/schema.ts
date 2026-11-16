@@ -29,6 +29,8 @@ export default defineSchema({
     title: v.string(),
     beneficiary: v.string(),
     interventionDate: v.string(),
+    additionalInterventionDates: v.optional(v.array(v.string())),
+    reportDate: v.optional(v.string()),
     status: reportStatusValidator,
     version: v.number(),
     createdBy: v.id("users"),

@@ -4,7 +4,7 @@ import type { MutationCtx } from "@/convex/_generated/server";
 import { requireWhitelistedUser } from "@/convex/authz";
 import { logAudit } from "@/convex/auditLog";
 import { reportCompanyValidator, reportFormValidator, reportStatusValidator, reportFormatValidator, reportLogoValidator, reportImageValidator } from "@/convex/reportValidators";
-import { defaultReportCompany, reportFilename, reportTemplate, reportImageLimit, reportImageMaxBytes } from "@/lib/reports/model";
+import { defaultReportCompany, reportSigningDate, reportFilename, reportTemplate, reportImageLimit, reportImageMaxBytes } from "@/lib/reports/model";
 import type { ReportImage, ReportLogo } from "@/lib/reports/model";
 import { normalizeReportForm, reportValidationIssues } from "@/lib/reports/validation";
 
@@ -130,7 +130,7 @@ export const save = mutation({
     const now = Date.now();
     let number = existing?.number;
     if (!number) {
-      const year = form.interventionDate.slice(0, 4);
+      const year = reportSigningDate(form).slice(0, 4);
       const counter = await ctx.db.query("technicalReportCounters").withIndex("by_year", (q) => q.eq("year", year)).unique();
       const value = (counter?.value ?? 0) + 1;
       if (counter) await ctx.db.patch(counter._id, { value });
@@ -139,7 +139,7 @@ export const save = mutation({
       number = `${(settings?.company ?? defaultReportCompany).reportPrefix}-${year}-${String(value).padStart(4, "0")}`;
     }
     const version = (existing?.version ?? 0) + 1;
-    const fields = { number, title: form.title.trim(), beneficiary: form.beneficiary.trim(), interventionDate: form.interventionDate, status: args.status, version, updatedBy: userId, updatedAt: now };
+    const fields = { number, title: form.title.trim(), beneficiary: form.beneficiary.trim(), interventionDate: form.interventionDate, additionalInterventionDates: form.additionalInterventionDates, reportDate: form.reportDate, status: args.status, version, updatedBy: userId, updatedAt: now };
     const reportId = existing?._id ?? await ctx.db.insert("technicalReports", { ...fields, createdBy: userId, createdAt: now });
     if (existing) await ctx.db.patch(existing._id, fields);
     const versionId = await ctx.db.insert("technicalReportVersions", {

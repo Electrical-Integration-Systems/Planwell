@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { prepareReportImage } from "@/lib/reports/images";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createReportForm, priorityLabels, reportFilename, reportImageLimit, reportRendererVersion, reportSigners, reportTemplate } from "@/lib/reports/model";
+import { createReportForm, priorityLabels, reportFilename, reportImageLimit, reportRendererVersion, reportSigners, reportSigningDate, reportTemplate } from "@/lib/reports/model";
 import type { ReportCompany, ReportFormat, ReportForm, ReportSection, ReportSnapshot, ReportStatus } from "@/lib/reports/model";
 import { normalizeReportForm, reportFinalRequiredFields, reportSaveErrorMessage, reportValidationIssues } from "@/lib/reports/validation";
 import type { ReportValidationIssue } from "@/lib/reports/validation";
@@ -219,7 +219,16 @@ export function ReportEditor({ storedVersion, currentCompany, currentLogoUrl, la
           <Card><CardHeader><CardTitle>{reportTemplate.headings[0]}</CardTitle><CardDescription>Titlul și beneficiarul sunt obligatorii pentru salvarea ciornei. Finalizarea necesită și locația, executantul, scopul, lucrările, starea finală și concluziile.</CardDescription></CardHeader><CardContent className="grid gap-5 sm:grid-cols-2">
             {field("title", "Titlul / obiectul intervenției", false, true)}{field("beneficiary", "Beneficiar", false, true)}
             {field("location", "Locație intervenție")}{field("interventionType", "Tip intervenție")}
-            {field("interventionDate", "Data intervenției", false, true)}{field("duration", "Durată (ex.: 6 ore)")}
+            {field("interventionDate", "Data efectivă a intervenției", false, true)}
+            <ReportField fieldName="reportDate" label="Data întocmirii și semnării raportului" type="date" required value={reportSigningDate(form)} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "reportDate")?.message} onChange={(value) => update("reportDate", value)} />
+            <div className="space-y-3 sm:col-span-2">
+              {(form.additionalInterventionDates ?? []).map((date, index) => <div key={index} className="flex items-end gap-2">
+                <ReportField fieldName="additionalInterventionDates" label={`Zi suplimentară de intervenție ${index + 1}`} type="date" required value={date} disabled={busy !== null} error={validationIssues.find((issue) => issue.field === "additionalInterventionDates")?.message} onChange={(value) => update("additionalInterventionDates", form.additionalInterventionDates?.map((item, row) => row === index ? value : item))} />
+                <Button variant="ghost" size="icon" aria-label={`Elimină ziua suplimentară ${index + 1}`} disabled={busy !== null} onClick={() => update("additionalInterventionDates", form.additionalInterventionDates?.filter((_, row) => row !== index))}><Trash2 className="size-4" /></Button>
+              </div>)}
+              <Button variant="outline" disabled={busy !== null || (form.additionalInterventionDates?.length ?? 0) >= 100} onClick={() => update("additionalInterventionDates", [...(form.additionalInterventionDates ?? []), ""])}><Plus className="size-4" />Adaugă zi de intervenție</Button>
+            </div>
+            {field("duration", "Durată (ex.: 6 ore)")}
             {field("technician", "Executant / întocmit")}{field("beneficiaryRepresentative", "Reprezentant beneficiar")}
             {field("equipment", "Echipamente", true)}{field("finalState", "Stare la finalul intervenției", true)}
           </CardContent></Card>

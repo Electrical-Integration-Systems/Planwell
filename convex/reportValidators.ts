@@ -40,6 +40,8 @@ export const reportFormValidator = v.object({
   equipment: v.string(),
   interventionType: v.string(),
   interventionDate: v.string(),
+  additionalInterventionDates: v.optional(v.array(v.string())),
+  reportDate: v.optional(v.string()),
   duration: v.string(),
   technician: v.string(),
   beneficiaryRepresentative: v.string(),
